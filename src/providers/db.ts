@@ -1,4 +1,4 @@
-import { Sequelize } from 'sequelize';
+import { Sequelize } from 'sequelize-typescript';
 
 const DB = new Sequelize('postgres://username:password@localhost:5432/gogin?sslmode=disable', {
     dialect: 'postgres',
@@ -8,7 +8,8 @@ const DB = new Sequelize('postgres://username:password@localhost:5432/gogin?sslm
         min: 0,
         acquire: 30000,
         idle: 10000
-    }
+    },
+    models: [__dirname + '/../models']
 });
 
 export default DB;

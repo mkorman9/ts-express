@@ -1,9 +1,11 @@
 import { Router } from 'express';
+import { Op } from 'sequelize';
 
-import { Clients, ClientAttributes } from '../models/client';
+import Client from '../models/client';
+import CreditCard from '../models/credit_card';
 
 interface ClientsGetResponse {
-    data: ClientAttributes[],
+    data: Client[],
     totalPages: number
 }
 
@@ -23,11 +25,19 @@ router.get('', async (req: any, res: any, next: any) => {
     let clientsPage = null;
 
     try {
-        clientsPage = await Clients.findAndCountAll({
+        clientsPage = await Client.findAndCountAll({
             limit: pageSize,
             offset: pageSize * pageNumber,
+            where: {
+                isDeleted: {
+                    [Op.ne]: true
+                }
+            },
             order: [
                 ['birthDate', 'DESC']
+            ],
+            include: [
+                CreditCard
             ]
         });
     } catch (err) {
@@ -43,13 +53,19 @@ router.get('', async (req: any, res: any, next: any) => {
 });
 
 router.get('/:id', async (req: any, res: any, next: any) => {
-    let client: ClientAttributes = null;
+    let client: Client = null;
     
     try {
-        client = await Clients.findOne({
+        client = await Client.findOne({
             where: {
-                id: req.params['id']
-            }
+                id: req.params['id'],
+                isDeleted: {
+                    [Op.ne]: true
+                }
+            },
+            include: [
+                CreditCard
+            ]
         });
     } catch (err) {
         if (err.name === 'SequelizeDatabaseError' && 
