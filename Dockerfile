@@ -14,6 +14,7 @@ USER app
 
 RUN yarn install --production
 
+ENV TZ UTC
 ENV NODE_ENV production
 
 CMD exec node ./dist
