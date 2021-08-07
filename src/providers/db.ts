@@ -1,6 +1,8 @@
 import { Sequelize } from 'sequelize-typescript';
 
-const DB = new Sequelize('postgres://username:password@localhost:5432/gogin?sslmode=disable', {
+import { DatabaseURI } from './config';
+
+const DB = new Sequelize(DatabaseURI, {
     dialect: 'postgres',
     logging: false,
     pool: {
