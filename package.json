@@ -14,11 +14,9 @@
     "start": "NODE_ENV=development tsc-watch --onSuccess \"node ./dist\""
   },
   "dependencies": {
-    "chai": "^4.3.4",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "express-winston": "^4.1.0",
-    "mocha": "^9.0.3",
     "winston": "^3.3.3"
   },
   "devDependencies": {
@@ -28,6 +26,8 @@
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.4.13",
     "@types/shelljs": "^0.8.9",
+    "chai": "^4.3.4",
+    "mocha": "^9.0.3",
     "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2",
     "shelljs": "^0.8.4",
