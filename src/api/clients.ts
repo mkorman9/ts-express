@@ -70,18 +70,11 @@ router.get('/:id', async (req: any, res: any, next: any) => {
     } catch (err) {
         if (err.name === 'SequelizeDatabaseError' && 
             err.original && 
-            err.original.code === '22P02') {
+            err.original.code === '22P02') {  // invalid UUID format
         } else {
             next(err);
             return;
         }
-    }
-
-    if (!client) {
-        res.status(404);
-        res.type('text');
-        res.send('');
-        return;
     }
 
     res.status(200);
