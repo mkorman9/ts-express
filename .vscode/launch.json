@@ -15,7 +15,22 @@
                 "<node_internals>/**"
             ],
             "type": "pwa-node",
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}",
+            "outputCapture": "std"
+        },
+        {
+            "name": "test",
+            "request": "launch",
+            "runtimeArgs": [
+                "test"
+            ],
+            "runtimeExecutable": "yarn",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "pwa-node",
+            "cwd": "${workspaceFolder}",
+            "outputCapture": "std"
         }
     ]
 }

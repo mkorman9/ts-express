@@ -2,6 +2,9 @@ import express from 'express';
 import dotenv from 'dotenv';
 
 import routes from './routes';
+import { log } from './logging';
+
+log.info(`starting up in '${process.env.NODE_ENV}' mode`);
 
 dotenv.config();
 const serverPort = parseInt(process.env.SERVER_PORT) || 5000;
@@ -15,5 +18,5 @@ app.disable('etag');
 app.use(routes);
 
 app.listen(serverPort, serverHost, () => {
-    console.log(`server listening on ${serverHost}:${serverPort}`);
+    log.info(`server listening on ${serverHost}:${serverPort}`);
 });
