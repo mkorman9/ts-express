@@ -1,0 +1,32 @@
+{
+  "name": "ts-express",
+  "version": "1.0.0",
+  "main": "dist",
+  "private": true,
+  "scripts": {
+    "clean": "rimraf dist/*",
+    "lint": "tslint -c tslint.json -p tsconfig.json",
+    "compile": "tsc -p tsconfig.json",
+    "build":  "npm-run-all clean lint compile",
+    "start": "npm-run-all clean lint && tsc -p tsconfig.json --watch & NODE_ENV=development nodemon dist"
+  },
+  "author": "Michał Korman",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "@types/dotenv": "^8.2.0",
+    "@types/express": "^4.17.13",
+    "@types/node": "^16.4.13",
+    "@types/shelljs": "^0.8.9",
+    "nodemon": "^2.0.12",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.2",
+    "shelljs": "^0.8.4",
+    "ts-node": "^10.1.0",
+    "tslint": "^6.1.3",
+    "typescript": "^4.3.5"
+  }
+}
