@@ -5,13 +5,13 @@ import Client from '../models/client';
 import CreditCard from '../models/credit_card';
 
 interface ClientsGetResponse {
-    data: Client[],
-    totalPages: number
+    data: Client[];
+    totalPages: number;
 }
 
-const router = Router();
+const clientsAPI = Router();
 
-router.get('', async (req: any, res: any, next: any) => {
+clientsAPI.get('', async (req: any, res: any, next: any) => {
     let pageNumber = parseInt(req.query.page);
     if (Number.isNaN(pageNumber) || pageNumber < 0) {
         pageNumber = 0;
@@ -52,9 +52,9 @@ router.get('', async (req: any, res: any, next: any) => {
     } as ClientsGetResponse);
 });
 
-router.get('/:id', async (req: any, res: any, next: any) => {
+clientsAPI.get('/:id', async (req: any, res: any, next: any) => {
     let client: Client = null;
-    
+
     try {
         client = await Client.findOne({
             where: {
@@ -68,8 +68,8 @@ router.get('/:id', async (req: any, res: any, next: any) => {
             ]
         });
     } catch (err) {
-        if (err.name === 'SequelizeDatabaseError' && 
-            err.original && 
+        if (err.name === 'SequelizeDatabaseError' &&
+            err.original &&
             err.original.code === '22P02') {  // invalid UUID format
         } else {
             next(err);
@@ -81,4 +81,16 @@ router.get('/:id', async (req: any, res: any, next: any) => {
     res.json(client);
 });
 
-export default router;
+clientsAPI.post('', async (req: any, res: any, next: any) => {
+    // TODO
+});
+
+clientsAPI.put('/:id', async (req: any, res: any, next: any) => {
+    // TODO
+});
+
+clientsAPI.delete('/:id', async (req: any, res: any, next: any) => {
+    // TODO
+});
+
+export default clientsAPI;

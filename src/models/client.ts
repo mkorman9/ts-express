@@ -28,9 +28,9 @@ class Client extends Model {
     @Column({ field: 'email', type: DataTypes.STRING(64) })
     email: string;
 
-    @Column({ 
-        field: 'birth_date', 
-        type: DataTypes.DATE, 
+    @Column({
+        field: 'birth_date',
+        type: DataTypes.DATE,
         allowNull: true,
         get: function() {
             const value = this.getDataValue('birthDate');
@@ -47,7 +47,7 @@ class Client extends Model {
     isDeleted: boolean;
 
     @HasMany(() => CreditCard, 'clientId')
-    creditCards: CreditCard[]
+    creditCards: CreditCard[];
 }
 
 export default Client;
