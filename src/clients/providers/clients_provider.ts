@@ -93,8 +93,10 @@ export const findClientById = async (id: string): Promise<Client | null> => {
 
 export const addClient = async (clientPayload: ClientAddPayload): Promise<Client> => {
     try {
+        const id = uuidv4();
+
         return await Client.create({
-            id: uuidv4(),
+            id: id,
             gender: clientPayload.gender || '-',
             firstName: clientPayload.firstName,
             lastName: clientPayload.lastName,
@@ -104,8 +106,13 @@ export const addClient = async (clientPayload: ClientAddPayload): Promise<Client
             birthDate: clientPayload.birthDate || null,
             isDeleted: false,
             creditCards: clientPayload.creditCards.map(cc => ({
+                clientId: id,
                 number: cc.number
             }))
+        }, {
+            include: [
+                CreditCard
+            ]
         });
     } catch (err) {
         throw err;
