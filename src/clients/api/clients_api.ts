@@ -33,17 +33,6 @@ interface ClientsGetResponse {
     totalPages: number;
 }
 
-interface ClientAddRequest {
-    gender?: string;
-    firstName?: string;
-    lastName?: string;
-    address?: string;
-    phoneNumber?: string;
-    email?: string;
-    birthDate?: Moment;
-    creditCards?: CreditCardView[];
-}
-
 const ClientAddRequestValidators = [
     body('gender')
         .optional()
