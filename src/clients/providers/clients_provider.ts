@@ -127,7 +127,7 @@ export const deleteClientById = async (id: string): Promise<boolean> => {
                     id: id,
                     isDeleted: {
                         [Op.ne]: true
-                    },
+                    }
                 },
                 include: [
                     CreditCard

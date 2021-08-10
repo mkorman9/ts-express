@@ -142,7 +142,7 @@ clientsAPI.get('/:id', async (req: Request, res: Response, next: NextFunction) =
             return res
                 .status(404)
                 .json({
-                    status: "error"
+                    status: 'error'
                 });
         }
 
@@ -221,15 +221,15 @@ clientsAPI.delete('/:id', async (req: Request, res: Response, next: NextFunction
             return res
                 .status(404)
                 .json({
-                    status: "error",
-                    message: "Client not found"
+                    status: 'error',
+                    message: 'Client not found'
                 });
         }
 
         return res
             .status(200)
             .json({
-                status: "success"
+                status: 'success'
             });
     } catch (err) {
         next(err);
