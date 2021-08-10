@@ -7,7 +7,8 @@ import {
     FindClientsSortFields,
     findClientById,
     ClientAddPayload,
-    addClient
+    addClient,
+    deleteClientById
 } from '../providers/clients_provider';
 import Client from '../models/client';
 
@@ -139,8 +140,10 @@ clientsAPI.get('/:id', async (req: Request, res: Response, next: NextFunction) =
         const client = await findClientById(req.params['id']);
         if (!client) {
             return res
-                .status(200)
-                .json(null);
+                .status(404)
+                .json({
+                    status: "error"
+                });
         }
 
         return res
@@ -212,7 +215,25 @@ clientsAPI.put('/:id', async (req: Request, res: Response, next: NextFunction) =
 });
 
 clientsAPI.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
-    // TODO
+    try {
+        const result = await deleteClientById(req.params['id']);
+        if (!result) {
+            return res
+                .status(404)
+                .json({
+                    status: "error",
+                    message: "Client not found"
+                });
+        }
+
+        return res
+            .status(200)
+            .json({
+                status: "success"
+            });
+    } catch (err) {
+        next(err);
+    }
 });
 
 export default clientsAPI;

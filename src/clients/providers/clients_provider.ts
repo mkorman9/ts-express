@@ -1,7 +1,9 @@
 import { Op } from 'sequelize';
 import { Moment } from 'moment';
 import { v4 as uuidv4 } from 'uuid';
+import { Transaction } from 'sequelize';
 
+import DB from '../../providers/db';
 import Client from '../models/client';
 import CreditCard from '../models/credit_card';
 
@@ -107,5 +109,41 @@ export const addClient = async (clientPayload: ClientAddPayload): Promise<Client
         });
     } catch (err) {
         throw err;
+    }
+};
+
+export const deleteClientById = async (id: string): Promise<boolean> => {
+    try {
+        return await DB.transaction(async (t: Transaction) => {
+            const client = await Client.findOne({
+                where: {
+                    id: id,
+                    isDeleted: {
+                        [Op.ne]: true
+                    },
+                },
+                include: [
+                    CreditCard
+                ],
+                transaction: t
+            });
+
+            if (!client) {
+                return false;
+            }
+
+            client.isDeleted = true;
+            await client.save({ transaction: t });
+
+            return true;
+        });
+    } catch (err) {
+        if (err.name === 'SequelizeDatabaseError' &&
+            err.original &&
+            err.original.code === '22P02') {  // invalid UUID format
+            return false;
+        } else {
+            throw err;
+        }
     }
 };
