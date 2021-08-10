@@ -1,5 +1,6 @@
 import { Op } from 'sequelize';
-// import { v4 as uuidv4 } from 'uuid';
+import { Moment } from 'moment';
+import { v4 as uuidv4 } from 'uuid';
 
 import Client from '../models/client';
 import CreditCard from '../models/credit_card';
@@ -21,6 +22,17 @@ export interface FindClientsPagedOptions {
 
     sortBy?: FindClientsSortFields;
     sortReverse?: boolean;
+}
+
+export interface ClientAddPayload {
+    gender?: string;
+    firstName: string;
+    lastName: string;
+    address?: string;
+    phoneNumber?: string;
+    email?: string;
+    birthDate?: Moment;
+    creditCards: { number: string }[];
 }
 
 export const findClientsPaged = async (opts?: FindClientsPagedOptions): Promise<{rows: Client[], count: number}> => {
@@ -77,19 +89,23 @@ export const findClientById = async (id: string): Promise<Client | null> => {
     }
 };
 
-export const addClient = async() => {
-    /*
-        let client = await Client.create({
+export const addClient = async (clientPayload: ClientAddPayload): Promise<Client> => {
+    try {
+        return await Client.create({
             id: uuidv4(),
-            gender: '-',
-            firstName: 'ZZZ',
-            lastName: 'ZZZ',
-            address: '',
-            phoneNumber: '',
-            email: '',
-            birthDate: null,
+            gender: clientPayload.gender || '-',
+            firstName: clientPayload.firstName,
+            lastName: clientPayload.lastName,
+            address: clientPayload.address || '',
+            phoneNumber: clientPayload.phoneNumber || '',
+            email: clientPayload.email || '',
+            birthDate: clientPayload.birthDate || null,
             isDeleted: false,
-            creditCards: []
+            creditCards: clientPayload.creditCards.map(cc => ({
+                number: cc.number
+            }))
         });
-    */
+    } catch (err) {
+        throw err;
+    }
 };
