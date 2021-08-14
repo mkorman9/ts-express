@@ -1,11 +1,13 @@
 import { Op, WhereAttributeHash } from 'sequelize';
-import { Moment } from 'moment';
+import moment, { Moment } from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { Transaction } from 'sequelize';
 
 import DB from '../../providers/db';
 import Client from '../models/client';
 import CreditCard from '../models/credit_card';
+import ClientChange from '../models/client_change';
+import { generateClientChangeset } from './client_changes_helper';
 
 export enum FindClientsSortFields {
     id = 'id',
@@ -201,7 +203,7 @@ export const addClient = async (clientPayload: ClientAddPayload): Promise<Client
         const id = uuidv4();
 
         return await DB.transaction(async (t: Transaction) => {
-            return await Client.create({
+            const client = await Client.create({
                 id: id,
                 gender: clientPayload.gender || '-',
                 firstName: clientPayload.firstName,
@@ -218,8 +220,23 @@ export const addClient = async (clientPayload: ClientAddPayload): Promise<Client
             }, {
                 include: [
                     CreditCard
-                ]
+                ],
+                transaction: t
             });
+
+            const changeset = generateClientChangeset({}, client);
+            await ClientChange.create({
+                id: uuidv4(),
+                clientId: id,
+                type: 'CREATED',
+                timestamp: moment(),
+                author: null,
+                changeset: JSON.stringify(changeset)
+            }, {
+                transaction: t
+            });
+
+            return client;
         });
     } catch (err) {
         throw err;
@@ -246,6 +263,17 @@ export const updateClient = async (id: string, clientPayload: ClientUpdatePayloa
                 return false;
             }
 
+            const originalClientData = {
+                gender: client.gender,
+                firstName: client.firstName,
+                lastName: client.lastName,
+                address: client.address,
+                phoneNumber: client.phoneNumber,
+                email: client.email,
+                birthDate: client.birthDate ? moment(client.birthDate) : null,
+                creditCards: (client.creditCards || []).map(cc => ({ number: cc.number }))
+            };
+
             if (clientPayload.creditCards) {
                 await CreditCard.destroy({
                     where: {
@@ -263,7 +291,12 @@ export const updateClient = async (id: string, clientPayload: ClientUpdatePayloa
                     }
                 );
 
-                client.reload();
+                await client.reload({
+                    include: [
+                        CreditCard
+                    ],
+                    transaction: t
+                });
             }
             if (clientPayload.gender) {
                 client.gender = clientPayload.gender;
@@ -288,6 +321,19 @@ export const updateClient = async (id: string, clientPayload: ClientUpdatePayloa
             }
 
             await client.save({ transaction: t });
+
+            const changeset = generateClientChangeset(originalClientData, client);
+            await ClientChange.create({
+                id: uuidv4(),
+                clientId: id,
+                type: 'UPDATED',
+                timestamp: moment(),
+                author: null,
+                changeset: JSON.stringify(changeset)
+            }, {
+                transaction: t
+            });
+
             return true;
         });
     } catch (err) {
@@ -322,8 +368,19 @@ export const deleteClientById = async (id: string): Promise<boolean> => {
             }
 
             client.isDeleted = true;
-
             await client.save({ transaction: t });
+
+            await ClientChange.create({
+                id: uuidv4(),
+                clientId: id,
+                type: 'DELETED',
+                timestamp: moment(),
+                author: null,
+                changeset: ''
+            }, {
+                transaction: t
+            });
+
             return true;
         });
     } catch (err) {
