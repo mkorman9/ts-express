@@ -1,4 +1,4 @@
-import { Op } from 'sequelize';
+import { Op, WhereAttributeHash } from 'sequelize';
 import { Moment } from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { Transaction } from 'sequelize';
@@ -18,12 +18,26 @@ export enum FindClientsSortFields {
     birthDate = 'birthDate'
 }
 
+export interface FindClientsFilters {
+    gender?: string;
+    firstName?: string;
+    lastName?: string;
+    address?: string;
+    phoneNumber?: string;
+    email?: string;
+    bornAfter?: Moment;
+    bornBefore?: Moment;
+    creditCardNumber?: string;
+}
+
 export interface FindClientsPagedOptions {
     pageNumber?: number;
     pageSize?: number;
 
     sortBy?: FindClientsSortFields;
     sortReverse?: boolean;
+
+    filters?: FindClientsFilters;
 }
 
 export interface ClientAddPayload {
@@ -43,17 +57,97 @@ export const findClientsPaged = async (opts?: FindClientsPagedOptions): Promise<
         pageSize: opts.pageSize || 10,
 
         sortBy: opts.sortBy || FindClientsSortFields.id,
-        sortReverse: opts.sortReverse || false
+        sortReverse: opts.sortReverse || false,
+
+        filters: opts.filters || {}
     };
 
     try {
+        let filters: WhereAttributeHash<any>[] = [];
+
+        if (options.filters.gender) {
+            filters.push({
+                gender: {
+                    [Op.eq]: options.filters.gender
+                }
+            });
+        }
+        if (options.filters.firstName) {
+            filters.push({
+                firstName: {
+                    [Op.iLike]: `%${options.filters.firstName}%`
+                }
+            });
+        }
+        if (options.filters.lastName) {
+            filters.push({
+                lastName: {
+                    [Op.iLike]: `%${options.filters.lastName}%`
+                }
+            });
+        }
+        if (options.filters.address) {
+            filters.push({
+                address: {
+                    [Op.iLike]: `%${options.filters.address}%`
+                }
+            });
+        }
+        if (options.filters.phoneNumber) {
+            filters.push({
+                phoneNumber: {
+                    [Op.iLike]: `%${options.filters.phoneNumber}%`
+                }
+            });
+        }
+        if (options.filters.email) {
+            filters.push({
+                email: {
+                    [Op.iLike]: `%${options.filters.email}%`
+                }
+            });
+        }
+        if (options.filters.bornAfter) {
+            filters.push({
+                birthDate: {
+                    [Op.gte]: options.filters.bornAfter
+                }
+            });
+        }
+        if (options.filters.bornBefore) {
+            filters.push({
+                birthDate: {
+                    [Op.lte]: options.filters.bornBefore
+                }
+            });
+        }
+        if (options.filters.creditCardNumber) {
+            const clientWithCreditCard = await CreditCard.findAll({
+                where: {
+                    number: {
+                        [Op.like]: `%${options.filters.creditCardNumber}%`
+                    }
+                }
+            });
+
+            filters.push({
+                id: {
+                    [Op.in]: clientWithCreditCard.map(cc => cc.clientId)
+                }
+            });
+        }
+
         return await Client.findAndCountAll({
             limit: options.pageSize,
             offset: options.pageSize * options.pageNumber,
             where: {
-                isDeleted: {
-                    [Op.ne]: true
-                }
+                [Op.and]: [{
+                    isDeleted: {
+                        [Op.ne]: true
+                    }
+                }, {
+                    [Op.and]: [...filters]
+                }]
             },
             order: [
                 [options.sortBy, options.sortReverse ? 'DESC' : 'ASC']

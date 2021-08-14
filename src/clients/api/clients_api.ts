@@ -5,6 +5,7 @@ import moment, { Moment } from 'moment';
 import {
     findClientsPaged,
     FindClientsSortFields,
+    FindClientsFilters,
     findClientById,
     ClientAddPayload,
     addClient,
@@ -92,13 +93,33 @@ clientsAPI.get('', async (req: Request, res: Response, next: NextFunction) => {
 
     let sortReverse = 'sortReverse' in req.query;
 
+    let filters: FindClientsFilters = {};
+    try {
+        filters = parseClientsFilters(req.query);
+    } catch (err) {
+        if (err instanceof ClientsFiltersParsingError) {
+            return res
+                .status(400)
+                .json({
+                    status: 'error',
+                    message: 'Validation error',
+                    causes: {
+                        field: err.field,
+                        code: err.code
+                    }
+                });
+        }
+    }
+
     try {
         const clientsPage = await findClientsPaged({
             pageNumber,
             pageSize,
 
             sortBy,
-            sortReverse
+            sortReverse,
+
+            filters
         });
 
         res
@@ -224,5 +245,86 @@ clientsAPI.delete('/:id', async (req: Request, res: Response, next: NextFunction
         next(err);
     }
 });
+
+class ClientsFiltersParsingError extends Error {
+    public code: string;
+    public field: string;
+
+    constructor(code: string, field: string) {
+        super('ClientsFiltersParsingError');
+        this.code = code;
+        this.field = field;
+    }
+}
+
+const parseClientsFilters = (query: {}): FindClientsFilters => {
+    const queryFilters = query['filter'];
+    if (!queryFilters) {
+        return {};
+    }
+
+    let ret: FindClientsFilters = {};
+
+    Object.keys(queryFilters).forEach(k => {
+        let value = queryFilters[k];
+        if (Array.isArray(value)) {
+            value = value[value.length - 1];
+        }
+
+        if (k === 'gender') {
+            if (!['-', 'M', 'F'].includes(value)) {
+                throw new ClientsFiltersParsingError('oneof', 'filter[gender]');
+            }
+
+            ret.gender = value;
+        } else if (k === 'firstName') {
+            ret.firstName = value;
+        } else if (k === 'lastName') {
+            ret.lastName = value;
+        } else if (k === 'address') {
+            ret.address = value;
+        } else if (k === 'phoneNumber') {
+            ret.phoneNumber = value;
+        } else if (k === 'email') {
+            ret.email = value;
+        } else if (k === 'bornAfter') {
+            let dt: Moment = null;
+            try {
+                dt = moment(value, true);
+            } catch (err) {
+            }
+
+            if (!dt || !dt.isValid()) {
+                throw new ClientsFiltersParsingError('dateformat', 'filter[bornAfter]');
+            }
+
+            ret.bornAfter = dt;
+        } else if (k === 'bornBefore') {
+            let dt: Moment = null;
+            try {
+                dt = moment(value, true);
+            } catch (err) {
+            }
+
+            if (!dt || !dt.isValid()) {
+                throw new ClientsFiltersParsingError('dateformat', 'filter[bornBefore]');
+            }
+
+            ret.bornBefore = dt;
+        } else if (k === 'creditCard') {
+            ret.creditCardNumber = value;
+        } else {
+            throw new ClientsFiltersParsingError('oneof', 'filter');
+        }
+    });
+
+    if (ret.bornAfter && ret.bornBefore) {
+        if (ret.bornAfter.isAfter(ret.bornBefore)) {
+            throw new ClientsFiltersParsingError('invalidinterval', 'filter[bornAfter]');
+        }
+    }
+
+    return ret;
+};
 
 export default clientsAPI;
