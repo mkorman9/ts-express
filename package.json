@@ -11,7 +11,8 @@
     "compile": "tsc -p tsconfig.json",
     "build": "npm-run-all clean lint compile",
     "test": "mocha dist/**/*.test.js",
-    "start": "TZ=UTC NODE_ENV=development tsc-watch --onSuccess \"node ./dist\""
+    "serve": "TZ=UTC NODE_ENV=development node ./dist",
+    "start": "tsc-watch --onSuccess \"npm-run-all lint serve\""
   },
   "dependencies": {
     "dotenv": "^10.0.0",

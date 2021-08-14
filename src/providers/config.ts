@@ -4,7 +4,7 @@ const parseBoolean = (s: string | undefined): boolean => {
     return s && ['1', 'true', 'yes'].includes(s.toLocaleLowerCase());
 };
 
-dotenv.config();
+dotenv.config({ path: process.env.CONFIG_PATH });
 
 export const LogLevel = process.env.LOG_LEVEL || 'info';
 
