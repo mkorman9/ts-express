@@ -74,7 +74,13 @@ const ClientAddRequestValidators = [
     body('creditCards[*].number')
         .exists().withMessage('required')
         .bail()
-        .matches(/^\d{4} \d{4} \d{4} \d{4}$/).withMessage('ccnumber')
+        .matches(/^\d{4} \d{4} \d{4} \d{4}$/).withMessage('ccnumber'),
+    body('creditCards.number')
+        .custom((_, { req }) => {
+            const creditCards = (req.body['creditCards'] || []).map(cc => cc.number);
+            return creditCards.length === new Set(creditCards).size;
+        })
+        .withMessage('unique')
 ];
 
 const ClientUpdateRequestValidators = [
@@ -112,7 +118,13 @@ const ClientUpdateRequestValidators = [
     body('creditCards[*].number')
         .exists().withMessage('required')
         .bail()
-        .matches(/^\d{4} \d{4} \d{4} \d{4}$/).withMessage('ccnumber')
+        .matches(/^\d{4} \d{4} \d{4} \d{4}$/).withMessage('ccnumber'),
+    body('creditCards.number')
+        .custom((_, { req }) => {
+            const creditCards = (req.body['creditCards'] || []).map(cc => cc.number);
+            return creditCards.length === new Set(creditCards).size;
+        })
+        .withMessage('unique')
 ];
 
 const clientsAPI = Router();
