@@ -42,6 +42,10 @@ export interface FindClientsPagedOptions {
     filters?: FindClientsFilters;
 }
 
+export interface FindClientByIdOptions {
+    includeDeleted?: boolean;
+}
+
 export interface ClientAddPayload {
     gender?: string;
     firstName: string;
@@ -174,14 +178,23 @@ export const findClientsPaged = async (opts?: FindClientsPagedOptions): Promise<
     }
 };
 
-export const findClientById = async (id: string): Promise<Client | null> => {
+export const findClientById = async (id: string, findOptions?: FindClientByIdOptions): Promise<Client | null> => {
+    const options = {
+        includeDeleted: (findOptions?.includeDeleted === undefined) ? false : (findOptions?.includeDeleted === true)
+    };
+
+    let filters = {};
+    if (!options.includeDeleted) {
+        filters['isDeleted'] = {
+            [Op.ne]: true
+        };
+    }
+
     try {
         return await Client.findOne({
             where: {
                 id: id,
-                isDeleted: {
-                    [Op.ne]: true
-                }
+                ...filters
             },
             include: [
                 CreditCard
@@ -388,6 +401,32 @@ export const deleteClientById = async (id: string): Promise<boolean> => {
             err.original &&
             err.original.code === '22P02') {  // invalid UUID format
             return false;
+        } else {
+            throw err;
+        }
+    }
+};
+
+export const findChangelogForClient = async (id: string): Promise<ClientChange[] | null> => {
+    try {
+        const client = await findClientById(id, { includeDeleted: true });
+        if (!client) {
+            return null;
+        }
+
+        return await ClientChange.findAll({
+            where: {
+                clientId: client.id
+            },
+            order: [
+                ['timestamp', 'ASC']
+            ]
+        });
+    } catch (err) {
+        if (err.name === 'SequelizeDatabaseError' &&
+            err.original &&
+            err.original.code === '22P02') {  // invalid UUID format
+            return null;
         } else {
             throw err;
         }

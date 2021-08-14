@@ -11,9 +11,11 @@ import {
     addClient,
     ClientUpdatePayload,
     updateClient,
-    deleteClientById
+    deleteClientById,
+    findChangelogForClient
 } from '../providers/clients_provider';
 import Client from '../models/client';
+import { ClientChangeItem } from '../providers/client_changes_helper';
 
 interface CreditCardView {
     number: string;
@@ -331,6 +333,32 @@ clientsAPI.delete('/:id', async (req: Request, res: Response, next: NextFunction
             .json({
                 status: 'success'
             });
+    } catch (err) {
+        next(err);
+    }
+});
+
+clientsAPI.get('/changelog/client/:id', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const changeset = await findChangelogForClient(req.params['id']);
+        if (changeset === null) {
+            return res
+                .status(404)
+                .json({
+                    status: 'error',
+                    message: 'Client not found'
+                });
+        }
+
+        return res
+            .status(200)
+            .json(changeset.map(change => ({
+                type: change.type,
+                timestamp: change.timestamp,
+                authorId: '',
+                authorUsername: '',
+                changeset: JSON.parse(change.changeset || '[]') as ClientChangeItem[]
+            })));
     } catch (err) {
         next(err);
     }
