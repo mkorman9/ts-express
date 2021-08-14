@@ -9,6 +9,8 @@ import {
     findClientById,
     ClientAddPayload,
     addClient,
+    ClientUpdatePayload,
+    updateClient,
     deleteClientById
 } from '../providers/clients_provider';
 import Client from '../models/client';
@@ -63,6 +65,44 @@ const ClientAddRequestValidators = [
         .isLength({ max: 64 }).withMessage('gt'),
     body('birthDate')
         .optional()
+        .isISO8601().withMessage('format'),
+    body('creditCards')
+        .optional()
+        .isArray().withMessage('format'),
+    body('creditCards[*].number')
+        .exists().withMessage('required')
+        .bail()
+        .matches(/^\d{4} \d{4} \d{4} \d{4}$/).withMessage('ccnumber')
+];
+
+const ClientUpdateRequestValidators = [
+    body('gender')
+        .optional()
+        .isIn(['-', 'M', 'F']).withMessage('oneof'),
+    body('firstName')
+        .optional()
+        .isString().withMessage('format')
+        .bail()
+        .isLength({ min: 1 }).withMessage('lt')
+        .isLength({ max: 255 }).withMessage('gt'),
+    body('lastName')
+        .optional()
+        .isString().withMessage('format')
+        .bail()
+        .isLength({ min: 1 }).withMessage('lt')
+        .isLength({ max: 255 }).withMessage('gt'),
+    body('address')
+        .optional()
+        .isLength({ max: 1024 }).withMessage('gt'),
+    body('phoneNumber')
+        .optional()
+        .isLength({ max: 64 }).withMessage('gt'),
+    body('email')
+        .optional()
+        .isLength({ max: 64 }).withMessage('gt'),
+    body('birthDate')
+        .optional()
+        .if((value) => value !== null)
         .isISO8601().withMessage('format'),
     body('creditCards')
         .optional()
@@ -152,7 +192,8 @@ clientsAPI.get('/:id', async (req: Request, res: Response, next: NextFunction) =
             return res
                 .status(404)
                 .json({
-                    status: 'error'
+                    status: 'error',
+                    message: 'Client not found'
                 });
         }
 
@@ -220,9 +261,58 @@ clientsAPI.post(
     }
 );
 
-clientsAPI.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
-    // TODO
-});
+clientsAPI.put(
+    '/:id',
+    ClientUpdateRequestValidators,
+    async (req: Request, res: Response, next: NextFunction) => {
+        const validationErrors = validationResult(req);
+        if (!validationErrors.isEmpty()) {
+            return res
+                .status(400)
+                .json({
+                    status: 'error',
+                    message: 'Validation error',
+                    causes: validationErrors.array().map(e => ({
+                        field: e.param,
+                        code: e.msg
+                    }))
+                });
+        }
+
+        const clientPayload: ClientUpdatePayload = {
+            gender: req.body['gender'],
+            firstName: req.body['firstName'],
+            lastName: req.body['lastName'],
+            address: req.body['address'],
+            phoneNumber: req.body['phoneNumber'],
+            email: req.body['email'],
+            birthDate: req.body['birthDate'] ? moment(req.body['birthDate']) : req.body['birthDate'],
+            creditCards: !req.body['creditCards'] ? undefined : (req.body['creditCards'] as { number: string }[]).map(cc => ({
+                number: cc['number']
+            }))
+        };
+
+        try {
+            const result = await updateClient(req.params['id'], clientPayload);
+            if (!result) {
+                return res
+                    .status(404)
+                    .json({
+                        status: 'error',
+                        message: 'Client not found'
+                    });
+            }
+
+            return res
+                .status(200)
+                .json({
+                    status: 'success'
+                });
+        } catch (err) {
+            next(err);
+        }
+    }
+);
 
 clientsAPI.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {

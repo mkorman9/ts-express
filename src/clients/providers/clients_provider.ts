@@ -51,6 +51,17 @@ export interface ClientAddPayload {
     creditCards: { number: string }[];
 }
 
+export interface ClientUpdatePayload {
+    gender?: string;
+    firstName?: string;
+    lastName?: string;
+    address?: string;
+    phoneNumber?: string;
+    email?: string;
+    birthDate?: Moment | null;
+    creditCards?: { number: string }[];
+}
+
 export const findClientsPaged = async (opts?: FindClientsPagedOptions): Promise<{rows: Client[], count: number}> => {
     const options: FindClientsPagedOptions = {
         pageNumber: opts.pageNumber || 0,
@@ -189,27 +200,104 @@ export const addClient = async (clientPayload: ClientAddPayload): Promise<Client
     try {
         const id = uuidv4();
 
-        return await Client.create({
-            id: id,
-            gender: clientPayload.gender || '-',
-            firstName: clientPayload.firstName,
-            lastName: clientPayload.lastName,
-            address: clientPayload.address || '',
-            phoneNumber: clientPayload.phoneNumber || '',
-            email: clientPayload.email || '',
-            birthDate: clientPayload.birthDate || null,
-            isDeleted: false,
-            creditCards: clientPayload.creditCards.map(cc => ({
-                clientId: id,
-                number: cc.number
-            }))
-        }, {
-            include: [
-                CreditCard
-            ]
+        return await DB.transaction(async (t: Transaction) => {
+            return await Client.create({
+                id: id,
+                gender: clientPayload.gender || '-',
+                firstName: clientPayload.firstName,
+                lastName: clientPayload.lastName,
+                address: clientPayload.address || '',
+                phoneNumber: clientPayload.phoneNumber || '',
+                email: clientPayload.email || '',
+                birthDate: clientPayload.birthDate || null,
+                isDeleted: false,
+                creditCards: clientPayload.creditCards.map(cc => ({
+                    clientId: id,
+                    number: cc.number
+                }))
+            }, {
+                include: [
+                    CreditCard
+                ]
+            });
         });
     } catch (err) {
         throw err;
+    }
+};
+
+export const updateClient = async (id: string, clientPayload: ClientUpdatePayload): Promise<boolean> => {
+    try {
+        return await DB.transaction(async (t: Transaction) => {
+            const client = await Client.findOne({
+                where: {
+                    id: id,
+                    isDeleted: {
+                        [Op.ne]: true
+                    }
+                },
+                include: [
+                    CreditCard
+                ],
+                transaction: t
+            });
+
+            if (!client) {
+                return false;
+            }
+
+            if (clientPayload.creditCards) {
+                await CreditCard.destroy({
+                    where: {
+                        clientId: id
+                    },
+                    transaction: t
+                });
+
+                await CreditCard.bulkCreate(
+                    clientPayload.creditCards.map(cc => ({
+                        clientId: id,
+                        number: cc.number
+                    })), {
+                        transaction: t
+                    }
+                );
+
+                client.reload();
+            }
+            if (clientPayload.gender) {
+                client.gender = clientPayload.gender;
+            }
+            if (clientPayload.firstName) {
+                client.firstName = clientPayload.firstName;
+            }
+            if (clientPayload.lastName) {
+                client.lastName = clientPayload.lastName;
+            }
+            if (clientPayload.address) {
+                client.address = clientPayload.address;
+            }
+            if (clientPayload.phoneNumber) {
+                client.phoneNumber = clientPayload.phoneNumber;
+            }
+            if (clientPayload.email) {
+                client.email = clientPayload.email;
+            }
+            if (clientPayload.birthDate !== undefined) {
+                client.birthDate = clientPayload.birthDate;
+            }
+
+            await client.save({ transaction: t });
+            return true;
+        });
+    } catch (err) {
+        if (err.name === 'SequelizeDatabaseError' &&
+            err.original &&
+            err.original.code === '22P02') {  // invalid UUID format
+            return false;
+        } else {
+            throw err;
+        }
     }
 };
 
@@ -234,8 +322,8 @@ export const deleteClientById = async (id: string): Promise<boolean> => {
             }
 
             client.isDeleted = true;
-            await client.save({ transaction: t });
 
+            await client.save({ transaction: t });
             return true;
         });
     } catch (err) {
