@@ -27,4 +27,10 @@ const DB = new Sequelize(DatabaseURI, {
     models: modelsDirs.map(dir => path.resolve(__dirname, '..', dir))
 });
 
+export const testDBConnection = (): Promise<void> => {
+    return DB
+        .authenticate()
+        .then(() => {});
+};
+
 export default DB;

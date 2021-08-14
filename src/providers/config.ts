@@ -20,3 +20,11 @@ export const DatabasePoolMax = parseInt(process.env.DATABASE_POOL_MAX) || 5;
 export const DatabasePoolMin = parseInt(process.env.DATABASE_POOL_MIN) || 0;
 export const DatabasePoolAcquireMs = parseInt(process.env.DATABASE_POOL_ACQUIRE_MS) || 30000;
 export const DatabasePoolIdleMs = parseInt(process.env.DATABASE_POOL_IDLE_MS) || 10000;
+
+export const RedisHost = process.env.REDIS_HOST;
+if (!RedisHost) {
+    throw new Error('REDIS_HOST is missing');
+}
+export const RedisPort = parseInt(process.env.REDIS_PORT) || 6379;
+export const RedisPassword = process.env.REDIS_PASSWORD;
+export const RedisTLS = parseBoolean(process.env.REDIS_TLS);
