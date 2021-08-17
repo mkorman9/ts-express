@@ -16,6 +16,7 @@ import {
 } from '../providers/clients_provider';
 import Client from '../models/client';
 import { ClientChangeItem } from '../providers/client_changes_helper';
+import { tokenAuthMiddleware, requireRoles } from '../../session/middlewares/authorization_middleware';
 
 interface CreditCardView {
   number: string;
@@ -129,110 +130,118 @@ const ClientUpdateRequestValidators = [
 
 const clientsAPI = Router();
 
-clientsAPI.get('', async (req: Request, res: Response, next: NextFunction) => {
-  let pageNumber = parseInt(req.query.page as string);
-  if (Number.isNaN(pageNumber) || pageNumber < 0) {
-    pageNumber = 0;
-  }
+clientsAPI.get(
+  '',
+  async (req: Request, res: Response, next: NextFunction) => {
+    let pageNumber = parseInt(req.query.page as string);
+    if (Number.isNaN(pageNumber) || pageNumber < 0) {
+      pageNumber = 0;
+    }
 
-  let pageSize = parseInt(req.query.pageSize as string);
-  if (Number.isNaN(pageSize) || pageSize <= 0 || pageSize > 100) {
-    pageSize = 10;
-  }
+    let pageSize = parseInt(req.query.pageSize as string);
+    if (Number.isNaN(pageSize) || pageSize <= 0 || pageSize > 100) {
+      pageSize = 10;
+    }
 
-  let sortBy = FindClientsSortFields.id;
-  if (req.query.sortBy && (req.query.sortBy as string) in FindClientsSortFields) {
-    sortBy = req.query.sortBy as FindClientsSortFields;
-  }
+    let sortBy = FindClientsSortFields.id;
+    if (req.query.sortBy && (req.query.sortBy as string) in FindClientsSortFields) {
+      sortBy = req.query.sortBy as FindClientsSortFields;
+    }
 
-  let sortReverse = 'sortReverse' in req.query;
+    let sortReverse = 'sortReverse' in req.query;
 
-  let filters: FindClientsFilters = {};
-  try {
-    filters = parseClientsFilters(req.query);
-  } catch (err) {
-    if (err instanceof ClientsFiltersParsingError) {
-      return res
-        .status(400)
+    let filters: FindClientsFilters = {};
+    try {
+      filters = parseClientsFilters(req.query);
+    } catch (err) {
+      if (err instanceof ClientsFiltersParsingError) {
+        return res
+          .status(400)
+          .json({
+            status: 'error',
+            message: 'Validation error',
+            causes: {
+              field: err.field,
+              code: err.code
+            }
+          });
+      }
+    }
+
+    try {
+      const clientsPage = await findClientsPaged({
+        pageNumber,
+        pageSize,
+
+        sortBy,
+        sortReverse,
+
+        filters
+      });
+
+      res
+        .status(200)
         .json({
-          status: 'error',
-          message: 'Validation error',
-          causes: {
-            field: err.field,
-            code: err.code
-          }
-        });
+          data: clientsPage.rows.map((c: Client) => ({
+            id: c.id,
+            gender: c.gender,
+            firstName: c.firstName,
+            lastName: c.lastName,
+            address: c.address,
+            phoneNumber: c.phoneNumber,
+            email: c.email,
+            birthDate: c.birthDate,
+            creditCards: c.creditCards.map(cc => ({
+              number: cc.number
+            }))
+          }) as ClientView),
+          totalPages: Math.ceil(clientsPage.count / pageSize)
+        } as ClientsGetResponse);
+    } catch (err) {
+      next(err);
     }
   }
+);
 
-  try {
-    const clientsPage = await findClientsPaged({
-      pageNumber,
-      pageSize,
+clientsAPI.get(
+  '/:id',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const client = await findClientById(req.params['id']);
+      if (!client) {
+        return res
+          .status(404)
+          .json({
+            status: 'error',
+            message: 'Client not found'
+          });
+      }
 
-      sortBy,
-      sortReverse,
-
-      filters
-    });
-
-    res
-      .status(200)
-      .json({
-        data: clientsPage.rows.map((c: Client) => ({
-          id: c.id,
-          gender: c.gender,
-          firstName: c.firstName,
-          lastName: c.lastName,
-          address: c.address,
-          phoneNumber: c.phoneNumber,
-          email: c.email,
-          birthDate: c.birthDate,
-          creditCards: c.creditCards.map(cc => ({
+      return res
+        .status(200)
+        .json({
+          id: client.id,
+          gender: client.gender,
+          firstName: client.firstName,
+          lastName: client.lastName,
+          address: client.address,
+          phoneNumber: client.phoneNumber,
+          email: client.email,
+          birthDate: client.birthDate,
+          creditCards: client.creditCards.map(cc => ({
             number: cc.number
           }))
-        }) as ClientView),
-        totalPages: Math.ceil(clientsPage.count / pageSize)
-      } as ClientsGetResponse);
-  } catch (err) {
-    next(err);
-  }
-});
-
-clientsAPI.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const client = await findClientById(req.params['id']);
-    if (!client) {
-      return res
-        .status(404)
-        .json({
-          status: 'error',
-          message: 'Client not found'
-        });
+        } as ClientView);
+    } catch (err) {
+      next(err);
     }
-
-    return res
-      .status(200)
-      .json({
-        id: client.id,
-        gender: client.gender,
-        firstName: client.firstName,
-        lastName: client.lastName,
-        address: client.address,
-        phoneNumber: client.phoneNumber,
-        email: client.email,
-        birthDate: client.birthDate,
-        creditCards: client.creditCards.map(cc => ({
-          number: cc.number
-        }))
-      } as ClientView);
-  } catch (err) {
-    next(err);
   }
-});
+);
 
 clientsAPI.post(
   '',
+  tokenAuthMiddleware(),
+  requireRoles(['CLIENTS_EDITOR']),
   ...ClientAddRequestValidators,
   async (req: Request, res: Response, next: NextFunction) => {
     const validationErrors = validationResult(req);
@@ -277,6 +286,8 @@ clientsAPI.post(
 
 clientsAPI.put(
   '/:id',
+  tokenAuthMiddleware(),
+  requireRoles(['CLIENTS_EDITOR']),
   ClientUpdateRequestValidators,
   async (req: Request, res: Response, next: NextFunction) => {
     const validationErrors = validationResult(req);
@@ -328,53 +339,63 @@ clientsAPI.put(
   }
 );
 
-clientsAPI.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const result = await deleteClientById(req.params['id']);
-    if (!result) {
+clientsAPI.delete(
+  '/:id',
+  tokenAuthMiddleware(),
+  requireRoles(['CLIENTS_EDITOR']),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await deleteClientById(req.params['id']);
+      if (!result) {
+        return res
+          .status(404)
+          .json({
+            status: 'error',
+            message: 'Client not found'
+          });
+      }
+
       return res
-        .status(404)
+        .status(200)
         .json({
-          status: 'error',
-          message: 'Client not found'
+          status: 'success'
         });
+    } catch (err) {
+      next(err);
     }
-
-    return res
-      .status(200)
-      .json({
-        status: 'success'
-      });
-  } catch (err) {
-    next(err);
   }
-});
+);
 
-clientsAPI.get('/changelog/client/:id', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const changeset = await findChangelogForClient(req.params['id']);
-    if (changeset === null) {
+clientsAPI.get(
+  '/changelog/client/:id',
+  tokenAuthMiddleware(),
+  requireRoles(['CLIENTS_EDITOR']),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const changeset = await findChangelogForClient(req.params['id']);
+      if (changeset === null) {
+        return res
+          .status(404)
+          .json({
+            status: 'error',
+            message: 'Client not found'
+          });
+      }
+
       return res
-        .status(404)
-        .json({
-          status: 'error',
-          message: 'Client not found'
-        });
+        .status(200)
+        .json(changeset.map(change => ({
+          type: change.type,
+          timestamp: change.timestamp,
+          authorId: '',
+          authorUsername: '',
+          changeset: JSON.parse(change.changeset || '[]') as ClientChangeItem[]
+        })));
+    } catch (err) {
+      next(err);
     }
-
-    return res
-      .status(200)
-      .json(changeset.map(change => ({
-        type: change.type,
-        timestamp: change.timestamp,
-        authorId: '',
-        authorUsername: '',
-        changeset: JSON.parse(change.changeset || '[]') as ClientChangeItem[]
-      })));
-  } catch (err) {
-    next(err);
   }
-});
+);
 
 class ClientsFiltersParsingError extends Error {
   public code: string;
