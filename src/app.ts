@@ -10,6 +10,7 @@ import notFoundHandler from './handlers/not_found_handler';
 import './session/providers/session_provider';
 
 const app = express();
+app.set('trust proxy', ['loopback', 'linklocal', 'uniquelocal']);
 app.disable('x-powered-by');
 app.disable('etag');
 app.use(cookieParser());
