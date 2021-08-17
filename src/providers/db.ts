@@ -12,7 +12,8 @@ import {
 import { log } from './logging';
 
 const modelsDirs = [
-  'clients/models'
+  'clients/models',
+  'accounts/models'
 ];
 
 const DB = new Sequelize(DatabaseURI, {

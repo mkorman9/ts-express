@@ -15,6 +15,7 @@
     "start": "tsc-watch --onSuccess \"npm-run-all lint serve\""
   },
   "dependencies": {
+    "bcrypt": "^5.0.1",
     "cookie-parser": "^1.4.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
