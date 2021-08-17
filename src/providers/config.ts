@@ -11,6 +11,7 @@ export const LogLevel = process.env.LOG_LEVEL || 'info';
 export const ServerPort = parseInt(process.env.SERVER_PORT) || 5000;
 export const ServerHost = process.env.SERVER_HOST || '0.0.0.0';
 export const BehindTLSProxy = parseBoolean(process.env.BEHIND_TLS_PROXY);
+export const RatelimiterEnabled = parseBoolean(process.env.RATELIMITER_ENABLED);
 
 export const DatabaseURI = process.env.DATABASE_URI;
 if (!DatabaseURI) {

@@ -10,6 +10,7 @@ import {
 import {
   startSession
 } from '../../session/providers/session_provider';
+import { ratelimiterMiddleware } from '../../providers/rate_limiter';
 
 const PasswordAuthRequestValidators = [
   body('email')
@@ -22,6 +23,7 @@ const authAPI = Router();
 
 authAPI.post(
   '/password',
+  ratelimiterMiddleware('login'),
   ...PasswordAuthRequestValidators,
   async (req: Request, res: Response, next: NextFunction) => {
     const validationErrors = validationResult(req);
