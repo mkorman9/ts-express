@@ -8,11 +8,13 @@ import healthcheckHandler from './handlers/healthcheck_handler';
 import requestParsingErrorHandler from './handlers/request_parsing_error_handler';
 import internalErrorHandler from './handlers/internal_error_handler';
 import notFoundHandler from './handlers/not_found_handler';
+import { accessLogger } from './providers/access_logger';
 
 const app = express();
 app.set('trust proxy', ['loopback', 'linklocal', 'uniquelocal']);
 app.disable('x-powered-by');
 app.disable('etag');
+app.use(accessLogger());
 app.use(cookieParser());
 app.use(express.json());
 app.use(requestParsingErrorHandler);
