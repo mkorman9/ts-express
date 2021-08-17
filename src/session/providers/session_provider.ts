@@ -81,11 +81,44 @@ export const startSession = async (subject: string, props: NewSessionProps = {})
   return sessionContext;
 };
 
+export const revokeSession = async (sessionContext: SessionContext): Promise<boolean> => {
+  const sessionKey = `${SessionRedisKeyPrefix}:${sessionContext.subject}:${sessionContext.id}`;
+  const tokenKey = `${TokenRedisKeyPrefix}:${sessionContext.raw}`;
+
+  const deleted = await redisClient.del(sessionKey);
+  await redisClient.del(tokenKey);
+
+  return deleted > 0;
+};
+
+export const refreshSession = async (sessionContext: SessionContext): Promise<SessionContext> => {
+  if (!sessionContext.expiresAt) {
+    return sessionContext;
+  }
+
+  sessionContext.expiresAt = moment().add(sessionContext.duration, 'seconds');
+
+  const sessionKey = `${SessionRedisKeyPrefix}:${sessionContext.subject}:${sessionContext.id}`;
+  const tokenKey = `${TokenRedisKeyPrefix}:${sessionContext.raw}`;
+
+  await redisClient.del(sessionKey);
+  await redisClient.del(tokenKey);
+
+  const sessionData = serializeSessionContext(sessionContext);
+  await redisClient.hmset(sessionKey, sessionData);
+  await redisClient.set(tokenKey, `${sessionContext.subject}:${sessionContext.id}`);
+
+  await redisClient.expire(sessionKey, sessionContext.duration);
+  await redisClient.expire(tokenKey, sessionContext.duration);
+
+  return sessionContext;
+};
+
 const buildSessionContext = (sessionData: {[prop: string]: string}): SessionContext => {
   return {
     id: sessionData['id'],
-    issuedAt: moment(parseInt(sessionData['issuedAt'])),
-    expiresAt: sessionData['expiresAt'] ? moment(parseInt(sessionData['expiresAt'])) : null,
+    issuedAt: moment.unix(parseInt(sessionData['issuedAt'])),
+    expiresAt: sessionData['expiresAt'] ? moment.unix(parseInt(sessionData['expiresAt'])) : null,
     duration: parseInt(sessionData['duration']),
     issuer: sessionData['issuer'],
     subject: sessionData['subject'],
@@ -99,7 +132,7 @@ const buildSessionContext = (sessionData: {[prop: string]: string}): SessionCont
 const serializeSessionContext = (sessionContext: SessionContext): {[prop: string]: string} => {
   let d = {
     id: sessionContext.id,
-    issuedAt: sessionContext.issuedAt.valueOf().toString(),
+    issuedAt: sessionContext.issuedAt.unix().toString(),
     duration: sessionContext.duration.toString(),
     issuer: sessionContext.issuer,
     subject: sessionContext.subject,
@@ -109,7 +142,7 @@ const serializeSessionContext = (sessionContext: SessionContext): {[prop: string
   };
 
   if (sessionContext.expiresAt) {
-    d['expiresAt'] = sessionContext.expiresAt.valueOf().toString();
+    d['expiresAt'] = sessionContext.expiresAt.unix().toString();
   }
 
   if (sessionContext.resources) {

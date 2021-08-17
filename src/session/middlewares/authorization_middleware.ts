@@ -1,5 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, CookieOptions } from 'express';
+import moment from 'moment';
+
 import { SessionContext, findSession, findSessionWithToken } from '../providers/session_provider';
+import { BehindTLSProxy } from '../../providers/config';
 
 const SessionCookieName = 'SESSION_ID';
 const SessionFieldName = 'sessionContext';
@@ -24,7 +27,7 @@ const authMiddleware = (sessionExtractor: (req: Request) => (() => Promise<Sessi
         return next();
       }
 
-      req[SessionFieldName] = sessionContext;
+      setSessionContext(sessionContext, req);
     } catch (err) {
       return next(err);
     }
@@ -39,6 +42,10 @@ export const getSessionContext = (req: Request): SessionContext | null => {
   }
 
   return null;
+};
+
+export const setSessionContext = (sessionContext: SessionContext | null, req: Request) => {
+  req[SessionFieldName] = sessionContext;
 };
 
 export const cookieAuthMiddleware = authMiddleware((req: Request) => {
@@ -122,6 +129,30 @@ export const requireRoles = (roles: string[]) => {
         });
     });
   };
+};
+
+export const sendSessionCookie = (req: Request, res: Response) => {
+  const sessionContext = getSessionContext(req);
+  let value = '';
+
+  const options: CookieOptions = {
+    httpOnly: true,
+    sameSite: 'strict',
+    secure: BehindTLSProxy,
+    path: '/api/v1/login/session/status'
+  };
+
+  if (sessionContext) {
+    if (sessionContext.expiresAt) {
+      options.expires = sessionContext.expiresAt.toDate();
+    }
+
+    value = Buffer.from(`${sessionContext.subject}:${sessionContext.id}`).toString('base64');
+  } else {
+    options.expires = moment(0).toDate();
+  }
+
+  res.cookie(SessionCookieName, value, options);
 };
 
 const parseSessionCookie = (cookieValue: string): [subject: string, sessionId: string] | null => {
