@@ -39,65 +39,70 @@ authAPI.post(
     }
 
     const rememberMe = 'rememberMe' in req.query;
-    const account = await findAccountByCredentialsEmail(req.body['email']);
 
-    if (!account || !account.passwordCredentials) {
-      return res
-        .status(401)
-        .json({
-          status: 'error',
-          causes: {
-            field: 'credentials',
-            code: 'invalid'
-          }
-        });
-    }
+    try {
+      const account = await findAccountByCredentialsEmail(req.body['email']);
 
-    const passwordMatch = await bcrypt.compare(req.body['password'], account.passwordCredentials.passwordBcrypt);
-    if (!passwordMatch) {
-      return res
-        .status(401)
-        .json({
-          status: 'error',
-          causes: {
-            field: 'credentials',
-            code: 'invalid'
-          }
-        });
-    }
+      if (!account || !account.passwordCredentials) {
+        return res
+          .status(401)
+          .json({
+            status: 'error',
+            causes: {
+              field: 'credentials',
+              code: 'invalid'
+            }
+          });
+      }
 
-    if (!account.isActive) {
-      return res
-        .status(401)
-        .json({
-          status: 'error',
-          causes: {
-            field: 'account',
-            code: 'inactive'
-          }
-        });
-    }
+      const passwordMatch = await bcrypt.compare(req.body['password'], account.passwordCredentials.passwordBcrypt);
+      if (!passwordMatch) {
+        return res
+          .status(401)
+          .json({
+            status: 'error',
+            causes: {
+              field: 'credentials',
+              code: 'invalid'
+            }
+          });
+      }
 
-    const sessionContext = await startSession(account.id, {
-      ip: req.ip,
-      duration: rememberMe ? (14 * 24 * 60 * 60) : (4 * 60 * 60),
-      roles: account.roles
-    });
+      if (!account.isActive) {
+        return res
+          .status(401)
+          .json({
+            status: 'error',
+            causes: {
+              field: 'account',
+              code: 'inactive'
+            }
+          });
+      }
 
-    setSessionContext(sessionContext, req);
-    sendSessionCookie(req, res);
-
-    return res
-      .status(200)
-      .json({
-        id: sessionContext.id,
-        startTime: sessionContext.issuedAt,
-        expiresAt: sessionContext.expiresAt,
-        subject: sessionContext.subject,
-        loginIp: sessionContext.ip,
-        roles: Array.from(sessionContext.roles),
-        accessToken: sessionContext.raw
+      const sessionContext = await startSession(account.id, {
+        ip: req.ip,
+        duration: rememberMe ? (14 * 24 * 60 * 60) : (4 * 60 * 60),
+        roles: account.roles
       });
+
+      setSessionContext(sessionContext, req);
+      sendSessionCookie(req, res);
+
+      return res
+        .status(200)
+        .json({
+          id: sessionContext.id,
+          startTime: sessionContext.issuedAt,
+          expiresAt: sessionContext.expiresAt,
+          subject: sessionContext.subject,
+          loginIp: sessionContext.ip,
+          roles: Array.from(sessionContext.roles),
+          accessToken: sessionContext.raw
+        });
+    } catch (err) {
+      next(err);
+    }
   }
 );
 
