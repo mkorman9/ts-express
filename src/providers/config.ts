@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 
 const parseBoolean = (s: string | undefined): boolean => {
-    return s && ['1', 'true', 'yes'].includes(s.toLocaleLowerCase());
+  return s && ['1', 'true', 'yes'].includes(s.toLocaleLowerCase());
 };
 
 dotenv.config({ path: process.env.CONFIG_PATH });
@@ -13,7 +13,7 @@ export const ServerHost = process.env.SERVER_HOST || '0.0.0.0';
 
 export const DatabaseURI = process.env.DATABASE_URI;
 if (!DatabaseURI) {
-    throw new Error('DATABASE_URI is missing');
+  throw new Error('DATABASE_URI is missing');
 }
 export const DatabaseQueryLogging = parseBoolean(process.env.DATABASE_QUERY_LOGGING);
 export const DatabasePoolMax = parseInt(process.env.DATABASE_POOL_MAX) || 5;
@@ -23,7 +23,7 @@ export const DatabasePoolIdleMs = parseInt(process.env.DATABASE_POOL_IDLE_MS) ||
 
 export const RedisHost = process.env.REDIS_HOST;
 if (!RedisHost) {
-    throw new Error('REDIS_HOST is missing');
+  throw new Error('REDIS_HOST is missing');
 }
 export const RedisPort = parseInt(process.env.REDIS_PORT) || 6379;
 export const RedisPassword = process.env.REDIS_PASSWORD;
