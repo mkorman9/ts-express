@@ -14,19 +14,19 @@ const app = express();
 app.set('trust proxy', ['loopback', 'linklocal', 'uniquelocal']);
 app.disable('x-powered-by');
 app.disable('etag');
+
 app.use(accessLogger());
 app.use(cookieParser());
 app.use(express.json());
 app.use(requestParsingErrorHandler);
-app.get('/debug/health', healthcheckHandler);
+
+app.get('/health', healthcheckHandler);
 
 // API v1
 const apiV1 = Router();
-
 apiV1.use('/client', clientsAPI);
 apiV1.use('/login/session', sessionAPI);
 apiV1.use('/login/auth', authAPI);
-
 app.use('/api/v1', apiV1);
 
 app.use(internalErrorHandler);
