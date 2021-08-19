@@ -419,7 +419,7 @@ clientsAPI.delete(
 );
 
 clientsAPI.get(
-  '/changelog/client/:id',
+  '/:id/changelog',
   tokenAuthMiddleware(),
   requireRoles(['CLIENTS_EDITOR']),
   async (req: Request, res: Response, next: NextFunction) => {

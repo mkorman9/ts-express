@@ -17,7 +17,7 @@ import {
 const sessionAPI = Router();
 
 sessionAPI.get(
-  '/status',
+  '/token',
   cookieAuthMiddleware(),
   async (req: Request, res: Response, next: NextFunction) => {
     const sessionContext = getSessionContext(req);

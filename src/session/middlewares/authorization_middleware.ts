@@ -168,8 +168,7 @@ export const sendSessionCookie = (req: Request, res: Response) => {
   const options: CookieOptions = {
     httpOnly: true,
     sameSite: 'strict',
-    secure: BehindTLSProxy,
-    path: '/api/v1/login/session/status'
+    secure: BehindTLSProxy
   };
 
   if (sessionContext) {
