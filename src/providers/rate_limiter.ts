@@ -1,13 +1,40 @@
 import { Request, Response, NextFunction } from 'express';
+import onHeaders from 'on-headers';
 
+import { log } from './logging';
 import redisClient from './redis';
 import { RatelimiterEnabled } from './config';
 
-const RatelimiterRedisPrefix = 'ratelimit';
-const RatelimiterMaxRequests = 250;
-const RatelimiterTimeWindow = 60;
+export interface RatelimiterMiddlewareProps {
+  countStatusCodes?: number[];
+}
 
-export const ratelimiterMiddleware = (bucketName: string) => {
+const RatelimiterRedisPrefix = 'ratelimit';
+const BucketsConfig = {
+  general: {
+    maxRequests: 45,
+    timeWindow: 60
+  },
+  login: {
+    maxRequests: 15,
+    timeWindow: 60
+  }
+};
+
+export const ratelimiterMiddleware = (bucketName: string, props?: RatelimiterMiddlewareProps) => {
+  if (!props) {
+    props = {};
+  }
+
+  const options = {
+    countStatusCodes: props.countStatusCodes ? new Set(props.countStatusCodes) : undefined
+  };
+
+  let config = BucketsConfig.general;
+  if (bucketName === 'login') {
+    config = BucketsConfig.login;
+  }
+
   return async (req: Request, res: Response, next: NextFunction) => {
     if (!RatelimiterEnabled) {
       return next();
@@ -21,7 +48,7 @@ export const ratelimiterMiddleware = (bucketName: string) => {
         requestsCount = 0;
       }
 
-      if (requestsCount >= RatelimiterMaxRequests) {
+      if (requestsCount >= config.maxRequests) {
         return res
           .status(429)
           .json({
@@ -30,14 +57,27 @@ export const ratelimiterMiddleware = (bucketName: string) => {
           });
       }
 
-      await redisClient.incr(key);
-
       if (requestsCount === 0) {
-        await redisClient.expire(key, RatelimiterTimeWindow);
+        await redisClient.setex(key, config.timeWindow, '0');
       }
     } catch (err) {
       return next(err);
     }
+
+    onHeaders(res, async () => {
+      try {
+        let count = true;
+        if (options.countStatusCodes) {
+          count = options.countStatusCodes.has(res.statusCode);
+        }
+
+        if (count) {
+          await redisClient.incr(key);
+        }
+      } catch (err) {
+        log.error(`error while updating ratelimiter state: ${err}`);
+      }
+    });
 
     next();
   };
