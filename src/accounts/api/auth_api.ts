@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { body, validationResult } from 'express-validator';
+import moment from 'moment';
 import bcrypt from 'bcrypt';
 
 import { findAccountByCredentialsEmail } from '../providers/accounts_provider';
@@ -84,7 +85,7 @@ authAPI.post(
 
       const sessionContext = await startSession(account.id, {
         ip: req.ip,
-        duration: rememberMe ? (14 * 24 * 60 * 60) : (4 * 60 * 60),
+        duration: rememberMe ? moment.duration(14, 'days').asSeconds() : moment.duration(4, 'hours').asSeconds(),
         roles: account.roles
       });
 
