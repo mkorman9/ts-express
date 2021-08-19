@@ -68,6 +68,18 @@ export interface ClientUpdatePayload {
   creditCards?: { number: string }[];
 }
 
+export interface AddClientProps {
+  author: string;
+}
+
+export interface UpdateClientProps {
+  author: string;
+}
+
+export interface DeleteClientProps {
+  author: string;
+}
+
 export const findClientsPaged = async (opts?: FindClientsPagedOptions): Promise<{ rows: Client[], count: number }> => {
   const options: FindClientsPagedOptions = {
     pageNumber: opts.pageNumber || 0,
@@ -211,7 +223,7 @@ export const findClientById = async (id: string, findOptions?: FindClientByIdOpt
   }
 };
 
-export const addClient = async (clientPayload: ClientAddPayload): Promise<Client> => {
+export const addClient = async (clientPayload: ClientAddPayload, props: AddClientProps): Promise<Client> => {
   try {
     const id = uuidv4();
 
@@ -243,7 +255,7 @@ export const addClient = async (clientPayload: ClientAddPayload): Promise<Client
         clientId: id,
         type: 'CREATED',
         timestamp: moment(),
-        author: null,
+        author: props.author,
         changeset: JSON.stringify(changeset)
       }, {
         transaction: t
@@ -256,7 +268,7 @@ export const addClient = async (clientPayload: ClientAddPayload): Promise<Client
   }
 };
 
-export const updateClient = async (id: string, clientPayload: ClientUpdatePayload): Promise<boolean> => {
+export const updateClient = async (id: string, clientPayload: ClientUpdatePayload, props: UpdateClientProps): Promise<boolean> => {
   try {
     return await DB.transaction(async (t: Transaction) => {
       const client = await Client.findOne({
@@ -341,7 +353,7 @@ export const updateClient = async (id: string, clientPayload: ClientUpdatePayloa
         clientId: id,
         type: 'UPDATED',
         timestamp: moment(),
-        author: null,
+        author: props.author,
         changeset: JSON.stringify(changeset)
       }, {
         transaction: t
@@ -360,7 +372,7 @@ export const updateClient = async (id: string, clientPayload: ClientUpdatePayloa
   }
 };
 
-export const deleteClientById = async (id: string): Promise<boolean> => {
+export const deleteClientById = async (id: string, props: DeleteClientProps): Promise<boolean> => {
   try {
     return await DB.transaction(async (t: Transaction) => {
       const client = await Client.findOne({
@@ -388,7 +400,7 @@ export const deleteClientById = async (id: string): Promise<boolean> => {
         clientId: id,
         type: 'DELETED',
         timestamp: moment(),
-        author: null,
+        author: props.author,
         changeset: ''
       }, {
         transaction: t
@@ -419,7 +431,7 @@ export const findChangelogForClient = async (id: string): Promise<ClientChange[]
         clientId: client.id
       },
       order: [
-        ['timestamp', 'ASC']
+        ['timestamp', 'DESC']
       ]
     });
   } catch (err) {

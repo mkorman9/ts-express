@@ -16,7 +16,14 @@ import {
 } from '../providers/clients_provider';
 import Client from '../models/client';
 import { ClientChangeItem } from '../providers/client_changes_helper';
-import { tokenAuthMiddleware, requireRoles } from '../../session/middlewares/authorization_middleware';
+import {
+  tokenAuthMiddleware,
+  requireRoles,
+  includeSessionAccount,
+  getSessionAccount
+} from '../../session/middlewares/authorization_middleware';
+import Account from '../../accounts/models/account';
+import { findAccountById } from '../../accounts/providers/accounts_provider';
 
 interface CreditCardView {
   number: string;
@@ -242,6 +249,7 @@ clientsAPI.post(
   '',
   tokenAuthMiddleware(),
   requireRoles(['CLIENTS_EDITOR']),
+  includeSessionAccount(),
   ...ClientAddRequestValidators,
   async (req: Request, res: Response, next: NextFunction) => {
     const validationErrors = validationResult(req);
@@ -271,8 +279,22 @@ clientsAPI.post(
       }))
     };
 
+    const account = getSessionAccount(req) as Account;
+    if (account.isBanned) {
+      return res
+          .status(400)
+          .json({
+            status: 'error',
+            message: 'Validation error',
+            causes: {
+              field: 'account',
+              code: 'banned'
+            }
+          });
+    }
+
     try {
-      const client = await addClient(clientPayload);
+      const client = await addClient(clientPayload, { author: account.id });
       return res
         .status(200)
         .json({
@@ -288,6 +310,7 @@ clientsAPI.put(
   '/:id',
   tokenAuthMiddleware(),
   requireRoles(['CLIENTS_EDITOR']),
+  includeSessionAccount(),
   ClientUpdateRequestValidators,
   async (req: Request, res: Response, next: NextFunction) => {
     const validationErrors = validationResult(req);
@@ -317,8 +340,22 @@ clientsAPI.put(
       }))
     };
 
+    const account = getSessionAccount(req) as Account;
+    if (account.isBanned) {
+      return res
+          .status(400)
+          .json({
+            status: 'error',
+            message: 'Validation error',
+            causes: {
+              field: 'account',
+              code: 'banned'
+            }
+          });
+    }
+
     try {
-      const result = await updateClient(req.params['id'], clientPayload);
+      const result = await updateClient(req.params['id'], clientPayload, { author: account.id });
       if (!result) {
         return res
           .status(404)
@@ -343,9 +380,24 @@ clientsAPI.delete(
   '/:id',
   tokenAuthMiddleware(),
   requireRoles(['CLIENTS_EDITOR']),
+  includeSessionAccount(),
   async (req: Request, res: Response, next: NextFunction) => {
+    const account = getSessionAccount(req) as Account;
+    if (account.isBanned) {
+      return res
+          .status(400)
+          .json({
+            status: 'error',
+            message: 'Validation error',
+            causes: {
+              field: 'account',
+              code: 'banned'
+            }
+          });
+    }
+
     try {
-      const result = await deleteClientById(req.params['id']);
+      const result = await deleteClientById(req.params['id'], { author: account.id });
       if (!result) {
         return res
           .status(404)
@@ -372,8 +424,8 @@ clientsAPI.get(
   requireRoles(['CLIENTS_EDITOR']),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const changeset = await findChangelogForClient(req.params['id']);
-      if (changeset === null) {
+      const changelog = await findChangelogForClient(req.params['id']);
+      if (changelog === null) {
         return res
           .status(404)
           .json({
@@ -382,13 +434,22 @@ clientsAPI.get(
           });
       }
 
+      const authorsIds = new Set(changelog.map(c => c.author));
+      const authorsUsernames = new Map<string, string>();
+      for (const id of authorsIds) {
+        const author = await findAccountById(id);
+        if (author) {
+          authorsUsernames[id] = author.username;
+        }
+      }
+
       return res
         .status(200)
-        .json(changeset.map(change => ({
+        .json(changelog.map(change => ({
           type: change.type,
           timestamp: change.timestamp,
-          authorId: '',
-          authorUsername: '',
+          authorId: change.author,
+          authorUsername: authorsUsernames[change.author] || null,
           changeset: JSON.parse(change.changeset || '[]') as ClientChangeItem[]
         })));
     } catch (err) {

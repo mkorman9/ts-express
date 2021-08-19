@@ -61,6 +61,10 @@ class Account extends Model {
   @HasOne(() => GithubCredentials)
   githubCredentials: GithubCredentials | null;
 
+  get isBanned(): boolean {
+    return this.bannedUntil && moment().isBefore(this.bannedUntil);
+  }
+
   get roles(): string[] {
     if (!this.rolesString) {
       return [];

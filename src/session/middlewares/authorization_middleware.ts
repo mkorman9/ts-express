@@ -3,10 +3,13 @@ import moment from 'moment';
 
 import { SessionContext, findSession, findSessionWithToken } from '../providers/session_provider';
 import { BehindTLSProxy } from '../../providers/config';
+import Account from '../../accounts/models/account';
+import { findAccountById } from '../../accounts/providers/accounts_provider';
 
 const SessionCookieName = 'SESSION_ID';
 const SessionFieldName = 'sessionContext';
 const SessionExtractionStatusFieldName = 'sessionContextExtraction';
+const SessionAccountFieldName = 'sessionAccount';
 
 const authMiddleware = (sessionExtractor: (req: Request) => (() => Promise<SessionContext | null> | null)) => () => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -46,6 +49,15 @@ export const getSessionContext = (req: Request): SessionContext | null => {
 
 export const setSessionContext = (sessionContext: SessionContext | null, req: Request) => {
   req[SessionFieldName] = sessionContext;
+  req[SessionAccountFieldName] = undefined;
+};
+
+export const getSessionAccount = (req: Request): Account | null => {
+  if (req[SessionAccountFieldName]) {
+    return req[SessionAccountFieldName] as Account;
+  }
+
+  return null;
 };
 
 export const cookieAuthMiddleware = authMiddleware((req: Request) => {
@@ -128,6 +140,24 @@ export const requireRoles = (roles: string[]) => {
           message: 'Access denied'
         });
     });
+  };
+};
+
+export const includeSessionAccount = () => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    const sessionContext = getSessionContext(req);
+    if (!sessionContext) {
+      return next();
+    }
+
+    try {
+      const account = await findAccountById(sessionContext.subject);
+      req[SessionAccountFieldName] = account;
+    } catch (err) {
+      return next(err);
+    }
+
+    next();
   };
 };
 
