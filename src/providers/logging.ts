@@ -40,10 +40,7 @@ export const log = (() => {
       host: LogGelfHost,
       port: LogGelfPort,
 
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.json()
-      )
+      format: winston.format.printf(l => l.message)
     } as GelfTransporterOptions));
   }
 
