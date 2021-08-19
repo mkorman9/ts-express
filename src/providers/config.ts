@@ -7,6 +7,9 @@ const parseBoolean = (s: string | undefined): boolean => {
 dotenv.config({ path: process.env.CONFIG_PATH });
 
 export const LogLevel = process.env.LOG_LEVEL || 'info';
+export const LogGelfEnabled = parseBoolean(process.env.LOG_GELF_ENABLED);
+export const LogGelfHost = process.env.LOG_GELF_HOST || '127.0.0.1';
+export const LogGelfPort = parseInt(process.env.LOG_GELF_PORT) || 12201;
 
 export const ServerPort = parseInt(process.env.SERVER_PORT) || 5000;
 export const ServerHost = process.env.SERVER_HOST || '0.0.0.0';

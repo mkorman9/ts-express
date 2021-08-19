@@ -20,7 +20,13 @@ export const accessLogger = () => {
     onHeaders(res, () => {
       const elapsedTime = moment().diff(startTime, 'ms');
 
-      log.info(`${req.method} ${req.originalUrl} - ${res.statusCode} (${elapsedTime} ms) [${req.ip}]`);
+      log.info(`${req.method} ${req.originalUrl} - ${res.statusCode} (${elapsedTime} ms) [${req.ip}]`, {
+        tag: 'access_log',
+        method: req.method,
+        url: req.originalUrl,
+        status: res.statusCode,
+        clientIp: req.ip
+      });
     });
 
     next();

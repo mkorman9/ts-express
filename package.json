@@ -29,7 +29,8 @@
     "sequelize-typescript": "^2.1.0",
     "tedis": "^0.1.12",
     "uuid": "^8.3.2",
-    "winston": "^3.3.3"
+    "winston": "^3.3.3",
+    "winston-gelf-transporter": "^1.0.2"
   },
   "devDependencies": {
     "@types/chai": "^4.2.21",

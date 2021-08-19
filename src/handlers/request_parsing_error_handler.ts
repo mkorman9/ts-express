@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction, Errback } from 'express';
+import { Request, Response, NextFunction } from 'express';
 
-const requestParsingErrorHandler = (err: Errback, req: Request, res: Response, next: NextFunction) => {
+const requestParsingErrorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
   if (res.headersSent) {
     return next(err);
   }

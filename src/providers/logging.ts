@@ -1,9 +1,27 @@
 import winston from 'winston';
+import WinstonGelfTransporter from 'winston-gelf-transporter';
 
-import { LogLevel } from './config';
+import {
+  LogLevel,
+  LogGelfEnabled,
+  LogGelfHost,
+  LogGelfPort
+} from './config';
+
+interface GelfTransporterOptions {
+  level?: string;
+  silent?: boolean;
+  handleExceptions?: boolean;
+  version?: string;
+  host?: string;
+  port?: number;
+  protocol?: string;
+  hostName?: string;
+  additional?: Object;
+}
 
 export const log = (() => {
-  return winston.createLogger({
+  const l = winston.createLogger({
     level: LogLevel,
     transports: [
       new winston.transports.Console()
@@ -13,4 +31,21 @@ export const log = (() => {
       winston.format.printf(l => `${l.timestamp} | ${l.level} | ${l.message}`)
     )
   });
+
+  if (LogGelfEnabled) {
+    l.add(new WinstonGelfTransporter({
+      level: LogLevel,
+      hostName: process.env.HOST,
+      protocol: 'udp',
+      host: LogGelfHost,
+      port: LogGelfPort,
+
+      format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json()
+      )
+    } as GelfTransporterOptions));
+  }
+
+  return l;
 })();
