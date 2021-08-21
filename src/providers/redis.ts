@@ -7,10 +7,11 @@ import {
   RedisPassword,
   RedisTLS
 } from './config';
+import { ConfigurationError } from './common';
 
 const initTedis = () => {
   if (!RedisHost) {
-    throw new Error('Redis host needs to be specified');
+    throw new ConfigurationError('Redis host needs to be specified');
   }
 
   return new Tedis({
@@ -25,7 +26,7 @@ const redisClient = !InTestingMode ? initTedis() : ({} as Tedis);
 
 export const testRedisConnection = (): Promise<void> => {
   return redisClient.command('PING')
-    .then(() => { });
+    .then(() => {});
 };
 
 export default redisClient;

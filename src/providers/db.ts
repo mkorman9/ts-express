@@ -11,6 +11,7 @@ import {
   DatabasePoolIdleMs
 } from './config';
 import { log } from './logging';
+import { ConfigurationError } from './common';
 
 const modelsDirs = [
   'clients/models',
@@ -19,7 +20,7 @@ const modelsDirs = [
 
 const initSequelize = () => {
   if (!DatabaseURI) {
-    throw new Error('Database URI needs to be specified');
+    throw new ConfigurationError('Database URI needs to be specified');
   }
 
   return new Sequelize(DatabaseURI, {
@@ -40,7 +41,7 @@ const DB = !InTestingMode ? initSequelize() : ({} as Sequelize);
 export const testDBConnection = (): Promise<void> => {
   return DB
     .authenticate()
-    .then(() => { });
+    .then(() => {});
 };
 
 export default DB;

@@ -1,4 +1,5 @@
 import { Mode, ServerPort, ServerHost } from './providers/config';
+import './exception_handler';
 import app from './app';
 import { log } from './providers/logging';
 
