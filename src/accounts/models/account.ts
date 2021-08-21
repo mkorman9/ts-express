@@ -45,7 +45,7 @@ class Account extends Model {
     field: 'created_at',
     type: DataTypes.DATE,
     get: function () {
-      const value = this.getDataValue('createdAt');
+      const value = this.getDataValue('registeredAt');
       if (!value) {
         return null;
       }
@@ -53,13 +53,25 @@ class Account extends Model {
       return moment(value);
     }
   })
-  createdAt: Moment;
+  registeredAt: Moment;
 
   @HasOne(() => PasswordCredentials)
   passwordCredentials: PasswordCredentials | null;
 
   @HasOne(() => GithubCredentials)
   githubCredentials: GithubCredentials | null;
+
+  get email(): string {
+    if (this.passwordCredentials) {
+      return this.passwordCredentials.email;
+    }
+
+    if (this.githubCredentials) {
+      return this.githubCredentials.email;
+    }
+
+    return '';
+  }
 
   get isBanned(): boolean {
     return this.bannedUntil && moment().isBefore(this.bannedUntil);

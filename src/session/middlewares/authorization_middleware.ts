@@ -144,20 +144,24 @@ export const requireRoles = (roles: string[]) => {
 };
 
 export const includeSessionAccount = () => {
+  const a = requireAuthentication();
+
   return async (req: Request, res: Response, next: NextFunction) => {
-    const sessionContext = getSessionContext(req);
-    if (!sessionContext) {
-      return next();
-    }
+    await a(req, res, async () => {
+      const sessionContext = getSessionContext(req);
+      if (!sessionContext) {
+        return next();
+      }
 
-    try {
-      const account = await findAccountById(sessionContext.subject);
-      req[SessionAccountFieldName] = account;
-    } catch (err) {
-      return next(err);
-    }
+      try {
+        const account = await findAccountById(sessionContext.subject);
+        req[SessionAccountFieldName] = account;
+      } catch (err) {
+        return next(err);
+      }
 
-    next();
+      next();
+    });
   };
 };
 
