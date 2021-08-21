@@ -6,6 +6,8 @@ const parseBoolean = (s: string | undefined): boolean => {
 
 dotenv.config({ path: process.env.CONFIG_PATH });
 
+export const Mode = process.env.NODE_ENV || 'development';
+
 export const LogLevel = process.env.LOG_LEVEL || 'info';
 export const LogSyslogEnabled = parseBoolean(process.env.LOG_SYSLOG_ENABLED);
 export const LogSyslogHost = process.env.LOG_SYSLOG_HOST || '127.0.0.1';

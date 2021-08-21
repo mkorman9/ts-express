@@ -1,11 +1,11 @@
-import { ServerPort, ServerHost } from './providers/config';
+import { Mode, ServerPort, ServerHost } from './providers/config';
 import app from './app';
 import { log } from './providers/logging';
 
 import { testDBConnection } from './providers/db';
 import { testRedisConnection } from './providers/redis';
 
-log.info(`starting up in '${process.env.NODE_ENV}' mode`);
+log.info(`starting up in '${Mode}' mode`);
 
 testDBConnection()
   .then(() => {
@@ -25,10 +25,13 @@ testRedisConnection()
     process.exit(1);
   });
 
-process.on('SIGINT', () => {
-  process.exit(0);
+const server = app.listen(ServerPort, ServerHost, () => {
+  log.info(`server listening on ${ServerHost}:${ServerPort}`);
 });
 
-app.listen(ServerPort, ServerHost, () => {
-  log.info(`server listening on ${ServerHost}:${ServerPort}`);
+process.on('SIGINT', () => {
+  server.close(() => {
+    log.info('server stopped due to signal');
+    process.exit(0);
+  });
 });
