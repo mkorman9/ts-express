@@ -13,7 +13,8 @@ docker-compose up
 ```
 
 This will start Postgres and Redis using docker-compose stack. It will also initialize the database schema and upload some basic data for testing.
-Keep in mind the state of the database and redis will be held between consequitve `docker-compose up`. To reset the state run:
+<br />
+Keep in mind the state of the database and redis will be held between consequitve `docker-compose up` runs. To reset the state run:
 
 ```sh
 docker-compose down && rm -rf _docker_compose_volumes
