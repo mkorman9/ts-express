@@ -1,7 +1,26 @@
 import dotenv from 'dotenv';
+import fs from 'fs';
 
 const parseBoolean = (s: string | undefined): boolean => {
   return s && ['1', 'true', 'yes'].includes(s.toLocaleLowerCase());
+};
+
+const resolveSecret = (plaintextEnv: string | undefined, fileEnv: string | undefined): string | undefined => {
+  if (plaintextEnv) {
+    return plaintextEnv;
+  }
+
+  if (fileEnv) {
+    try {
+      const content = fs.readFileSync(fileEnv, { encoding: 'utf8' });
+      if (content) {
+        return content;
+      }
+    } catch (err) {
+    }
+  }
+
+  return undefined;
 };
 
 dotenv.config({ path: process.env.CONFIG_PATH });
@@ -18,7 +37,7 @@ export const ServerHost = process.env.SERVER_HOST || '0.0.0.0';
 export const BehindTLSProxy = parseBoolean(process.env.BEHIND_TLS_PROXY);
 export const RatelimiterEnabled = parseBoolean(process.env.RATELIMITER_ENABLED);
 
-export const DatabaseURI = process.env.DATABASE_URI;
+export const DatabaseURI = resolveSecret(process.env.DATABASE_URI, process.env.DATABASE_URI_FILE);
 if (!DatabaseURI) {
   throw new Error('DATABASE_URI is missing');
 }
@@ -33,5 +52,5 @@ if (!RedisHost) {
   throw new Error('REDIS_HOST is missing');
 }
 export const RedisPort = parseInt(process.env.REDIS_PORT) || 6379;
-export const RedisPassword = process.env.REDIS_PASSWORD;
+export const RedisPassword = resolveSecret(process.env.REDIS_PASSWORD, process.env.REDIS_PASSWORD_FILE);
 export const RedisTLS = parseBoolean(process.env.REDIS_TLS);
