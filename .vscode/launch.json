@@ -29,10 +29,12 @@
               "src/**/*.spec.ts"
             ],
             "env": {
-              "NODE_ENV": "testing"
+              "NODE_ENV": "testing",
+              "TZ": "UTC"
             },
             "cwd": "${workspaceFolder}",
-            "protocol": "inspector"
+            "protocol": "inspector",
+            "outputCapture": "std"
         }
     ]
 }
