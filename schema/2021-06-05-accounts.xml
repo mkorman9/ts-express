@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>   
+<databaseChangeLog  
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"  
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">  
+
+    <changeSet author="mkorman" id="2021-06-05-accounts">
+        <createTable tableName="accounts">
+            <column name="id" type="uuid">
+                <constraints nullable="false" />
+            </column>
+            <column name="username" type="varchar(255)">
+                <constraints nullable="true" unique="true" />
+            </column>
+            <column name="roles" type="varchar(1024)">
+                <constraints nullable="false" />
+            </column>
+            <column name="active" type="boolean">
+                <constraints nullable="false" />
+            </column>
+            <column name="deleted" type="boolean">
+                <constraints nullable="false" />
+            </column>
+            <column name="preferred_language" type="varchar(32)">
+                <constraints nullable="false" />
+            </column>
+            <column name="banned_until" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="accounts" columnNames="id" constraintName="accounts_pkey" />
+
+        <createTable tableName="accounts_credentials_email_password">
+            <column name="account_id" type="uuid">
+                <constraints nullable="false" />
+            </column>
+            <column name="email" type="varchar(255)">
+                <constraints nullable="false" unique="true" />
+            </column>
+            <column name="password_bcrypt" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="last_change_at" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+            <column name="last_change_ip" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="password_reset_code" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="accounts_credentials_email_password" columnNames="account_id" constraintName="accounts_credentials_email_password_pkey" />
+        <addForeignKeyConstraint baseTableName="accounts_credentials_email_password" referencedTableName="accounts" 
+                                 baseColumnNames="account_id" referencedColumnNames="id" 
+                                 constraintName="fk_accounts_credentials_email_password_accounts"
+                                 onDelete="CASCADE" onUpdate="CASCADE" />
+
+        <createTable tableName="accounts_credentials_github">
+            <column name="account_id" type="uuid">
+                <constraints nullable="false" />
+            </column>
+            <column name="github_account_id" type="bigint">
+                <constraints nullable="false" unique="true" />
+            </column>
+            <column name="email" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="github_username" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="profile_url" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="access_token" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="last_access" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+            <column name="last_access_ip" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="accounts_credentials_github" columnNames="account_id" constraintName="accounts_credentials_github_pkey" />
+        <addForeignKeyConstraint baseTableName="accounts_credentials_github" referencedTableName="accounts" 
+                                 baseColumnNames="account_id" referencedColumnNames="id" 
+                                 constraintName="fk_accounts_credentials_github_accounts"
+                                 onDelete="CASCADE" onUpdate="CASCADE" />
+
+        <createTable tableName="accounts_email_change_request">
+            <column name="id" type="uuid">
+                <constraints nullable="false" />
+            </column>
+            <column name="account_id" type="uuid">
+                <constraints nullable="false" />
+            </column>
+            <column name="desired_email" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="accounts_email_change_request" columnNames="id,account_id" constraintName="accounts_email_change_request_pkey" />
+        <addForeignKeyConstraint baseTableName="accounts_email_change_request" referencedTableName="accounts" 
+                                 baseColumnNames="account_id" referencedColumnNames="id" 
+                                 constraintName="fk_accounts_email_change_request_accounts"
+                                 onDelete="CASCADE" onUpdate="CASCADE" />
+    </changeSet>
+
+</databaseChangeLog>

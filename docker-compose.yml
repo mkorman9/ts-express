@@ -1,0 +1,57 @@
+version: '2.3'
+
+services:
+  redis:
+    image: redis
+    command: redis-server --requirepass password
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: postgres:12
+    environment:
+      POSTGRES_DB: tsexpress
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U username -d tsexpress"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrate-db-schema:
+    image: liquibase/liquibase:4.2
+    user: root
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./_docker_compose_volumes/liquibase:/mnt/container:rw
+      - ./schema/:/liquibase/changelog:ro
+    command: >
+      /bin/bash -c "
+        if [[ -f '/mnt/container/already.executed' ]]; then echo 'Skipping Liquibase' && exit 0; fi
+        ./liquibase --url="jdbc:postgresql://postgres:5432/tsexpress" --changeLogFile=changelog/changelog.xml --username=username --password=password update
+        echo '1' > /mnt/container/already.executed
+      "
+
+  import-test-data:
+    image: postgres:12
+    user: root
+    depends_on:
+      - migrate-db-schema
+    volumes:
+      - ./_docker_compose_volumes/testdata:/mnt/container:rw
+      - ./dev/testdata/:/mnt/testdata/:ro
+    command: >
+      /bin/bash -c "
+        if [[ -f '/mnt/container/already.executed' ]]; then echo 'Skipping test data upload' && exit 0; fi
+        sleep 5
+        for f in /mnt/testdata/*.sql;
+        do
+          PGPASSWORD=password psql -h postgres -p 5432 -d tsexpress -U username -f "$$f"
+        done
+        echo '1' > /mnt/container/already.executed
+      "
