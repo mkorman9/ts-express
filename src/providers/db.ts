@@ -2,6 +2,7 @@ import path from 'path/posix';
 import { Sequelize } from 'sequelize-typescript';
 
 import {
+  InTestingMode,
   DatabaseURI,
   DatabaseQueryLogging,
   DatabasePoolMax,
@@ -16,17 +17,25 @@ const modelsDirs = [
   'accounts/models'
 ];
 
-const DB = new Sequelize(DatabaseURI, {
-  dialect: 'postgres',
-  logging: DatabaseQueryLogging ? ((s: string) => log.debug(s)) : false,
-  pool: {
-    max: DatabasePoolMax,
-    min: DatabasePoolMin,
-    acquire: DatabasePoolAcquireMs,
-    idle: DatabasePoolIdleMs
-  },
-  models: modelsDirs.map(dir => path.resolve(__dirname, '..', dir))
-});
+const initSequelize = () => {
+  if (!DatabaseURI) {
+    throw new Error('Database URI needs to be specified');
+  }
+
+  return new Sequelize(DatabaseURI, {
+    dialect: 'postgres',
+    logging: DatabaseQueryLogging ? ((s: string) => log.debug(s)) : false,
+    pool: {
+      max: DatabasePoolMax,
+      min: DatabasePoolMin,
+      acquire: DatabasePoolAcquireMs,
+      idle: DatabasePoolIdleMs
+    },
+    models: modelsDirs.map(dir => path.resolve(__dirname, '..', dir))
+  });
+};
+
+const DB = !InTestingMode ? initSequelize() : ({} as Sequelize);
 
 export const testDBConnection = (): Promise<void> => {
   return DB

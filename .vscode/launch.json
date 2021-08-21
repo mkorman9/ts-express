@@ -6,31 +6,33 @@
     "configurations": [
         {
             "name": "start",
+            "type": "pwa-node",
             "request": "launch",
+            "runtimeExecutable": "yarn",
             "runtimeArgs": [
                 "start"
             ],
-            "runtimeExecutable": "yarn",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "type": "pwa-node",
             "cwd": "${workspaceFolder}",
             "outputCapture": "std"
         },
         {
             "name": "test",
-            "request": "launch",
-            "runtimeArgs": [
-                "test"
-            ],
-            "runtimeExecutable": "yarn",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
             "type": "pwa-node",
+            "request": "launch",
+            "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/ts-mocha",
+            "runtimeArgs": [
+              "-p",
+              "tsconfig.json",
+              "src/**/*.spec.ts"
+            ],
+            "env": {
+              "NODE_ENV": "testing"
+            },
             "cwd": "${workspaceFolder}",
-            "outputCapture": "std"
+            "protocol": "inspector"
         }
     ]
 }

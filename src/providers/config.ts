@@ -23,9 +23,12 @@ const resolveSecret = (plaintextEnv: string | undefined, fileEnv: string | undef
   return undefined;
 };
 
-dotenv.config({ path: process.env.CONFIG_PATH });
-
 export const Mode = process.env.NODE_ENV || 'development';
+export const InTestingMode = Mode === 'testing';
+
+if (!InTestingMode) {
+  dotenv.config({ path: process.env.CONFIG_PATH });
+}
 
 export const LogLevel = process.env.LOG_LEVEL || 'info';
 export const LogSyslogEnabled = parseBoolean(process.env.LOG_SYSLOG_ENABLED);
@@ -38,9 +41,6 @@ export const BehindTLSProxy = parseBoolean(process.env.BEHIND_TLS_PROXY);
 export const RatelimiterEnabled = parseBoolean(process.env.RATELIMITER_ENABLED);
 
 export const DatabaseURI = resolveSecret(process.env.DATABASE_URI, process.env.DATABASE_URI_FILE);
-if (!DatabaseURI) {
-  throw new Error('DATABASE_URI is missing');
-}
 export const DatabaseQueryLogging = parseBoolean(process.env.DATABASE_QUERY_LOGGING);
 export const DatabasePoolMax = parseInt(process.env.DATABASE_POOL_MAX) || 5;
 export const DatabasePoolMin = parseInt(process.env.DATABASE_POOL_MIN) || 0;
@@ -48,9 +48,6 @@ export const DatabasePoolAcquireMs = parseInt(process.env.DATABASE_POOL_ACQUIRE_
 export const DatabasePoolIdleMs = parseInt(process.env.DATABASE_POOL_IDLE_MS) || 10000;
 
 export const RedisHost = process.env.REDIS_HOST;
-if (!RedisHost) {
-  throw new Error('REDIS_HOST is missing');
-}
 export const RedisPort = parseInt(process.env.REDIS_PORT) || 6379;
 export const RedisPassword = resolveSecret(process.env.REDIS_PASSWORD, process.env.REDIS_PASSWORD_FILE);
 export const RedisTLS = parseBoolean(process.env.REDIS_TLS);
