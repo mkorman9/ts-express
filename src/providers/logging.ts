@@ -1,24 +1,13 @@
 import winston from 'winston';
-import WinstonGelfTransporter from 'winston-gelf-transporter';
+import { Syslog } from 'winston-syslog';
+import os from 'os';
 
 import {
   LogLevel,
-  LogGelfEnabled,
-  LogGelfHost,
-  LogGelfPort
+  LogSyslogEnabled,
+  LogSyslogHost,
+  LogSyslogPort
 } from './config';
-
-interface GelfTransporterOptions {
-  level?: string;
-  silent?: boolean;
-  handleExceptions?: boolean;
-  version?: string;
-  host?: string;
-  port?: number;
-  protocol?: string;
-  hostName?: string;
-  additional?: Object;
-}
 
 export const log = (() => {
   const l = winston.createLogger({
@@ -32,16 +21,22 @@ export const log = (() => {
     )
   });
 
-  if (LogGelfEnabled) {
-    l.add(new WinstonGelfTransporter({
-      level: LogLevel,
-      hostName: process.env.HOST,
-      protocol: 'udp',
-      host: LogGelfHost,
-      port: LogGelfPort,
+  if (LogSyslogEnabled) {
+    l.info(`syslog logger enabled, endpoint - ${LogSyslogHost}:${LogSyslogPort}`);
 
-      format: winston.format.printf(l => l.message)
-    } as GelfTransporterOptions));
+    l.add(new Syslog({
+      localhost: os.hostname(),
+      appName: 'ts-express',
+
+      protocol: 'udp',
+      host: LogSyslogHost,
+      port: LogSyslogPort,
+
+      format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json()
+      )
+    }));
   }
 
   return l;
