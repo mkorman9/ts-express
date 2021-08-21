@@ -1,5 +1,6 @@
 import express, { Router } from 'express';
 import cookieParser from 'cookie-parser';
+import prometheusMiddleware from 'express-prometheus-middleware';
 
 import clientsAPI from './clients/api/clients_api';
 import sessionAPI from './session/api/session_api';
@@ -20,6 +21,12 @@ app.disable('etag');
 app.use(accessLogger());
 app.use(cookieParser());
 app.use(express.json());
+app.use(prometheusMiddleware({
+  metricsPath: '/metrics',
+  collectDefaultMetrics: true,
+  requestDurationBuckets: [],
+  normalizeStatus: false
+}));
 app.use(requestParsingErrorHandler);
 
 app.get('/health', healthcheckHandler);

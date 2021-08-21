@@ -5,7 +5,8 @@ import moment from 'moment';
 import { log } from './logging';
 
 const IgnoredPaths = new Set([
-  '/health'
+  '/health',
+  '/metrics'
 ]);
 
 export const accessLogger = () => {
