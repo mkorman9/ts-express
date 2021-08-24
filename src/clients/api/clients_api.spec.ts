@@ -169,7 +169,64 @@ describe('Clients API Tests', () => {
     expect(response.body.causes).eql([{ field: 'sortBy', code: 'oneof' }]);
   });
 
-  it('should add new client when called with valid payload', async () => {
+  it('should find existing client by id when queried', async () => {
+    // given
+    const clientByIdMock = sinon.stub(clientsProvider, 'findClientById')
+      .returns(Promise.resolve(Records[0]));
+
+    // when
+    const response = await chai.request(app)
+      .get(`/api/v1/client/${Records[0].id}`);
+
+    // then
+    expect(clientByIdMock.callCount).equal(1);
+    expect(clientByIdMock.lastCall.args).eql([
+      Records[0].id
+    ]);
+    expect(response.status).equal(200);
+    expect(response.body).eql(mapClientModelToResponse(Records[0]));
+
+    clientByIdMock.restore();
+  });
+
+  it('should return error when queried for non-existing client id', async () => {
+    // given
+    const clientId = '894e1357-9f6f-4a2b-9871-4f38dd812a99';
+    const clientByIdMock = sinon.stub(clientsProvider, 'findClientById')
+      .returns(Promise.resolve(null));
+
+    // when
+    const response = await chai.request(app)
+      .get(`/api/v1/client/${clientId}`);
+
+    // then
+    expect(clientByIdMock.callCount).equal(1);
+    expect(clientByIdMock.lastCall.args).eql([
+      clientId
+    ]);
+    expect(response.status).equal(404);
+
+    clientByIdMock.restore();
+  });
+
+  it('should return error when trying to add client without valid session', async () => {
+    // given
+    const payload = {
+      firstName: 'Jane',
+      lastName: 'Doe'
+    };
+
+    // when
+    const response = await chai.request(app)
+      .post('/api/v1/client')
+      .type('application/json')
+      .send(payload);
+
+    // then
+    expect(response.status).equal(401);
+  });
+
+  it('should add new client when endpoint called with valid payload', async () => {
     // given
     const payload = {
       firstName: 'Jane',
@@ -209,6 +266,139 @@ describe('Clients API Tests', () => {
     getSessionContextMock.restore();
     getSessionAccountMock.restore();
     addClientMock.restore();
+  });
+
+  it('should return error when trying to add client with invalid gender', async () => {
+    // given
+    const payload = {
+      gender: 'X',
+      firstName: 'Jane',
+      lastName: 'Doe'
+    };
+
+    const getSessionContextMock = sinon.stub(authProvider, 'getSessionContext')
+      .returns(TestSessionContext);
+    const getSessionAccountMock = sinon.stub(authProvider, 'getSessionAccount')
+      .returns(TestSessionAccount);
+
+    // when
+    const response = await chai.request(app)
+      .post('/api/v1/client')
+      .type('application/json')
+      .send(payload);
+
+    // then
+    expect(response.status).equal(400);
+    expect(response.body.causes).eql([{ field: 'gender', code: 'oneof' }]);
+
+    getSessionContextMock.restore();
+    getSessionAccountMock.restore();
+  });
+
+  it('should return error when trying to add client without firstName', async () => {
+    // given
+    const payload = {
+      lastName: 'Doe'
+    };
+
+    const getSessionContextMock = sinon.stub(authProvider, 'getSessionContext')
+      .returns(TestSessionContext);
+    const getSessionAccountMock = sinon.stub(authProvider, 'getSessionAccount')
+      .returns(TestSessionAccount);
+
+    // when
+    const response = await chai.request(app)
+      .post('/api/v1/client')
+      .type('application/json')
+      .send(payload);
+
+    // then
+    expect(response.status).equal(400);
+    expect(response.body.causes).eql([{ field: 'firstName', code: 'required' }]);
+
+    getSessionContextMock.restore();
+    getSessionAccountMock.restore();
+  });
+
+  it('should return error when trying to add client without lastName', async () => {
+    // given
+    const payload = {
+      firstName: 'Jane'
+    };
+
+    const getSessionContextMock = sinon.stub(authProvider, 'getSessionContext')
+      .returns(TestSessionContext);
+    const getSessionAccountMock = sinon.stub(authProvider, 'getSessionAccount')
+      .returns(TestSessionAccount);
+
+    // when
+    const response = await chai.request(app)
+      .post('/api/v1/client')
+      .type('application/json')
+      .send(payload);
+
+    // then
+    expect(response.status).equal(400);
+    expect(response.body.causes).eql([{ field: 'lastName', code: 'required' }]);
+
+    getSessionContextMock.restore();
+    getSessionAccountMock.restore();
+  });
+
+  it('should return error when trying to add client with invalid birth date', async () => {
+    // given
+    const payload = {
+      firstName: 'Jane',
+      lastName: 'Doe',
+      birthDate: 'XXX'
+    };
+
+    const getSessionContextMock = sinon.stub(authProvider, 'getSessionContext')
+      .returns(TestSessionContext);
+    const getSessionAccountMock = sinon.stub(authProvider, 'getSessionAccount')
+      .returns(TestSessionAccount);
+
+    // when
+    const response = await chai.request(app)
+      .post('/api/v1/client')
+      .type('application/json')
+      .send(payload);
+
+    // then
+    expect(response.status).equal(400);
+    expect(response.body.causes).eql([{ field: 'birthDate', code: 'format' }]);
+
+    getSessionContextMock.restore();
+    getSessionAccountMock.restore();
+  });
+
+  it('should return error when trying to add client with invalid credit card number', async () => {
+    // given
+    const payload = {
+      firstName: 'Jane',
+      lastName: 'Doe',
+      creditCards: [{
+        number: 'XXXX XXX'
+      }]
+    };
+
+    const getSessionContextMock = sinon.stub(authProvider, 'getSessionContext')
+      .returns(TestSessionContext);
+    const getSessionAccountMock = sinon.stub(authProvider, 'getSessionAccount')
+      .returns(TestSessionAccount);
+
+    // when
+    const response = await chai.request(app)
+      .post('/api/v1/client')
+      .type('application/json')
+      .send(payload);
+
+    // then
+    expect(response.status).equal(400);
+    expect(response.body.causes).eql([{ field: 'creditCards[0].number', code: 'ccnumber' }]);
+
+    getSessionContextMock.restore();
+    getSessionAccountMock.restore();
   });
 });
 
