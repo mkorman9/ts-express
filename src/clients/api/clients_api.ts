@@ -151,8 +151,21 @@ clientsAPI.get(
     }
 
     let sortBy = FindClientsSortFields.id;
-    if (req.query.sortBy && (req.query.sortBy as string) in FindClientsSortFields) {
-      sortBy = req.query.sortBy as FindClientsSortFields;
+    if (req.query.sortBy) {
+      if (Object.values(FindClientsSortFields).includes(req.query.sortBy as FindClientsSortFields)) {
+        sortBy = req.query.sortBy as FindClientsSortFields;
+      } else {
+        return res
+          .status(400)
+          .json({
+            status: 'error',
+            message: 'Validation error',
+            causes: [{
+              field: 'sortBy',
+              code: 'oneof'
+            }]
+          });
+      }
     }
 
     let sortReverse = 'sortReverse' in req.query;
@@ -167,10 +180,10 @@ clientsAPI.get(
           .json({
             status: 'error',
             message: 'Validation error',
-            causes: {
+            causes: [{
               field: err.field,
               code: err.code
-            }
+            }]
           });
       }
     }
@@ -286,10 +299,10 @@ clientsAPI.post(
           .json({
             status: 'error',
             message: 'Validation error',
-            causes: {
+            causes: [{
               field: 'account',
               code: 'banned'
-            }
+            }]
           });
     }
 
@@ -347,10 +360,10 @@ clientsAPI.put(
           .json({
             status: 'error',
             message: 'Validation error',
-            causes: {
+            causes: [{
               field: 'account',
               code: 'banned'
-            }
+            }]
           });
     }
 
@@ -389,10 +402,10 @@ clientsAPI.delete(
           .json({
             status: 'error',
             message: 'Validation error',
-            causes: {
+            causes: [{
               field: 'account',
               code: 'banned'
-            }
+            }]
           });
     }
 
