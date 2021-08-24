@@ -148,6 +148,10 @@ export const includeSessionAccount = () => {
 
   return async (req: Request, res: Response, next: NextFunction) => {
     await a(req, res, async () => {
+      if (getSessionAccount(req)) {
+        return next();
+      }
+
       const sessionContext = getSessionContext(req);
       if (!sessionContext) {
         return next();

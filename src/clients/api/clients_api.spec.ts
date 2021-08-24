@@ -4,8 +4,11 @@ import sinon from 'sinon';
 import moment from 'moment';
 
 import app from '../../app';
+import * as authProvider from '../../session/middlewares/authorization_middleware';
 import * as clientsProvider from '../providers/clients_provider';
 import Client from '../models/client';
+import { SessionContext } from '../../session/providers/session_provider';
+import Account from '../../accounts/models/account';
 
 chai.use(chaiHttp);
 
@@ -31,10 +34,48 @@ const Records = [{
   birthDate: null,
   isDeleted: false,
   creditCards: [{
-    id: '54bbba06-a6c0-47e2-b026-78d5119abc90',
+    id: '1efb2901-6f1b-4a1f-8ceb-e59d3d7db197',
     number: '4312 3581 4844 5395'
   }]
 }] as Client[];
+
+const InsertedRecord = {
+  id: 'c9720047-b769-4345-9c60-a94339f46e08',
+  gender: '-',
+  firstName: 'Jane',
+  lastName: 'Doe',
+  address: '',
+  phoneNumber: '',
+  email: '',
+  birthDate: null,
+  isDeleted: false,
+  creditCards: []
+} as Client;
+
+const TestSessionContext = {
+  id: 'c3373b3f-e49c-40ce-b694-3c3801220165',
+  issuedAt: moment(),
+  expiresAt: moment().add(1, 'hour'),
+  duration: 3600,
+  issuer: '',
+  subject: 'testuser',
+  ip: '127.0.0.1',
+  roles: new Set<string>(['CLIENTS_EDITOR']),
+  resources: null,
+  raw: 'c9cf6558-d8df-42cf-9099-81273fd76550'
+} as SessionContext;
+
+const TestSessionAccount = {
+  id: 'e9fa80e1-d978-4430-8f44-904f741e13d0',
+  username: 'testuser',
+  rolesString: 'CLIENTS_EDITOR',
+  isActive: true,
+  isDeleted: false,
+  bannedUntil: null,
+  language: 'en-US',
+  passwordCredentials: null,
+  githubCredentials: null
+} as Account;
 
 describe('Clients API Tests', () => {
   it('should use default parameters when called for page without parameters', async () => {
@@ -126,6 +167,48 @@ describe('Clients API Tests', () => {
     // then
     expect(response.status).equal(400);
     expect(response.body.causes).eql([{ field: 'sortBy', code: 'oneof' }]);
+  });
+
+  it('should add new client when called with valid payload', async () => {
+    // given
+    const payload = {
+      firstName: 'Jane',
+      lastName: 'Doe'
+    };
+
+    const getSessionContextMock = sinon.stub(authProvider, 'getSessionContext')
+      .returns(TestSessionContext);
+    const getSessionAccountMock = sinon.stub(authProvider, 'getSessionAccount')
+      .returns(TestSessionAccount);
+    const addClientMock = sinon.stub(clientsProvider, 'addClient')
+      .returns(Promise.resolve(InsertedRecord));
+
+    // when
+    const response = await chai.request(app)
+      .post('/api/v1/client')
+      .type('application/json')
+      .send(payload);
+
+    // then
+    expect(addClientMock.callCount).equal(1);
+    expect(addClientMock.lastCall.args).eql([{
+      gender: undefined,
+      firstName: payload.firstName,
+      lastName: payload.lastName,
+      address: undefined,
+      phoneNumber: undefined,
+      email: undefined,
+      birthDate: undefined,
+      creditCards: []
+    }, {
+      author: TestSessionAccount.id
+    }]);
+    expect(response.status).equal(200);
+    expect(response.body.id).equal(InsertedRecord.id);
+
+    getSessionContextMock.restore();
+    getSessionAccountMock.restore();
+    addClientMock.restore();
   });
 });
 
