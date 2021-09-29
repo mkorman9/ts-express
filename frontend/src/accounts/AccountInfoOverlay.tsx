@@ -3,7 +3,7 @@ import { Spinner } from 'reactstrap';
 
 import { useAccountInfo } from "./AccountInfo";
 
-const AccountInfoOverlay: FC = (props: PropsWithChildren<{}>) => {
+const AccountInfoOverlay: FC = (props: PropsWithChildren<unknown>) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const { useLoadedAccountInfo, useMissingAccountInfo } = useAccountInfo();

@@ -19,7 +19,7 @@ i18n
     missingKeyHandler: (languages: readonly string[], ns: string, key: string, fallback: string) => {
       console.error(`missing translation of ${ns}:${key}, using ${fallback}`);
     },
-    missingInterpolationHandler: (text: string, value: any) => {
+    missingInterpolationHandler: (text: string, value: unknown) => {
       console.error(`missing interpolation ${text}, ${value}`);
     },
     resources,

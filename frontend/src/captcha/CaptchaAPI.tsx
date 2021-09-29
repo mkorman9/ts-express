@@ -1,20 +1,20 @@
-import { FC, createContext, useContext } from 'react';
+import { FC, createContext, useContext, PropsWithChildren } from 'react';
 
 import { callGet } from '../common/API';
-import type { 
-  CaptchaID, 
+import type {
+  CaptchaID,
   CaptchaAPIContextType
 } from './CaptchaAPI.d';
 
-export type { 
-  CaptchaID, 
+export type {
+  CaptchaID,
   CaptchaAPIContextType,
   CaptchaAnswer
 } from './CaptchaAPI.d';
 
 const CaptchaAPIContext = createContext<CaptchaAPIContextType>({} as CaptchaAPIContextType);
 
-export const CaptchaAPIProvider: FC = (props: any) => {
+export const CaptchaAPIProvider: FC = (props: PropsWithChildren<unknown>) => {
   const generateCaptcha = (): Promise<CaptchaID> => {
     return callGet<CaptchaID>('/api/v1/captcha/generate', {
     })
@@ -30,4 +30,4 @@ export const CaptchaAPIProvider: FC = (props: any) => {
   );
 };
 
-export const useCaptchaAPI = () => useContext(CaptchaAPIContext);
+export const useCaptchaAPI: (() => CaptchaAPIContextType) = () => useContext(CaptchaAPIContext);

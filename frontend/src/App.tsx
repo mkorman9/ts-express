@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, PropsWithChildren } from 'react';
 import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 import { Trans } from 'react-i18next';
 import { ToastContainer } from 'react-toastify';
@@ -39,7 +39,7 @@ import { AdminAPIProvider } from './admin/AdminAPI';
 
 import './App.scss';
 
-const AppProviders: FC = (props: any) => {
+const AppProviders: FC = (props: PropsWithChildren<unknown>) => {
   const components = [
     Trans,
     ScreenSizeDependentContentProvider,

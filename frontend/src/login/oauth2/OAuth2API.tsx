@@ -1,4 +1,4 @@
-import { FC, createContext, useContext } from 'react';
+import { FC, createContext, useContext, PropsWithChildren } from 'react';
 
 import { useSession } from '../../session/SessionProvider';
 import { useLanguages } from '../../common/LanguagesProvider';
@@ -22,7 +22,7 @@ export interface OAuth2APIContextType {
 
 const OAuth2APIContext = createContext<OAuth2APIContextType>({} as OAuth2APIContextType);
 
-export const OAuth2APIProvider: FC = (props: any) => {
+export const OAuth2APIProvider: FC = (props: PropsWithChildren<unknown>) => {
   const { session } = useSession();
   const accessToken = session.data.accessToken;
 
@@ -60,13 +60,13 @@ export const OAuth2APIProvider: FC = (props: any) => {
   };
 
   return (
-    <OAuth2APIContext.Provider value={{ 
-      getMetadata, 
-      performGithubCodeFlow 
+    <OAuth2APIContext.Provider value={{
+      getMetadata,
+      performGithubCodeFlow
     }}>
       {props.children}
     </OAuth2APIContext.Provider>
   );
 };
 
-export const useOAuth2API = () => useContext(OAuth2APIContext);
+export const useOAuth2API: (() => OAuth2APIContextType) = () => useContext(OAuth2APIContext);

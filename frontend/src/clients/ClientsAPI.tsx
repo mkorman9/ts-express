@@ -1,4 +1,4 @@
-import { FC, createContext, useContext } from 'react';
+import { FC, createContext, useContext, PropsWithChildren } from 'react';
 import moment from 'moment';
 
 import { useSession } from '../session/SessionProvider';
@@ -50,7 +50,7 @@ function _processValidationErrorCauses(causes: Array<ErrorCause>): Array<ClientE
 
 const ClientsAPIContext = createContext<ClientsAPIContextType>({} as ClientsAPIContextType);
 
-export const ClientsAPIProvider: FC = (props: any) => {
+export const ClientsAPIProvider: FC = (props: PropsWithChildren<unknown>) => {
   const { session } = useSession();
   const accessToken = session.data.accessToken;
 
@@ -180,4 +180,4 @@ export const ClientsAPIProvider: FC = (props: any) => {
   );
 };
 
-export const useClientsAPI = () => useContext(ClientsAPIContext);
+export const useClientsAPI: (() => ClientsAPIContextType) = () => useContext(ClientsAPIContext);

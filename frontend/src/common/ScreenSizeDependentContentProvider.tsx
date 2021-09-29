@@ -1,4 +1,4 @@
-import { FC, createContext, useContext, useEffect, useState } from 'react';
+import { FC, createContext, useContext, useEffect, useState, PropsWithChildren } from 'react';
 
 export interface ScreenSizeDependentContentContextType {
   isOnSmallScreen: boolean;
@@ -6,7 +6,7 @@ export interface ScreenSizeDependentContentContextType {
 
 const ScreenSizeDependentContentContext = createContext<ScreenSizeDependentContentContextType>({} as ScreenSizeDependentContentContextType);
 
-const ScreenSizeDependentContentProvider: FC = (props: any) => {
+const ScreenSizeDependentContentProvider: FC = (props: PropsWithChildren<unknown>) => {
   const checkIsOnSmallScreen = (): boolean => {
     return window.innerWidth <= 760;
   };
@@ -19,17 +19,17 @@ const ScreenSizeDependentContentProvider: FC = (props: any) => {
   }, []);
 
   return (
-    <ScreenSizeDependentContentContext.Provider value={{ 
-      isOnSmallScreen 
+    <ScreenSizeDependentContentContext.Provider value={{
+      isOnSmallScreen
     }}>
       {props.children}
     </ScreenSizeDependentContentContext.Provider>
   );
 };
 
-export const useScreenSizeDependentContent = () => useContext(ScreenSizeDependentContentContext);
+export const useScreenSizeDependentContent: (() => ScreenSizeDependentContentContextType) = () => useContext(ScreenSizeDependentContentContext);
 
-export const OnSmallScreen: FC = (props: any) => {
+export const OnSmallScreen: FC = (props: PropsWithChildren<unknown>) => {
   const { isOnSmallScreen } = useScreenSizeDependentContent();
 
   if (isOnSmallScreen) {
@@ -39,7 +39,7 @@ export const OnSmallScreen: FC = (props: any) => {
   }
 };
 
-export const OnRegularScreen: FC = (props: any) => {
+export const OnRegularScreen: FC = (props: PropsWithChildren<unknown>) => {
   const { isOnSmallScreen } = useScreenSizeDependentContent();
 
   if (!isOnSmallScreen) {

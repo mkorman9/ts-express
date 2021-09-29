@@ -1,4 +1,4 @@
-import { FC, createContext, useContext, useEffect, useState } from 'react';
+import { FC, createContext, useContext, useEffect, useState, PropsWithChildren } from 'react';
 import moment from 'moment';
 
 import { useSession } from '../session/SessionProvider';
@@ -10,7 +10,7 @@ import type {
   AccountInfoContextType
 } from './AccountInfo.d';
 
-export type { 
+export type {
   AccountInfoEventType,
   AccountInfoStatus,
   AccountInfoContextType
@@ -44,7 +44,7 @@ const defaultAccountInfoStatus: (() => AccountInfoStatus) = () => ({
 
 const AccountInfoContext = createContext<AccountInfoContextType>({} as AccountInfoContextType);
 
-const AccountInfoProvider: FC = (props: any) => {
+const AccountInfoProvider: FC = (props: PropsWithChildren<unknown>) => {
   const { useActiveSession, useMissingSession } = useSession();
   const { getAccountInfo } = useAccountAPI();
 
@@ -86,7 +86,7 @@ const AccountInfoProvider: FC = (props: any) => {
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDirty]);
-    
+
   useEffect(() => {
     if (!isLoaded) {
       return;
@@ -162,18 +162,18 @@ const AccountInfoProvider: FC = (props: any) => {
   };
 
   return (
-    <AccountInfoContext.Provider value={{ 
+    <AccountInfoContext.Provider value={{
       accountInfo,
       useLoadedAccountInfo,
       useMissingAccountInfo,
       useReloadedAccountInfo,
-      reloadAccountInfo 
+      reloadAccountInfo
     }}>
       {props.children}
     </AccountInfoContext.Provider>
   );
 };
 
-export const useAccountInfo = () => useContext(AccountInfoContext);
+export const useAccountInfo: (() => AccountInfoContextType) = () => useContext(AccountInfoContext);
 
 export default AccountInfoProvider;

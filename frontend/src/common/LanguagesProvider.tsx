@@ -1,4 +1,4 @@
-import { FC, createContext, useContext, useEffect, useState, useMemo } from 'react';
+import { FC, createContext, useContext, useEffect, useState, useMemo, PropsWithChildren } from 'react';
 import { useTranslation } from 'react-i18next';
 import moment, { Moment } from 'moment';
 import i18n from '../i18n';
@@ -37,7 +37,7 @@ export interface LanguagesContextType {
 
 const LanguagesContext = createContext<LanguagesContextType>({} as LanguagesContextType);
 
-const LanguagesProvider: FC = (props: any) => {
+const LanguagesProvider: FC = (props: PropsWithChildren<unknown>) => {
   const { t } = useTranslation();
 
   const allLanguages = useMemo<Array<LanguageDefinition>>(() => {
@@ -51,7 +51,7 @@ const LanguagesProvider: FC = (props: any) => {
           if (!v) {
             return '-';
           }
-                    
+
           return v.locale(lang.locale)
             .local()
             .format(format ? format : 'LLL');
@@ -66,7 +66,7 @@ const LanguagesProvider: FC = (props: any) => {
   };
 
   const [currentLanguage, setCurrentLanguage] = useState<LanguageDefinition>(() => getLanguageById(i18n.language) || allLanguages[0]);
-    
+
   useEffect(() => {
     moment.locale(currentLanguage.locale);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -76,14 +76,14 @@ const LanguagesProvider: FC = (props: any) => {
     if (currentLanguage.id === languageId) {
       return Promise.reject(new LanguageAlreadySetError());
     }
-    
+
     const language = getLanguageById(languageId);
     if (!language) {
       return Promise.reject(new LanguageNotFoundError());
     }
 
     return i18n.changeLanguage(languageId)
-      .then(_ => {        
+      .then(_ => {
         moment.locale(language.locale);
         setCurrentLanguage(language);
         return language;
@@ -102,6 +102,6 @@ const LanguagesProvider: FC = (props: any) => {
   );
 };
 
-export const useLanguages = () => useContext(LanguagesContext);
+export const useLanguages: (() => LanguagesContextType) = () => useContext(LanguagesContext);
 
 export default LanguagesProvider;

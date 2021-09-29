@@ -1,11 +1,11 @@
-import { FC, createContext, useContext } from 'react';
+import { FC, createContext, useContext, PropsWithChildren } from 'react';
 import moment from 'moment';
 
 import { useSession } from '../session/SessionProvider';
 import { useLanguages } from '../common/LanguagesProvider';
 import { callGet, callPost } from '../common/API';
 import type { CaptchaAnswer } from '../captcha/CaptchaAPI';
-import type { 
+import type {
   AccountInfo,
   PublicAccountInfo,
   AccountInfoResponse,
@@ -15,7 +15,7 @@ import type {
   AccountAPIContextType
 } from './AccountAPI.d';
 
-export type { 
+export type {
   LoginMethod,
   LoginMethods,
   AccountInfo,
@@ -34,7 +34,7 @@ export type {
 
 const AccountAPIContext = createContext<AccountAPIContextType>({} as AccountAPIContextType);
 
-export const AccountAPIProvider: FC = (props: any) => {
+export const AccountAPIProvider: FC = (props: PropsWithChildren<unknown>) => {
   const { currentLanguage } = useLanguages();
   const { session } = useSession();
   const accessToken = session.data.accessToken;
@@ -122,7 +122,7 @@ export const AccountAPIProvider: FC = (props: any) => {
         'Content-Type': 'application/json'
       },
       data: {
-        email: email, 
+        email: email,
         captcha: {
           id: captcha.id,
           answer: captcha.answer
@@ -161,7 +161,7 @@ export const AccountAPIProvider: FC = (props: any) => {
         'Content-Type': 'application/json'
       },
       data: {
-        id: code, 
+        id: code,
         accountID: accountId
       }
     })
@@ -175,8 +175,8 @@ export const AccountAPIProvider: FC = (props: any) => {
         'Content-Type': 'application/json'
       },
       data: {
-        username: username, 
-        email: email, 
+        username: username,
+        email: email,
         password: password,
         language: currentLanguage.id,
         captcha: {
@@ -264,4 +264,4 @@ export const AccountAPIProvider: FC = (props: any) => {
   );
 };
 
-export const useAccountAPI = () => useContext(AccountAPIContext);
+export const useAccountAPI: (() => AccountAPIContextType) = () => useContext(AccountAPIContext);

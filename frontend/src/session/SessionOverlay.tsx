@@ -3,7 +3,7 @@ import { Spinner } from 'reactstrap';
 
 import { useSession } from "./SessionProvider";
 
-const SessionOverlay: FC = (props: PropsWithChildren<{}>) => {
+const SessionOverlay: FC = (props: PropsWithChildren<unknown>) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const { useActiveSession, useMissingSession } = useSession();

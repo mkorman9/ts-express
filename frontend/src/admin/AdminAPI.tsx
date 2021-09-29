@@ -1,4 +1,4 @@
-import { FC, createContext, useContext } from 'react';
+import { FC, createContext, useContext, PropsWithChildren } from 'react';
 import moment from 'moment';
 
 import { useSession } from '../session/SessionProvider';
@@ -12,7 +12,7 @@ export type { AdminAPIContextType } from './AdminAPI.d';
 
 const AdminAPIContext = createContext<AdminAPIContextType>({} as AdminAPIContextType);
 
-export const AdminAPIProvider: FC = (props: any) => {
+export const AdminAPIProvider: FC = (props: PropsWithChildren<unknown>) => {
   const { session } = useSession();
   const accessToken = session.data.accessToken;
 
@@ -64,7 +64,7 @@ export const AdminAPIProvider: FC = (props: any) => {
         'Authorization': `Bearer ${accessToken}`
       },
       data: {
-        accountId: accountId, 
+        accountId: accountId,
         roles: roles
       },
     })
@@ -90,14 +90,14 @@ export const AdminAPIProvider: FC = (props: any) => {
   };
 
   return (
-    <AdminAPIContext.Provider value={{ 
-      listAllAccounts, 
-      setRolesForAccount, 
-      impersonate 
+    <AdminAPIContext.Provider value={{
+      listAllAccounts,
+      setRolesForAccount,
+      impersonate
     }}>
       {props.children}
     </AdminAPIContext.Provider>
   );
 };
 
-export const useAdminAPI = () => useContext(AdminAPIContext);
+export const useAdminAPI: (() => AdminAPIContextType) = () => useContext(AdminAPIContext);

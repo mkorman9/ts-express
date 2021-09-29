@@ -1,4 +1,4 @@
-import { FC, createContext, useContext } from 'react';
+import { FC, createContext, useContext, PropsWithChildren } from 'react';
 
 import { callPost } from '../common/API';
 import type { SessionData, SessionDataResponse } from '../session/SessionAPI';
@@ -9,7 +9,7 @@ export interface LoginAPIContextType {
 
 const LoginAPIContext = createContext<LoginAPIContextType>({} as LoginAPIContextType);
 
-export const LoginAPIProvider: FC = (props: any) => {
+export const LoginAPIProvider: FC = (props: PropsWithChildren<unknown>) => {
   const authWithPassword = (email: string, password: string, rememberMe: boolean): Promise<SessionData> => {
     return callPost<SessionDataResponse>(`/api/v1/login/auth/password${rememberMe ? '?rememberMe' : ''}`, {
       headers: {
@@ -36,4 +36,4 @@ export const LoginAPIProvider: FC = (props: any) => {
   );
 };
 
-export const useLoginAPI = () => useContext(LoginAPIContext);
+export const useLoginAPI: (() => LoginAPIContextType) = () => useContext(LoginAPIContext);

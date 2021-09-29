@@ -1,4 +1,4 @@
-import { FC, createContext, useContext, useState, useEffect } from 'react';
+import { FC, createContext, useContext, useState, useEffect, PropsWithChildren } from 'react';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
 
@@ -26,11 +26,11 @@ const defaultSessionStatus: (() => SessionStatus) = () => ({
 
 const Session = createContext<SessionContextType>({} as SessionContextType);
 
-const SessionProvider: FC = (props: any) => {
+const SessionProvider: FC = (props: PropsWithChildren<unknown>) => {
   const [sessionData, setSessionData] = useState<SessionData | null>(null);
   const prevSessionData = usePrevious<SessionData | null>(sessionData);
   const [session, setSession] = useState<SessionStatus>(() => defaultSessionStatus());
-  const [refreshTimer, setRefreshTimer] = useState<any>(null);
+  const [refreshTimer, setRefreshTimer] = useState<NodeJS.Timeout | null>(null);
 
   const { t } = useTranslation();
   const { getSessionStatus, refreshSession, terminateSession } = useSessionAPI();
@@ -168,6 +168,6 @@ const SessionProvider: FC = (props: any) => {
   );
 };
 
-export const useSession = () => useContext(Session);
+export const useSession: (() => SessionContextType) = () => useContext(Session);
 
 export default SessionProvider;

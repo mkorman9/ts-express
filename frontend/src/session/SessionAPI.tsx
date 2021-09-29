@@ -1,4 +1,4 @@
-import { FC, createContext, useContext } from 'react';
+import { FC, createContext, useContext, PropsWithChildren } from 'react';
 
 import { callGet, callPost, callPut } from '../common/API';
 import type { SessionData, SessionDataResponse, SessionAPIContextType } from './SessionAPI.d';
@@ -7,7 +7,7 @@ export type { SessionData, SessionDataResponse, SessionAPIContextType } from './
 
 const SessionAPIContext = createContext<SessionAPIContextType>({} as SessionAPIContextType);
 
-export const SessionAPIProvider: FC = (props: any) => {
+export const SessionAPIProvider: FC = (props: PropsWithChildren<unknown>) => {
   const getSessionStatus = (): Promise<SessionData> => {
     return callGet<SessionDataResponse>(`/api/v1/login/session/token`, {
     })
@@ -52,4 +52,4 @@ export const SessionAPIProvider: FC = (props: any) => {
   );
 };
 
-export const useSessionAPI = () => useContext(SessionAPIContext);
+export const useSessionAPI: (() => SessionAPIContextType) = () => useContext(SessionAPIContext);

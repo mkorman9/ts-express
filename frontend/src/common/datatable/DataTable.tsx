@@ -8,36 +8,36 @@ import DataTablePagination from './DataTablePagination';
 import { useSession } from '../../session/SessionProvider';
 import { useScreenSizeDependentContent } from '../../common/ScreenSizeDependentContentProvider';
 import './DataTable.scss';
-import type { 
-  DataTableColumn, 
-  DataTableColumnInstance, 
+import type {
+  DataTableColumn,
+  DataTableColumnInstance,
   DataTableRow,
-  ColumnId, 
-  RowId, 
+  ColumnId,
+  RowId,
   RowIdSelectorFunc,
-  UseDataTableProps, 
+  UseDataTableProps,
   DataTableComponentProps,
   UseDataTableResult
 } from './DataTable.d';
 
 export type {
   ExtraColumnProps,
-  DataTableColumn, 
-  DataTableColumnInstance, 
+  DataTableColumn,
+  DataTableColumnInstance,
   DataTableRow,
-  ColumnId, 
-  RowId, 
+  ColumnId,
+  RowId,
   RowIdSelectorFunc,
   TableExtraProps,
   RenderCellProps,
-  UseDataTableProps, 
+  UseDataTableProps,
   DataTableComponentProps,
   UseDataTableResult
 } from './DataTable.d';
 
 export function useDataTable<D extends object = {}>(
-  columns: DataTableColumn<D>[], 
-  data: D[], 
+  columns: DataTableColumn<D>[],
+  data: D[],
   props?: UseDataTableProps<D>
 ): UseDataTableResult<D> {
   const rowIdSelector: RowIdSelectorFunc<D> = (props && props.rowIdSelector) ? props.rowIdSelector : ((row: DataTableRow<D>) => row.id);
@@ -62,7 +62,7 @@ export function useDataTable<D extends object = {}>(
   const [availablePageSizes, setAvailablePageSizes] = useState<number[]>(
     () => (props && props.initialState && props.initialState.pageSizes) ? props.initialState.pageSizes() : [5, 10, 15]
   );
-    
+
   const [sortBy, setSortBy] = useState<ColumnId<D>>(
     () => (props && props.initialState && props.initialState.sortBy) ? props.initialState.sortBy() : ""
   );
@@ -79,8 +79,8 @@ export function useDataTable<D extends object = {}>(
     () => (props && props.initialState && props.initialState.hiddenColumns) ? props.initialState.hiddenColumns() : new Set()
   );
 
-  const { getTableProps, getTableBodyProps, headerGroups, allColumns, visibleColumns, rows, prepareRow } = useTable<D>({ 
-    columns, 
+  const { getTableProps, getTableBodyProps, headerGroups, allColumns, visibleColumns, rows, prepareRow } = useTable<D>({
+    columns,
     data
   });
 
@@ -116,8 +116,8 @@ export function useDataTable<D extends object = {}>(
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    session, 
-    columns, 
+    session,
+    columns,
     hiddenColumns
   ]);
 
@@ -147,8 +147,8 @@ export function useDataTable<D extends object = {}>(
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    data, 
-    rows, 
+    data,
+    rows,
     expandedRowId
   ]);
 
@@ -210,7 +210,7 @@ export function useDataTable<D extends object = {}>(
                   );
                 })}
               </tr>
-                            
+
               <DataTableExpandedRowArea<D>
                 visibleColumns={visibleColumns}
                 view={(expandedRowArea && expandedRowId === rowIdSelector(row)) ? expandedRowArea : null}
@@ -232,12 +232,12 @@ export function useDataTable<D extends object = {}>(
   </>);
 
   return {
-    ...{ 
-      DataTable, 
-      isLoading, 
-      setIsLoading 
+    ...{
+      DataTable,
+      isLoading,
+      setIsLoading
     },
-    ...{ 
+    ...{
       currentPage,
       setCurrentPage,
       pageSize,
