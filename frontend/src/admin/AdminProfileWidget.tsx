@@ -9,36 +9,36 @@ import { useSession } from '../session/SessionProvider';
 import { useAccountInfo } from '../accounts/AccountInfo';
 
 export interface AdminProfileWidgetProps {
-    accountId: string;
+  accountId: string;
 }
 
 const AdminProfileWidget: FC<AdminProfileWidgetProps> = ({ accountId }) => {
-    const { impersonate } = useAdminAPI();
-    const { newSession, useSwitchedSession } = useSession();
-    const { reloadAccountInfo } = useAccountInfo();
-    const history = useHistory();
-    const { t } = useTranslation();
+  const { impersonate } = useAdminAPI();
+  const { newSession, useSwitchedSession } = useSession();
+  const { reloadAccountInfo } = useAccountInfo();
+  const history = useHistory();
+  const { t } = useTranslation();
 
-    const handleImpersonate = () => {
-        impersonate(accountId)
-            .then(sessionInfo => {
-                toast.success(t('adminProfileWidget.impersonateSuccess'), { autoClose: 2000, hideProgressBar: true, closeOnClick: true });
-                newSession(sessionInfo);
-            })
-    };
+  const handleImpersonate = () => {
+    impersonate(accountId)
+      .then(sessionInfo => {
+        toast.success(t('adminProfileWidget.impersonateSuccess'), { autoClose: 2000, hideProgressBar: true, closeOnClick: true });
+        newSession(sessionInfo);
+      })
+  };
 
-    useSwitchedSession((_) => {
-        reloadAccountInfo();
-        history.push('/');
-    });
+  useSwitchedSession((_) => {
+    reloadAccountInfo();
+    history.push('/');
+  });
 
-    return (
-        <div>
-            <Button color="primary" onClick={handleImpersonate}>
-                {t('adminProfileWidget.impersonate')}
-            </Button>
-        </div>
-    );
+  return (
+    <div>
+      <Button color="primary" onClick={handleImpersonate}>
+        {t('adminProfileWidget.impersonate')}
+      </Button>
+    </div>
+  );
 };
 
 export default AdminProfileWidget;

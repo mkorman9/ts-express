@@ -7,28 +7,28 @@ import { Localization } from 'react-widgets';
 import { useLanguages } from './LanguagesProvider';
 
 const CalendarLocalization: FC = (props: PropsWithChildren<{}>) => {
-    const { t } = useTranslation();
-    const { currentLanguage } = useLanguages();
+  const { t } = useTranslation();
+  const { currentLanguage } = useLanguages();
 
-    const [localizer, setLocalizer] = useState<any>(() => new (MomentLocalizer as any)(moment));
+  const [localizer, setLocalizer] = useState<any>(() => new (MomentLocalizer as any)(moment));
 
-    useEffect(() => {
-        setLocalizer(new (MomentLocalizer as any)(moment));
-    }, [currentLanguage]);
+  useEffect(() => {
+    setLocalizer(new (MomentLocalizer as any)(moment));
+  }, [currentLanguage]);
 
-    return (<>
-        <Localization 
-            date={localizer} 
-            messages={{
-                moveToday: t('dateSelector.today'),
-                moveBack: t('dateSelector.back'),
-                moveForward: t('dateSelector.forward'),
-                dateButton: t('dateSelector.dateButton')
-            }}
-        >
-            {props.children}
-        </Localization>
-    </>);
+  return (<>
+    <Localization 
+      date={localizer} 
+      messages={{
+        moveToday: t('dateSelector.today'),
+        moveBack: t('dateSelector.back'),
+        moveForward: t('dateSelector.forward'),
+        dateButton: t('dateSelector.dateButton')
+      }}
+    >
+      {props.children}
+    </Localization>
+  </>);
 };
 
 export default CalendarLocalization;

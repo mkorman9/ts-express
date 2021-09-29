@@ -4,18 +4,18 @@ import RolesBadges from './RolesBadges';
 import RolesEditor from './RolesEditor';
 
 export interface RolesWidgetProps {
-    roles: Set<string>;
-    accountId: string;
+  roles: Set<string>;
+  accountId: string;
 }
 
 const RolesWidget: FC<RolesWidgetProps> = ({ roles, accountId }) => {
-    const { session } = useSession();
+  const { session } = useSession();
 
-    if (session.data.roles.has('PERMISSIONS_ADMIN')) {
-        return <RolesEditor assignedRoles={roles} accountId={accountId} />;
-    } else {
-        return <RolesBadges assignedRoles={roles} />;
-    }
+  if (session.data.roles.has('PERMISSIONS_ADMIN')) {
+    return <RolesEditor assignedRoles={roles} accountId={accountId} />;
+  } else {
+    return <RolesBadges assignedRoles={roles} />;
+  }
 };
 
 export default RolesWidget;

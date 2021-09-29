@@ -38,66 +38,66 @@ import { AdminAPIProvider } from './admin/AdminAPI';
 import './App.scss';
 
 const AppProviders: FC = (props: any) => {
-    const components = [
-        Trans,
-        ScreenSizeDependentContentProvider,
-        LanguagesProvider,
-        CalendarLocalization,
-        SessionAPIProvider,
-        SessionProvider,
+  const components = [
+    Trans,
+    ScreenSizeDependentContentProvider,
+    LanguagesProvider,
+    CalendarLocalization,
+    SessionAPIProvider,
+    SessionProvider,
 
-        ClientsAPIProvider,
-        LoginAPIProvider,
-        AccountAPIProvider,
-        OAuth2APIProvider,
-        CaptchaAPIProvider,
-        AdminAPIProvider,
+    ClientsAPIProvider,
+    LoginAPIProvider,
+    AccountAPIProvider,
+    OAuth2APIProvider,
+    CaptchaAPIProvider,
+    AdminAPIProvider,
 
-        AccountInfoProvider
-    ];
-    const children = props.children;
+    AccountInfoProvider
+  ];
+  const children = props.children;
 
-    return (<>
-        {components.reduceRight((acc, Component) => {
-            return <Component>{acc}</Component>
-        }, children)}
-    </>);
+  return (<>
+    {components.reduceRight((acc, Component) => {
+      return <Component>{acc}</Component>
+    }, children)}
+  </>);
 };
 
 const App: FC = () => {
-    return (<>
-        <AppProviders>
-            <BrowserRouter>
-                <ToastContainer position="top-center" autoClose={false} />
-                <NavigationBar />
+  return (<>
+    <AppProviders>
+      <BrowserRouter>
+        <ToastContainer position="top-center" autoClose={false} />
+        <NavigationBar />
 
-                <Switch>
-                    <Route exact path="/" component={ClientsTablePage} />
+        <Switch>
+          <Route exact path="/" component={ClientsTablePage} />
 
-                    <Route exact path="/login" component={LoginPage} />
-                    <Route exact path="/register" component={RegisterPage} />
-                    <Route exact path="/registration/successful" component={RegistrationSuccessfulPage} />
-                    <Route exact path="/account/activate/:accountId" component={ActivateAccountPage} />
-                    <Route exact path="/email/change/:accountId/:code" component={ChangeEmailPage} />
-                    <Route exact path="/profile" component={ProfilePage} />
-                    <Route exact path="/profile/user/:username" component={PublicProfilePage} />
-                    <Route exact path="/profile/id/:id" component={PublicProfilePage} />
-                    <Route exact path="/password/forgot" component={ForgotPasswordPage} />
-                    <Route exact path="/password/set" component={SetPasswordPage} />
-                    <Route exact path="/password/set/:accountId/:code" component={SetPasswordPage} />
+          <Route exact path="/login" component={LoginPage} />
+          <Route exact path="/register" component={RegisterPage} />
+          <Route exact path="/registration/successful" component={RegistrationSuccessfulPage} />
+          <Route exact path="/account/activate/:accountId" component={ActivateAccountPage} />
+          <Route exact path="/email/change/:accountId/:code" component={ChangeEmailPage} />
+          <Route exact path="/profile" component={ProfilePage} />
+          <Route exact path="/profile/user/:username" component={PublicProfilePage} />
+          <Route exact path="/profile/id/:id" component={PublicProfilePage} />
+          <Route exact path="/password/forgot" component={ForgotPasswordPage} />
+          <Route exact path="/password/set" component={SetPasswordPage} />
+          <Route exact path="/password/set/:accountId/:code" component={SetPasswordPage} />
                     
-                    <Route path="/oauth2/github/callback" component={GithubCallback} />
+          <Route path="/oauth2/github/callback" component={GithubCallback} />
 
-                    <Route path="/admin/accounts" component={AccountsListPage} />
+          <Route path="/admin/accounts" component={AccountsListPage} />
                     
-                    <Route path='/not-found' component={NotFoundPage} />
-                    <Redirect from='*' to='/not-found' />
-                </Switch>
+          <Route path='/not-found' component={NotFoundPage} />
+          <Redirect from='*' to='/not-found' />
+        </Switch>
 
-                <div className="mb-4"></div>
-            </BrowserRouter>
-        </AppProviders>
-    </>);
+        <div className="mb-4"></div>
+      </BrowserRouter>
+    </AppProviders>
+  </>);
 };
 
 export default App;

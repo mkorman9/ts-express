@@ -15,7 +15,9 @@
     "@types/react-router-dom": "^5.1.0",
     "@types/react-table": "^7.7.0",
     "@types/react-widgets": "^4.4.0",
-    "@types/react-widgets-moment": "^4.0.0"
+    "@types/react-widgets-moment": "^4.0.0",
+    "@typescript-eslint/eslint-plugin": "^4.32.0",
+    "@typescript-eslint/parser": "^4.32.0"
   },
   "dependencies": {
     "axios": "^0.21.1",
@@ -41,9 +43,25 @@
   },
   "proxy": "http://localhost:5000",
   "eslintConfig": {
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint"
+    ],
     "extends": [
-      "react-app"
-    ]
+      "react-app",
+      "eslint:recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended"
+    ],
+    "rules": {
+      "indent": "off",
+      "@typescript-eslint/indent": [
+        "warn",
+        2
+      ],
+      "@typescript-eslint/no-empty-function": 0,
+      "@typescript-eslint/ban-types": 1
+    }
   },
   "browserslist": {
     "production": [

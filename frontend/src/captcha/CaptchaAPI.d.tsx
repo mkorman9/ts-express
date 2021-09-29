@@ -1,12 +1,12 @@
 export interface CaptchaID {
-    id: string;
+  id: string;
 }
 
 export interface CaptchaAPIContextType {
-    generateCaptcha: () => Promise<CaptchaID>;
+  generateCaptcha: () => Promise<CaptchaID>;
 }
 
 export interface CaptchaAnswer {
-    id: string;
-    answer: string;
+  id: string;
+  answer: string;
 }
