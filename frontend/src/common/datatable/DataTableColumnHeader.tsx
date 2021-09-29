@@ -6,14 +6,15 @@ import type { DataTableColumnHeaderProps } from './DataTableColumnHeader.d';
 
 export type { DataTableColumnHeaderProps } from './DataTableColumnHeader.d';
 
-const DataTableColumnHeader = <D extends object>({ 
-  column, 
-  sortBy, 
-  sortReverse, 
-  setSortBy, 
-  setSortReverse, 
-  hiddenColumns, 
-  setHiddenColumns 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+const DataTableColumnHeader = <D extends object>({
+  column,
+  sortBy,
+  sortReverse,
+  setSortBy,
+  setSortReverse,
+  hiddenColumns,
+  setHiddenColumns
 }: PropsWithChildren<DataTableColumnHeaderProps<D>>) => {
   const sortable = (column.sortable);
   const isSortedBy = (column.id === sortBy);
