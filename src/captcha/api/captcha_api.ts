@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 
 import { ratelimiterMiddleware } from '../../providers/rate_limiter';
-import { generateCaptcha, getCaptchaImage } from '../providers/captcha_provider';
+import { generateCaptcha, getCaptchaAudio, getCaptchaImage } from '../providers/captcha_provider';
 
 const captchaAPI = Router();
 
@@ -53,7 +53,7 @@ captchaAPI.get(
 
       return res
         .status(200)
-        .type('image/jpeg')
+        .contentType('image/jpeg')
         .send(image);
     } catch (err) {
       next(err);
@@ -65,9 +65,34 @@ captchaAPI.get(
   '/audio/:id',
   ratelimiterMiddleware('general'),
   async (req: Request, res: Response, next: NextFunction) => {
-    return res
-      .status(404)
-      .json({});
+    const id = req.params['id'];
+
+    let language = req.query.lang as string;
+    if (!language) {
+      language = 'en-US';
+    }
+
+    try {
+      const audio = await getCaptchaAudio(id, { language });
+      if (!audio) {
+        return res
+          .status(404)
+          .json({
+            status: 'error',
+            causes: [{
+              field: 'id',
+              code: 'invalid'
+            }]
+          });
+      }
+
+      return res
+        .status(200)
+        .contentType('audio/mpeg')
+        .send(audio);
+    } catch (err) {
+      next(err);
+    }
   }
 );
 

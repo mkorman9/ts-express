@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import captcha from 'nodejs-captcha';
+import axios from 'axios';
 
 import redisClient from '../../providers/redis';
 
@@ -8,8 +9,12 @@ export interface GetCaptchaImageProps {
   height: number;
 }
 
-const CaptchaCharset = '1234567890abcdefghijklmnoprstuvyz'.split('');
-const CaptchaLength = 5;
+export interface GetCaptchaAudioProps {
+  language: string;
+}
+
+const CaptchaCharset = '1234567890'.split('');
+const CaptchaLength = 6;
 const CaptchaExpirationSeconds = 30 * 60;  // 30 min
 const CaptchaRedisPrefix = 'captcha';
 
@@ -42,6 +47,34 @@ export const getCaptchaImage = async (id: string, props: GetCaptchaImageProps): 
   });
   const data = captchaObj.image.replace(/^data:image\/\w+;base64,/, '');
   return Buffer.from(data, 'base64');
+};
+
+export const getCaptchaAudio = async (id: string, props: GetCaptchaAudioProps): Promise<Buffer | null> => {
+  const result = await redisClient.get(`${CaptchaRedisPrefix}:${id}`);
+  if (!result) {
+    return null;
+  }
+
+  const captchaValue = result.toString();
+
+  let language = 'en';
+  if (props.language === 'pl-PL') {
+    language = 'pl';
+  }
+
+  let captchaValueToRead = '';
+  if (language === 'en' || language === 'pl') {
+    captchaValueToRead = captchaValue.split('').join(', ').toUpperCase();
+  }
+
+  const response = await axios.get(
+    `http://translate.google.com/translate_tts?ie=UTF-8&total=1&idx=0&textlen=32&client=tw-ob&q=${encodeURIComponent(captchaValueToRead)}&tl=${language}`,
+    {
+      responseType: 'arraybuffer'
+    }
+  );
+
+  return response.data;
 };
 
 export const verifyCaptchaAnswer = async (id: string, answer: string): Promise<boolean> => {
