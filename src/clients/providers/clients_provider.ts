@@ -96,9 +96,7 @@ export const findClientsPaged = async (opts?: FindClientsPagedOptions): Promise<
 
     if (options.filters.gender) {
       filters.push({
-        gender: {
-          [Op.eq]: options.filters.gender
-        }
+        gender: options.filters.gender
       });
     }
     if (options.filters.firstName) {
@@ -139,14 +137,14 @@ export const findClientsPaged = async (opts?: FindClientsPagedOptions): Promise<
     if (options.filters.bornAfter) {
       filters.push({
         birthDate: {
-          [Op.gte]: options.filters.bornAfter
+          [Op.gte]: options.filters.bornAfter.toDate()
         }
       });
     }
     if (options.filters.bornBefore) {
       filters.push({
         birthDate: {
-          [Op.lte]: options.filters.bornBefore
+          [Op.lte]: options.filters.bornBefore.toDate()
         }
       });
     }
@@ -171,9 +169,7 @@ export const findClientsPaged = async (opts?: FindClientsPagedOptions): Promise<
       offset: options.pageSize * options.pageNumber,
       where: {
         [Op.and]: [{
-          isDeleted: {
-            [Op.ne]: true
-          }
+          isDeleted: false
         }, {
           [Op.and]: [...filters]
         }]
@@ -274,9 +270,7 @@ export const updateClient = async (id: string, clientPayload: ClientUpdatePayloa
       const client = await Client.findOne({
         where: {
           id: id,
-          isDeleted: {
-            [Op.ne]: true
-          }
+          isDeleted: false
         },
         include: [
           CreditCard
@@ -378,9 +372,7 @@ export const deleteClientById = async (id: string, props: DeleteClientProps): Pr
       const client = await Client.findOne({
         where: {
           id: id,
-          isDeleted: {
-            [Op.ne]: true
-          }
+          isDeleted: false
         },
         include: [
           CreditCard
