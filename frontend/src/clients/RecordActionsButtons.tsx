@@ -8,10 +8,10 @@ import type { Client } from './ClientsAPI';
 export interface RecordActionsButtonsProps {
   record: Client;
   setRecordToDelete: Dispatch<SetStateAction<Client | null>>;
-  refreshData: (modifiedRecordId?: string) => void;
+  setRecordToEdit: Dispatch<SetStateAction<Client | null>>;
 }
 
-const RecordActionsButtons: FC<RecordActionsButtonsProps> = ({ record, setRecordToDelete, refreshData }) => {
+const RecordActionsButtons: FC<RecordActionsButtonsProps> = ({ record, setRecordToDelete, setRecordToEdit }) => {
   const { useLoadedAccountInfo } = useAccountInfo();
   const [disabled, setDisabled] = useState<boolean>(() => false);
 
@@ -22,7 +22,7 @@ const RecordActionsButtons: FC<RecordActionsButtonsProps> = ({ record, setRecord
   return (<>
     <DeleteRecordButton onClick={() => setRecordToDelete(record)} disabled={disabled} />
     {' '}
-    <EditRecordButton record={record} refreshData={refreshData} disabled={disabled} />
+    <EditRecordButton onClick={() => setRecordToEdit(record)} disabled={disabled} />
   </>);
 };
 

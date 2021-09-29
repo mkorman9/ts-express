@@ -1,4 +1,4 @@
-import { FC, useState, useEffect, useMemo } from 'react';
+import { FC, useState, useEffect, useMemo, Dispatch, SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RouteComponentProps } from 'react-router';
 import { toast } from 'react-toastify';
@@ -9,6 +9,7 @@ import ClientsTableHiddenColumns from './ClientsTableHiddenColumns';
 import RecordActionsButtons from './RecordActionsButtons';
 import AddRecordButton from './AddRecordButton';
 import DeleteRecordModal from './DeleteRecordModal';
+import EditRecordModal from './EditRecordModal';
 import CreditCardsList from './CreditCardsList';
 import ExpandableValue from '../common/ExpandableValue';
 import RowExpander from '../common/RowExpander';
@@ -20,7 +21,8 @@ import { useLanguages } from '../common/LanguagesProvider';
 import { parseQueryString } from '../common/Utils';
 
 export interface ClientsTablePageCellRenderProps {
-  refreshData: (modifiedRecordId?: string) => void;
+  setRecordToDelete: Dispatch<SetStateAction<Client | null>>;
+  setRecordToEdit: Dispatch<SetStateAction<Client | null>>;
 }
 
 const ClientsTablePage: FC<RouteComponentProps> = (props) => {
@@ -57,6 +59,7 @@ const ClientsTablePage: FC<RouteComponentProps> = (props) => {
   const [expandedClientChangelog, setExpandedClientChangelog] = useState<ClientChange[] | null>(() => null);
   const [isDirty, setIsDirty] = useState<boolean>(() => true);
   const [recordToDelete, setRecordToDelete] = useState<Client | null>(() => null);
+  const [recordToEdit, setRecordToEdit] = useState<Client | null>(() => null);
 
   const columns = useMemo<DataTableColumn<Client>[]>(() => [
     {
@@ -71,7 +74,7 @@ const ClientsTablePage: FC<RouteComponentProps> = (props) => {
       id: "actions",
       requiredRoles: ["CLIENTS_EDITOR"],
       Cell: (props: RenderCellProps<Client, ClientsTablePageCellRenderProps>) =>
-        <RecordActionsButtons record={props.row.values as Client} setRecordToDelete={setRecordToDelete} refreshData={props.refreshData} />
+        <RecordActionsButtons record={props.row.values as Client} setRecordToDelete={props.setRecordToDelete} setRecordToEdit={props.setRecordToEdit} />
     },
     {
       Header: t('table.columns.id') as string,
@@ -376,7 +379,8 @@ const ClientsTablePage: FC<RouteComponentProps> = (props) => {
         {(session.data.roles.has("CLIENTS_EDITOR")) && (<AddRecordButton refreshData={refreshDataCallback} />)}
         <DataTable
           cellRenderProps={{
-            refreshData: refreshDataCallback
+            setRecordToDelete,
+            setRecordToEdit
           }}
           expandedRowArea={
             session.data.roles.has("CLIENTS_EDITOR") ?
@@ -389,6 +393,13 @@ const ClientsTablePage: FC<RouteComponentProps> = (props) => {
             record={recordToDelete}
             refreshData={refreshDataCallback}
             close={() => setRecordToDelete(null)}
+          />
+        )}
+        {recordToEdit && (
+          <EditRecordModal
+            record={recordToEdit}
+            refreshData={refreshDataCallback}
+            close={() => setRecordToEdit(null)}
           />
         )}
       </div>
