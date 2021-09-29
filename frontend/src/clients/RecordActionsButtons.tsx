@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { Dispatch, FC, SetStateAction, useState } from 'react';
 
 import DeleteRecordButton from './DeleteRecordButton';
 import EditRecordButton from './EditRecordButton';
@@ -7,10 +7,11 @@ import type { Client } from './ClientsAPI';
 
 export interface RecordActionsButtonsProps {
   record: Client;
+  setRecordToDelete: Dispatch<SetStateAction<Client | null>>;
   refreshData: (modifiedRecordId?: string) => void;
 }
 
-const RecordActionsButtons: FC<RecordActionsButtonsProps> = ({ record, refreshData }) => {
+const RecordActionsButtons: FC<RecordActionsButtonsProps> = ({ record, setRecordToDelete, refreshData }) => {
   const { useLoadedAccountInfo } = useAccountInfo();
   const [disabled, setDisabled] = useState<boolean>(() => false);
 
@@ -19,7 +20,7 @@ const RecordActionsButtons: FC<RecordActionsButtonsProps> = ({ record, refreshDa
   });
 
   return (<>
-    <DeleteRecordButton record={record} refreshData={refreshData} disabled={disabled} />
+    <DeleteRecordButton onClick={() => setRecordToDelete(record)} disabled={disabled} />
     {' '}
     <EditRecordButton record={record} refreshData={refreshData} disabled={disabled} />
   </>);
