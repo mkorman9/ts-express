@@ -23,6 +23,7 @@
     "express-validator": "^6.12.1",
     "express-winston": "^4.1.0",
     "moment": "^2.29.1",
+    "nodejs-captcha": "^0.0.6",
     "on-headers": "^1.0.2",
     "pg": "^8.7.1",
     "prom-client": "^13.2.0",

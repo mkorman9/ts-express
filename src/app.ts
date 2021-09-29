@@ -6,6 +6,7 @@ import clientsAPI from './clients/api/clients_api';
 import sessionAPI from './session/api/session_api';
 import authAPI from './accounts/api/auth_api';
 import accountAPI from './accounts/api/account_api';
+import captchaAPI from './captcha/api/captcha_api';
 
 import healthcheckHandler from './handlers/healthcheck_handler';
 import requestParsingErrorHandler from './handlers/request_parsing_error_handler';
@@ -37,6 +38,7 @@ apiV1.use('/client', clientsAPI);
 apiV1.use('/login/session', sessionAPI);
 apiV1.use('/login/auth', authAPI);
 apiV1.use('/login/account', accountAPI);
+apiV1.use('/captcha', captchaAPI);
 app.use('/api/v1', apiV1);
 
 app.use(internalErrorHandler);
