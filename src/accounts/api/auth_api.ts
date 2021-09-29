@@ -51,10 +51,10 @@ authAPI.post(
           .status(401)
           .json({
             status: 'error',
-            causes: {
+            causes: [{
               field: 'credentials',
               code: 'invalid'
-            }
+            }]
           });
       }
 
@@ -64,10 +64,10 @@ authAPI.post(
           .status(401)
           .json({
             status: 'error',
-            causes: {
+            causes: [{
               field: 'credentials',
               code: 'invalid'
-            }
+            }]
           });
       }
 
@@ -76,10 +76,10 @@ authAPI.post(
           .status(401)
           .json({
             status: 'error',
-            causes: {
+            causes: [{
               field: 'account',
               code: 'inactive'
-            }
+            }]
           });
       }
 

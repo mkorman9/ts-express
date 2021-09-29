@@ -14,6 +14,8 @@ import ClientsTablePage from './clients/ClientsTablePage';
 
 import SessionProvider from './session/SessionProvider';
 import AccountInfoProvider from './accounts/AccountInfo';
+import SessionOverlay from './session/SessionOverlay';
+import AccountInfoOverlay from './accounts/AccountInfoOverlay';
 import LoginPage from './login/LoginPage';
 import RegisterPage from './accounts/RegisterPage';
 import RegistrationSuccessfulPage from './accounts/RegistrationSuccessfulPage';
@@ -53,7 +55,10 @@ const AppProviders: FC = (props: any) => {
     CaptchaAPIProvider,
     AdminAPIProvider,
 
-    AccountInfoProvider
+    AccountInfoProvider,
+
+    SessionOverlay,
+    AccountInfoOverlay
   ];
   const children = props.children;
 
@@ -85,11 +90,11 @@ const App: FC = () => {
           <Route exact path="/password/forgot" component={ForgotPasswordPage} />
           <Route exact path="/password/set" component={SetPasswordPage} />
           <Route exact path="/password/set/:accountId/:code" component={SetPasswordPage} />
-                    
+
           <Route path="/oauth2/github/callback" component={GithubCallback} />
 
           <Route path="/admin/accounts" component={AccountsListPage} />
-                    
+
           <Route path='/not-found' component={NotFoundPage} />
           <Redirect from='*' to='/not-found' />
         </Switch>

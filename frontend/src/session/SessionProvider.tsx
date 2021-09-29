@@ -17,7 +17,7 @@ const defaultSessionData: (() => SessionData) = () => ({
   accessToken: "",
   roles: new Set()
 });
-const defaultSessionStatus: (() => SessionStatus) = () => ({ 
+const defaultSessionStatus: (() => SessionStatus) = () => ({
   lastEvent: "loading",
   isActive: false,
   isStillLoading: true,
@@ -155,9 +155,9 @@ const SessionProvider: FC = (props: any) => {
   };
 
   return (
-    <Session.Provider value={{ 
+    <Session.Provider value={{
       session,
-      newSession, 
+      newSession,
       endSession,
       useActiveSession,
       useMissingSession,
