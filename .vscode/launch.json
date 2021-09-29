@@ -35,6 +35,29 @@
             "cwd": "${workspaceFolder}",
             "protocol": "inspector",
             "outputCapture": "std"
+        },
+        {
+            "name": "frontend",
+            "request": "launch",
+            "runtimeArgs": [
+                "start"
+            ],
+            "runtimeExecutable": "yarn",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "pwa-node",
+            "cwd": "${workspaceFolder}/frontend"
+        },
+        {
+            "name": "debug frontend in chrome",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}/frontend/src",
+            "sourceMapPathOverrides": {
+              "webpack:///src/*": "${webRoot}/*"
+            }
         }
     ]
 }

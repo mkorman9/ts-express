@@ -26,6 +26,9 @@ The app uses yarn to keep track of the external dependencies. When running for t
 
 ```sh
 yarn install
+
+cd frontend/
+yarn install
 ```
 
 Then each time when you want to start the app, simply run:
@@ -33,3 +36,12 @@ Then each time when you want to start the app, simply run:
 ```sh
 yarn start
 ```
+
+Similarly, if you want to run the frontend, execute:
+
+```sh
+cd frontend/
+yarn start
+```
+
+Then visit `http://localhost:3000`

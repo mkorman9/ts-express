@@ -1,0 +1,312 @@
+{
+    "dateSelector": {
+        "today": "Today",
+        "back": "Back",
+        "forward": "Forward",
+        "dateButton": "Select Date"
+    },
+    "languages": {
+        "enUS": "English (United States)",
+        "plPL": "Polish"
+    },
+    "session": {
+        "sessionEnded": "You have been automatically logged out."
+    },
+    "notFound": {
+        "header": "Not found",
+        "message": "The requested page was not found"
+    },
+    "navigation": {
+        "menu": "Menu",
+        "clientsList": "Clients List",
+        "accountsList": "Accounts List",
+        "loggedOutButton": "Log In / Register",
+        "hello": "Hello, {{name}}",
+        "logIn": "Log In",
+        "logOut": "Log Out",
+        "createAccount": "Create Account",
+        "changePassword": "Change Password",
+        "profile": "Profile"
+    },
+    "table": {
+        "errorLoading": "Error loading clients list. Please try again later.",
+        "hiddenColumns": "Hiden Columns",
+        "filters": {
+            "activeFilters": "Active Filters ({{ number }})",
+            "clearFilters": "Clear Filters",
+            "gender": "Gender",
+            "genders": {
+                "M": "Male",
+                "F": "Female",
+                "NA": "Unknown"
+            },
+            "firstName": "First Name",
+            "lastName": "Last Name",
+            "address": "Address",
+            "phoneNumber": "Phone Number",
+            "email": "E-mail",
+            "bornAfter": "Born After",
+            "bornBefore": "Born Before",
+            "creditCardNumber": "Credit Card Number"
+        },
+        "columns": {
+            "actions": "Actions",
+            "id": "ID",
+            "gender": "Gender",
+            "firstName": "First Name",
+            "lastName": "Last Name",
+            "address": "Address",
+            "phoneNumber": "Phone Number",
+            "email": "E-mail",
+            "birthDate": "Birth Date",
+            "creditCards": "Credit Cards"
+        }
+    },
+    "clientChangelogWidget": {
+        "listOfChanges": "List of Changes",
+        "fieldsChanged": "Fields changed:",
+        "loadingError": "Failed to load client's changelog. Try again later.",
+        "gender": {
+            "M": "Male",
+            "F": "Female",
+            "NA": "N/A"
+        },
+        "changeType": {
+            "created": "Added by <profileUrl>{{ author }}</profileUrl>",
+            "updated": "Modified by <profileUrl>{{ author }}</profileUrl>",
+            "deleted": "Deleted by <profileUrl>{{ author }}</profileUrl>"
+        },
+        "field": {
+            "added": {
+                "gender": "<bold>Gender</bold> set to <highlight>{{- value }}</highlight>",
+                "firstName": "<bold>First Name</bold> set to <highlight>{{- value }}</highlight>",
+                "lastName": "<bold>Last Name</bold> set to <highlight>{{- value }}</highlight>",
+                "address": "<bold>Address</bold> set to <highlight>{{- value }}</highlight>",
+                "phoneNumber": "<bold>Phone Number</bold> set to <highlight>{{- value }}</highlight>",
+                "email": "<bold>E-mail</bold> set to <highlight>{{- value }}</highlight>",
+                "birthDate": "<bold>Birth Date</bold> set to <highlight>{{- value }}</highlight>",
+                "creditCard": "<bold>Credit Card</bold> added <highlight>{{- value }}</highlight>"
+            },
+            "changed": {
+                "gender": "<bold>Gender</bold> changed from <highlight>{{- oldValue }}</highlight> to <highlight>{{- value }}</highlight>",
+                "firstName": "<bold>First Name</bold> changed from <highlight>{{- oldValue }}</highlight> to <highlight>{{- value }}</highlight>",
+                "lastName": "<bold>Last Name</bold> changed from <highlight>{{- oldValue }}</highlight> to <highlight>{{- value }}</highlight>",
+                "address": "<bold>Address</bold> changed from <highlight>{{- oldValue }}</highlight> to <highlight>{{- value }}</highlight>",
+                "phoneNumber": "<bold>Phone Number</bold> changed from <highlight>{{- oldValue }}</highlight> to <highlight>{{- value }}</highlight>",
+                "email": "<bold>E-mail</bold> changed from <highlight>{{- oldValue }}</highlight> to <highlight>{{- value }}</highlight>",
+                "birthDate": "<bold>Birth Date</bold> changed from <highlight>{{- oldValue }}</highlight> to <highlight>{{- value }}</highlight>"
+            },
+            "removed": {
+                "firstName": "<bold>First Name</bold> removed",
+                "lastName": "<bold>Last Name</bold> removed",
+                "address": "<bold>Address</bold> removed",
+                "phoneNumber": "<bold>Phone Number</bold> removed",
+                "email": "<bold>E-mail</bold> removed",
+                "birthDate": "<bold>Birth Date</bold> removed",
+                "creditCard": "<bold>Credit Card</bold> removed <highlight>{{- value }}</highlight>"
+            }
+        }
+    },
+    "addRecord": {
+        "button": "Add Client",
+        "header": "Add New Client",
+        "gender": "Gender",
+        "genders": {
+            "M": "Male",
+            "F": "Female",
+            "NA": "N/A"
+        },
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "address": "Address",
+        "phoneNumber": "Phone Number",
+        "email": "E-mail",
+        "birthDate": "Birth Date",
+        "creditCards": "Credit Cards",
+        "addButton": "Add",
+        "cancelButton": "Cancel",
+        "serverError": "Error adding client. Please try again later.",
+        "requiredError": "Needs not to be empty",
+        "creditCardFormatError": "Credit card number needs to be in format XXXX XXXX XXXX XXXX",
+        "emailFormatError": "Needs to be a valid e-mail address",
+        "accountBannedError": "Your account is banned.",
+        "successToast": "Client {{name}} added."
+    },
+    "editRecord": {
+        "header": "Edit Client {{name}}",
+        "gender": "Gender",
+        "genders": {
+            "M": "Male",
+            "F": "Female",
+            "NA": "N/A"
+        },
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "address": "Address",
+        "phoneNumber": "Phone Number",
+        "email": "E-mail",
+        "birthDate": "Birth Date",
+        "creditCards": "Credit Cards",
+        "saveButton": "Save",
+        "cancelButton": "Cancel",
+        "serverError": "Error saving client. Please try again later.",
+        "requiredError": "Needs not to be empty",
+        "creditCardFormatError": "Credit card number needs to be in format XXXX XXXX XXXX XXXX",
+        "emailFormatError": "Needs to be a valid e-mail address",
+        "accountBannedError": "Your account is banned.",
+        "successToast": "Client {{name}} saved."
+    },
+    "deleteRecord": {
+        "header": "Confirm Deleting Client",
+        "message": "Do you really want to delete client {{name}}?",
+        "deleteButton": "Delete",
+        "cancelButton": "Cancel",
+        "serverError": "Error deleting user. Please try again later.",
+        "accountBannedError": "Your account is banned.",
+        "successToast": "Client {{name}} deleted."
+    },
+    "loginPage": {
+        "email": "E-mail",
+        "password": "Password",
+        "logInButton": "Log In",
+        "serverError": "Error logging in. Please try again later.",
+        "invalidCredentialsError": "Invalid E-mail or password.",
+        "rateLimitingError": "Too many tries. Please try again later.",
+        "inactiveAccountError": "Your account has not been activated yet.",
+        "forgotPasswordButton": "Forgot Password",
+        "rememberMe": "Remember Me"
+    },
+    "registerPage": {
+        "username": "User Name",
+        "email": "E-mail",
+        "password": "Password",
+        "repeatPassword": "Repeat Password",
+        "captcha": "Rewrite the code from the picture",
+        "registerButton": "Register",
+        "rateLimitingError": "Too many tries. Please try again later.",
+        "userNameRequiredError": "Needs to be at least 4 characters long",
+        "userNameFormatError": "Needs to contain only only letters and digits",
+        "userNameExistsError": "Account with this name already exists",
+        "emailRequiredError": "Needs not to be empty",
+        "emailFormatError": "Needs to be a valid e-mail address",
+        "emailExistError": "Account with this e-mail already exists",
+        "passwordLengthError": "Needs to be at least 4 characters long",
+        "passwordsNotEqualError": "Both passwords must match",
+        "serverError": "Error creating account. Please try again later.",
+        "captchaError": "Invalid code"
+    },
+    "registationSuccessfulPage": {
+        "header": "Account created successfully",
+        "message": "Check your mailbox to activate your account."
+    },
+    "activateAccountPage": {
+        "success": "Account activated. You can now log in.",
+        "fail": "Failed to active account.",
+        "rateLimitingError": "Too many tries. Please try again later.",
+        "serverError": "Error activating account. Please try again later."
+    },
+    "changeEmailPage": {
+        "success": "E-mail changed successfully.",
+        "fail": "Failed to change E-mail.",
+        "rateLimitingError": "Too many tries. Please try again later.",
+        "serverError": "Error changing E-mail. Please try again later."
+    },
+    "editProfilePage": {
+        "successEmailChanged": "Verification message sent to '{{email}}'. Check your mailbox to complete process.",
+        "successUsernameChanged": "Username changed successfully",
+        "successPasswordChanged": "Password changed successfully",
+        "successLanguageChanged": "Language changed successfully",
+        "oldPasswordRequiredError": "Needs not to be empty",
+        "oldPasswordInvalidError": "Password is incorrect",
+        "newPasswordLengthError": "Needs to be at least 4 characters long",
+        "invalidAccountError": "This account has no password set.",
+        "serverError": "Unexpected error occurred. Please try again later.",
+        "passwordsNotEqualError": "Both passwords must match",
+        "userNameLengthError": "Needs to be at least 4 characters long",
+        "userNameExistsError": "Account with this name already exists",
+        "emailRequiredError": "Needs not to be empty",
+        "emailFormatError": "Needs to be a valid e-mail address",
+        "emailExistError": "Account with this e-mail already exists",
+        "username": "Username",
+        "email": "E-mail",
+        "registeredAt": "Registered At",
+        "roles": "Roles",
+        "language": "Language",
+        "oldPassword": "Old Password",
+        "newPassword": "New Password",
+        "repeatNewPassword": "Repeat New Password",
+        "saveButtonText": "Save",
+        "setPasswordButtonText": "Set Password",
+        "bannedMessage": "BANNED - {{until}}"
+    },
+    "publicProfilePage": {
+        "username": "Username",
+        "registeredAt": "Registered At",
+        "roles": "Roles",
+        "language": "Language",
+        "notFoundError": "Account with this name doesn't exist",
+        "serverError": "Error loading user profile. Please try again later.",
+        "bannedMessage": "BANNED - {{until}}"
+    },
+    "rolesEditor": {
+        "success": "Successfully assigned roles to account",
+        "serverError": "Error assiging roles. Please try again later.",
+        "saveButton": "Save Roles"
+    },
+    "forgotPasswordPage": {
+        "success": "Password reset successful. Check your mailbox for instructions.",
+        "rateLimitingError": "Too many tries. Please try again later.",
+        "emailRequiredError": "Needs not to be empty",
+        "emailFormatError": "Needs to be a valid e-mail address",
+        "invalidAccountError": "This account is ineligible for password reset.",
+        "serverError": "Error resetting password. Please try again later.",
+        "resetPasswordButtonText": "Reset Password",
+        "email": "E-mail",
+        "captcha": "Rewrite the code from the picture",
+        "captchaError": "Invalid code"
+    },
+    "setPasswordPage": {
+        "success": "Password set successfully.",
+        "rateLimitingError": "Too many tries. Please try again later.",
+        "passwordLengthError": "Needs to be at least 4 characters long",
+        "invalidAccountError": "Cannot set password for this account.",
+        "serverError": "Error setting password. Please try again later.",
+        "passwordsNotEqualError": "Both passwords must match",
+        "emailExistError": "Account with this e-mail already exists",
+        "email": "E-mail",
+        "password": "New Password",
+        "repeatPassword": "Repeat New Password",
+        "setPasswordButtonText": "Set"
+    },
+    "oauth2Buttons": {
+        "signInGithubLabel": "Sign in with GitHub"
+    },
+    "githubOAuth2Callback": {
+        "missingCodeError": "Missing or invalid code.",
+        "missingStateError": "Missing or invalid state.",
+        "providerDisabledError": "GitHub OAuth2 provider is disabled on this server.",
+        "flowFailedError": "Could not get confirmation from GitHub.",
+        "inactiveAccountError": "Your account is inactive.",
+        "rateLimitingError": "Too many tries. Please try again later.",
+        "serverError": "Error logging in. Please try again later."
+    },
+    "accountsListPage": {
+        "table": {
+            "id": "ID",
+            "profile": "Profile",
+            "email": "E-mail",
+            "roles": "Roles",
+            "registeredAt": "Registered At"
+        },
+        "filters": {
+            "clearFilters": "Clear Filters",
+            "username": "Username"
+        },
+        "inactive": "Inactive",
+        "serverError": "Failed to load accounts list. Try again later."
+    },
+    "adminProfileWidget": {
+        "impersonate": "Impersonate",
+        "impersonateSuccess": "Successfully impersonated user session."
+    }
+}

@@ -1,0 +1,312 @@
+{
+    "dateSelector": {
+        "today": "Dzisiaj",
+        "back": "Wstecz",
+        "forward": "Dalej",
+        "dateButton": "Wybierz datę"
+    },
+    "languages": {
+        "enUS": "Angielski (Stany Zjednoczone)",
+        "plPL": "Polski"
+    },
+    "session": {
+        "sessionEnded": "Zostałeś automatycznie wylogowany."
+    },
+    "notFound": {
+        "header": "Nie odnaleziono",
+        "message": "Żądana strona nie została odnaleziona"
+    },
+    "navigation": {
+        "menu": "Menu",
+        "clientsList": "Lista Klientów",
+        "accountsList": "List Kont",
+        "loggedOutButton": "Zaloguj się / Stwórz konto",
+        "hello": "Witaj, {{name}}",
+        "logIn": "Zaloguj",
+        "logOut": "Wyloguj",
+        "createAccount": "Stwórz konto",
+        "changePassword": "Zmień hasło",
+        "profile": "Profil"
+    },
+    "table": {
+        "errorLoading": "Błąd wczytywania listy klientów. Spróbuj ponownie później.",
+        "hiddenColumns": "Ukryte kolumny",
+        "filters": {
+            "activeFilters": "Aktywne filtry ({{ number }})",
+            "clearFilters": "Wyczyść filtry",
+            "gender": "Płeć",
+            "genders": {
+                "M": "Mężczyzna",
+                "F": "Kobieta",
+                "NA": "Nieznana"
+            },
+            "firstName": "Imię",
+            "lastName": "Nazwisko",
+            "address": "Adres",
+            "phoneNumber": "Numer telefonu",
+            "email": "E-mail",
+            "bornAfter": "Urodzony po",
+            "bornBefore": "Urodzony przed",
+            "creditCardNumber": "Numer karty"
+        },
+        "columns": {
+            "actions": "Operacje",
+            "id": "ID",
+            "gender": "Płeć",
+            "firstName": "Imię",
+            "lastName": "Nazwisko",
+            "address": "Adres",
+            "phoneNumber": "Numer telefonu",
+            "email": "E-mail",
+            "birthDate": "Data urodzenia",
+            "creditCards": "Karty kredytowe"
+        }
+    },
+    "clientChangelogWidget": {
+        "listOfChanges": "Lista zmian",
+        "fieldsChanged": "Zmienione pola:",
+        "loadingError": "Nie udało się wczytać historii edycji dla użytkownika. Spróbuj ponownie później.",
+        "gender": {
+            "M": "Mężczyzna",
+            "F": "Kobieta",
+            "NA": "N/D"
+        },
+        "changeType": {
+            "created": "Dodany przez <profileUrl>{{ author }}</profileUrl>",
+            "updated": "Zmodyfikowany przez <profileUrl>{{ author }}</profileUrl>",
+            "deleted": "Usunięty przez <profileUrl>{{ author }}</profileUrl>"
+        },
+        "field": {
+            "added": {
+                "gender": "<bold>Płeć</bold> ustawiona na <highlight>{{- value }}</highlight>",
+                "firstName": "<bold>Imię</bold> ustawione na <highlight>{{- value }}</highlight>",
+                "lastName": "<bold>Nazwisko</bold> ustawione na <highlight>{{- value }}</highlight>",
+                "address": "<bold>Adres</bold> ustawiony na <highlight>{{- value }}</highlight>",
+                "phoneNumber": "<bold>Numer telefonu</bold> ustawiony na <highlight>{{- value }}</highlight>",
+                "email": "<bold>E-mail</bold> ustawiony na <highlight>{{- value }}</highlight>",
+                "birthDate": "<bold>Data urodzenia</bold> ustawiona na <highlight>{{- value }}</highlight>",
+                "creditCard": "<bold>Karta kredytowa</bold> dodano <highlight>{{- value }}</highlight>"
+            },
+            "changed": {
+                "gender": "<bold>Płeć</bold> zmieniona z <highlight>{{- oldValue }}</highlight> na <highlight>{{- value }}</highlight>",
+                "firstName": "<bold>Imię</bold> zmienione z <highlight>{{- oldValue }}</highlight> na <highlight>{{- value }}</highlight>",
+                "lastName": "<bold>Nazwisko</bold> zmienione z <highlight>{{- oldValue }}</highlight> na <highlight>{{- value }}</highlight>",
+                "address": "<bold>Adres</bold> zmieniony z <highlight>{{- oldValue }}</highlight> na <highlight>{{- value }}</highlight>",
+                "phoneNumber": "<bold>Numer telefonu</bold> zmieniony z <highlight>{{- oldValue }}</highlight> na <highlight>{{- value }}</highlight>",
+                "email": "<bold>E-mail</bold> zmieniony z <highlight>{{- oldValue }}</highlight> na <highlight>{{- value }}</highlight>",
+                "birthDate": "<bold>Data urodzenia</bold> zmieniona z <highlight>{{- oldValue }}</highlight> na <highlight>{{- value }}</highlight>"
+            },
+            "removed": {
+                "firstName": "<bold>Imię</bold> usunięto",
+                "lastName": "<bold>Nazwisko</bold> usunięto",
+                "address": "<bold>Adres</bold> usunięto",
+                "phoneNumber": "<bold>Numer telefonu</bold> usunięto",
+                "email": "<bold>E-mail</bold> usunięto",
+                "birthDate": "<bold>Data urodzenia</bold> usunięto",
+                "creditCard": "<bold>Karta kredytowa</bold> usunięto <highlight>{{- value }}</highlight>"
+            }
+        }
+    },
+    "addRecord": {
+        "button": "Dodaj Klienta",
+        "header": "Dodaj nowego klienta",
+        "gender": "Płeć",
+        "genders": {
+            "M": "Mężczyzna",
+            "F": "Kobieta",
+            "NA": "N/D"
+        },
+        "firstName": "Imię",
+        "lastName": "Nazwisko",
+        "address": "Adres",
+        "phoneNumber": "Numer telefonu",
+        "email": "E-mail",
+        "birthDate": "Data urodzenia",
+        "creditCards": "Karty Kredytowe",
+        "addButton": "Dodaj",
+        "cancelButton": "Anuluj",
+        "serverError": "Błąd przy dodawaniu klienta. Spróbuj ponownie później.",
+        "requiredError": "To pole nie może być puste",
+        "creditCardFormatError": "Numer karty kredytowej musi być podany w formacie XXXX XXXX XXXX XXXX",
+        "emailFormatError": "Podaj poprawny adres e-mail",
+        "accountBannedError": "Twoje konto jest zablokowane.",
+        "successToast": "Klient {{name}} został dodany."
+    },
+    "editRecord": {
+        "header": "Edytuj Klienta {{name}}",
+        "gender": "Płeć",
+        "genders": {
+            "M": "Mężczyzna",
+            "F": "Kobieta",
+            "NA": "N/D"
+        },
+        "firstName": "Imię",
+        "lastName": "Nazwisko",
+        "address": "Adres",
+        "phoneNumber": "Numer telefonu",
+        "email": "E-mail",
+        "birthDate": "Data urodzenia",
+        "creditCards": "Karty Kredytowe",
+        "saveButton": "Zapisz",
+        "cancelButton": "Anuluj",
+        "serverError": "Błąd przy zapisywaniu klienta. Spróbuj ponownie później.",
+        "requiredError": "To pole nie może być puste",
+        "creditCardFormatError": "Numer karty kredytowej musi być podany w formacie XXXX XXXX XXXX XXXX",
+        "emailFormatError": "Podaj poprawny adres e-mail",
+        "accountBannedError": "Twoje konto jest zablokowane.",
+        "successToast": "Klient {{name}} został zapisany."
+    },
+    "deleteRecord": {
+        "header": "Potwierdź usunięcie klienta",
+        "message": "Czy na pewno chcesz usunąć klienta {{name}}?",
+        "deleteButton": "Usuń",
+        "cancelButton": "Anuluj",
+        "serverError": "Błąd przy usuwaniu klienta. Spróbuj ponownie później.",
+        "accountBannedError": "Twoje konto jest zablokowane.",
+        "successToast": "Klient {{name}} został usunięty."
+    },
+    "loginPage": {
+        "email": "E-mail",
+        "password": "Hasło",
+        "logInButton": "Zaloguj",
+        "serverError": "Błąd przy próbie zalogowania. Spróbuj ponownie później.",
+        "invalidCredentialsError": "Niepoprawny E-mail lub hasło.",
+        "rateLimitingError": "Zbyt duża liczba prób. Spróbuj ponownie później.",
+        "inactiveAccountError": "Twoje konto nie zostało jeszcze aktywowane.",
+        "forgotPasswordButton": "Zapomniałem hasła",
+        "rememberMe": "Zapamiętaj mnie"
+    },
+    "registerPage": {
+        "username": "Nazwa Użytkownika",
+        "email": "E-mail",
+        "password": "Hasło",
+        "captcha": "Przepisz kod z obrazka",
+        "repeatPassword": "Powtórz Hasło",
+        "registerButton": "Zarejestruj się",
+        "rateLimitingError": "Zbyt duża liczba prób. Spróbuj ponownie później.",
+        "userNameRequiredError": "Nazwa musi się składać co najmniej z 4 znaków",
+        "userNameFormatError": "Nazwa musi składać się jedynie z liter i cyfr",
+        "userNameExistsError": "Konto o tej nazwie już istnieje",
+        "emailRequiredError": "E-mail nie może być pusty",
+        "emailFormatError": "Podaj poprawny adres e-mail",
+        "emailExistError": "Konto z tym adresem e-mail już istnieje",
+        "passwordLengthError": "Hasło musi składać się co najmniej z 4 znaków",
+        "passwordsNotEqualError": "Oba hasła muszą być identyczne",
+        "serverError": "Błąd przy próbie stworzenia konta. Spróbuj ponownie później.",
+        "captchaError": "Nieprawidłowy kod"
+    },
+    "registationSuccessfulPage": {
+        "header": "Konto stworzone",
+        "message": "Sprawdź swoją skrzynkę pocztową i potwierdź adres e-mail."
+    },
+    "activateAccountPage": {
+        "success": "Konto zostało aktywowane. Możesz teraz się zalogować.",
+        "fail": "Nie udało się aktywować konta.",
+        "rateLimitingError": "Zbyt duża liczba prób. Spróbuj ponownie później.",
+        "serverError": "Błąd przy próbie aktywacji konta. Spróbuj ponownie później."
+    },
+    "changeEmailPage": {
+        "success": "E-mail zmieniony pomyślnie.",
+        "fail": "Nie udało się zmienić E-maila.",
+        "rateLimitingError": "Zbyt duża liczba prób. Spróbuj ponownie później.",
+        "serverError": "Błąd przy próbie zmiany E-mail. Spróbuj ponownie później."
+    },
+    "editProfilePage": {
+        "successEmailChanged": "Wysłano wiadomość do '{{email}}'. Sprawdź swoją skrzynkę w celu dokończenia procesu",
+        "successUsernameChanged": "Nazwa konta zaktualizowana pomyślnie",
+        "successPasswordChanged": "Hasło zaktualizowane pomyślnie",
+        "successLanguageChanged": "Język zaktualizowany pomyślnie",
+        "oldPasswordRequiredError": "Uzupełnij stare hasło",
+        "oldPasswordInvalidError": "Hasło jest niepoprawne",
+        "newPasswordLengthError": "Hasło musi składać się co najmniej z 4 znaków",
+        "invalidAccountError": "To konto nie ma ustawionego hasła.",
+        "serverError": "Niespodziewany błąd. Spróbuj ponownie później.",
+        "passwordsNotEqualError": "Oba hasła muszą być identyczne",
+        "userNameLengthError": "Nazwa musi się składać co najmniej z 4 znaków",
+        "userNameExistsError": "Konto o tej nazwie już istnieje",
+        "emailRequiredError": "E-mail nie może być pusty",
+        "emailFormatError": "Podaj poprawny adres e-mail",
+        "emailExistError": "Konto z tym adresem e-mail już istnieje",
+        "username": "Nazwa konta",
+        "email": "E-mail",
+        "registeredAt": "Data rejestracji",
+        "roles": "Role",
+        "language": "Język",
+        "oldPassword": "Stare Hasło",
+        "newPassword": "Nowe Hasło",
+        "repeatNewPassword": "Powtórz Nowe Hasło",
+        "saveButtonText": "Zapisz",
+        "setPasswordButtonText": "Ustaw Hasło",
+        "bannedMessage": "ZABLOKOWANY - {{until}}"
+    },
+    "publicProfilePage": {
+        "username": "Nazwa konta",
+        "email": "E-mail",
+        "registeredAt": "Data rejestracji",
+        "language": "Język",
+        "notFoundError": "Konto o tej nazwie nie istnieje",
+        "serverError": "Błąd przy pobieraniu profilu konta. Spróbuj ponownie później.",
+        "bannedMessage": "ZABLOKOWANY - {{until}}"
+    },
+    "rolesEditor": {
+        "success": "Pomyślnie przypisano role do konta",
+        "serverError": "Błąd przy próbie przypisania ról. Spróbuj ponownie później.",
+        "saveButton": "Zapisz role"
+    },
+    "forgotPasswordPage": {
+        "success": "Hasło zresetowane pomyślnie. Sprawdź swoją skrzynkę pocztową.",
+        "rateLimitingError": "Zbyt duża liczba prób. Spróbuj ponownie później.",
+        "emailRequiredError": "E-mail nie może być pusty",
+        "emailFormatError": "Podaj poprawny adres e-mail",
+        "invalidAccountError": "Nie można zresetować hasła do tego konta.",
+        "serverError": "Błąd przy próbie zresetowania hasła. Spróbuj ponownie później.",
+        "resetPasswordButtonText": "Zresetuj hasło",
+        "email": "E-mail",
+        "captcha": "Przepisz kod z obrazka",
+        "captchaError": "Nieprawidłowy kod"
+    },
+    "setPasswordPage": {
+        "success": "Hasło ustawione pomyślnie.",
+        "rateLimitingError": "Zbyt duża liczba prób. Spróbuj ponownie później.",
+        "passwordLengthError": "Hasło musi składać się co najmniej z 4 znaków",
+        "invalidAccountError": "Nie można ustawić hasła do tego konta.",
+        "serverError": "Błąd przy próbie ustawienia hasła. Spróbuj ponownie później.",
+        "passwordsNotEqualError": "Oba hasła muszą być identyczne",
+        "emailExistError": "Konto z tym adresem e-mail już istnieje",
+        "email": "E-mail",
+        "password": "Nowe hasło",
+        "repeatPassword": "Powtórz Nowe Hasło",
+        "setPasswordButtonText": "Ustaw"
+    },
+    "oauth2Buttons": {
+        "signInGithubLabel": "Zaloguj się przez GitHub"
+    },
+    "githubOAuth2Callback": {
+        "missingCodeError": "Niepoprawny kod.",
+        "missingStateError": "Niepoprawny stan.",
+        "providerDisabledError": "Logowanie przez GitHub jest wyłączone na tym serwerze.",
+        "flowFailedError": "Błąd przy odbieraniu potwierdzenia od GitHub.",
+        "inactiveAccountError": "Twoje konto nie zostało aktywowane.",
+        "rateLimitingError": "Zbyt duża liczba prób. Spróbuj ponownie później.",
+        "serverError": "Błąd przy próbie zalogowania. Spróbuj ponownie później."
+    },
+    "accountsListPage": {
+        "table": {
+            "id": "ID",
+            "profile": "Profil",
+            "email": "E-mail",
+            "roles": "Role",
+            "registeredAt": "Data rejestracji"
+        },
+        "filters": {
+            "clearFilters": "Wyczyść filtry",
+            "username": "Nazwa konta"
+        },
+        "inactive": "Nieatywny",
+        "serverError": "Błąd przy pobieraniu listy kont. Spróbuj ponownie później."
+    },
+    "adminProfileWidget": {
+        "impersonate": "Podszyj się",
+        "impersonateSuccess": "Pomyślnie podszyto się pod użytkownika."
+    }
+}
