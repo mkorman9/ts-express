@@ -7,7 +7,7 @@ import {
   requireAuthentication,
   setSessionContext,
   sendSessionCookie
-} from '../../session/middlewares/authorization_middleware';
+} from '../../middlewares/authorization';
 import {
   SessionContext,
   refreshSession,

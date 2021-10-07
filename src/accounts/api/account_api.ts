@@ -4,17 +4,18 @@ import {
   tokenAuthMiddleware,
   includeSessionAccount,
   getSessionAccount
-} from '../../session/middlewares/authorization_middleware';
+} from '../../middlewares/authorization';
 import Account from '../models/account';
+import { findAccountById } from '../providers/accounts_provider';
 
 const accountAPI = Router();
 
 accountAPI.get(
   '/info',
   tokenAuthMiddleware(),
-  includeSessionAccount(),
+  includeSessionAccount(ctx => findAccountById(ctx.subject)),
   async (req: Request, res: Response, next: NextFunction) => {
-    const account = getSessionAccount(req) as Account;
+    const account = getSessionAccount<Account>(req);
 
     return res
       .status(200)

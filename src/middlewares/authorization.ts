@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction, CookieOptions } from 'express';
 import moment from 'moment';
 
-import { SessionContext, findSession, findSessionWithToken } from '../../providers/session';
-import { BehindTLSProxy } from '../../providers/config';
-import Account from '../../accounts/models/account';
-import { findAccountById } from '../../accounts/providers/accounts_provider';
+import { SessionContext, findSession, findSessionWithToken } from '../providers/session';
+import { BehindTLSProxy } from '../providers/config';
+
+export type AccountResolver<T> = (context: SessionContext) => Promise<T>;
 
 const SessionCookieName = 'SESSION_ID';
 const SessionFieldName = 'sessionContext';
@@ -52,9 +52,9 @@ export const setSessionContext = (req: Request, sessionContext: SessionContext |
   req[SessionAccountFieldName] = undefined;
 };
 
-export const getSessionAccount = (req: Request): Account | null => {
+export const getSessionAccount = <T = unknown>(req: Request): T | null => {
   if (req[SessionAccountFieldName]) {
-    return req[SessionAccountFieldName] as Account;
+    return req[SessionAccountFieldName] as T;
   }
 
   return null;
@@ -146,7 +146,7 @@ export const requireRoles = (roles: string[]) => {
   };
 };
 
-export const includeSessionAccount = () => {
+export const includeSessionAccount = <T = unknown>(resolver: AccountResolver<T>) => {
   const a = requireAuthentication();
 
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -161,7 +161,7 @@ export const includeSessionAccount = () => {
       }
 
       try {
-        const account = await findAccountById(sessionContext.subject);
+        const account = await resolver(sessionContext);
         req[SessionAccountFieldName] = account;
       } catch (err) {
         return next(err);

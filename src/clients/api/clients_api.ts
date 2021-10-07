@@ -21,7 +21,7 @@ import {
   requireRoles,
   includeSessionAccount,
   getSessionAccount
-} from '../../session/middlewares/authorization_middleware';
+} from '../../middlewares/authorization';
 import Account from '../../accounts/models/account';
 import { findAccountById } from '../../accounts/providers/accounts_provider';
 
@@ -262,7 +262,7 @@ clientsAPI.post(
   '',
   tokenAuthMiddleware(),
   requireRoles(['CLIENTS_EDITOR']),
-  includeSessionAccount(),
+  includeSessionAccount(ctx => findAccountById(ctx.subject)),
   ...ClientAddRequestValidators,
   async (req: Request, res: Response, next: NextFunction) => {
     const validationErrors = validationResult(req);
@@ -292,7 +292,7 @@ clientsAPI.post(
       }))
     };
 
-    const account = getSessionAccount(req) as Account;
+    const account = getSessionAccount<Account>(req);
     if (account.isBanned) {
       return res
           .status(400)
@@ -323,7 +323,7 @@ clientsAPI.put(
   '/:id',
   tokenAuthMiddleware(),
   requireRoles(['CLIENTS_EDITOR']),
-  includeSessionAccount(),
+  includeSessionAccount(ctx => findAccountById(ctx.subject)),
   ClientUpdateRequestValidators,
   async (req: Request, res: Response, next: NextFunction) => {
     const validationErrors = validationResult(req);
@@ -353,7 +353,7 @@ clientsAPI.put(
       }))
     };
 
-    const account = getSessionAccount(req) as Account;
+    const account = getSessionAccount<Account>(req);
     if (account.isBanned) {
       return res
           .status(400)
@@ -393,9 +393,9 @@ clientsAPI.delete(
   '/:id',
   tokenAuthMiddleware(),
   requireRoles(['CLIENTS_EDITOR']),
-  includeSessionAccount(),
+  includeSessionAccount(ctx => findAccountById(ctx.subject)),
   async (req: Request, res: Response, next: NextFunction) => {
-    const account = getSessionAccount(req) as Account;
+    const account = getSessionAccount<Account>(req);
     if (account.isBanned) {
       return res
           .status(400)

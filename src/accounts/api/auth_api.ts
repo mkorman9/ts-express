@@ -7,7 +7,7 @@ import { findAccountByCredentialsEmail } from '../providers/accounts_provider';
 import {
   setSessionContext,
   sendSessionCookie
-} from '../../session/middlewares/authorization_middleware';
+} from '../../middlewares/authorization';
 import {
   startSession
 } from '../../providers/session';

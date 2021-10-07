@@ -4,7 +4,7 @@ import sinon from 'sinon';
 import moment from 'moment';
 
 import app from '../../app';
-import * as authProvider from '../../session/middlewares/authorization_middleware';
+import * as authProvider from '../../middlewares/authorization';
 import * as clientsProvider from '../providers/clients_provider';
 import Client from '../models/client';
 import { SessionContext } from '../../providers/session';
