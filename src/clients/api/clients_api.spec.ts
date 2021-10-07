@@ -7,7 +7,7 @@ import app from '../../app';
 import * as authProvider from '../../session/middlewares/authorization_middleware';
 import * as clientsProvider from '../providers/clients_provider';
 import Client from '../models/client';
-import { SessionContext } from '../../session/providers/session_provider';
+import { SessionContext } from '../../providers/session';
 import Account from '../../accounts/models/account';
 
 chai.use(chaiHttp);

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction, CookieOptions } from 'express';
 import moment from 'moment';
 
-import { SessionContext, findSession, findSessionWithToken } from '../providers/session_provider';
+import { SessionContext, findSession, findSessionWithToken } from '../../providers/session';
 import { BehindTLSProxy } from '../../providers/config';
 import Account from '../../accounts/models/account';
 import { findAccountById } from '../../accounts/providers/accounts_provider';
@@ -30,7 +30,7 @@ const authMiddleware = (sessionExtractor: (req: Request) => (() => Promise<Sessi
         return next();
       }
 
-      setSessionContext(sessionContext, req);
+      setSessionContext(req, sessionContext);
     } catch (err) {
       return next(err);
     }
@@ -47,7 +47,7 @@ export const getSessionContext = (req: Request): SessionContext | null => {
   return null;
 };
 
-export const setSessionContext = (sessionContext: SessionContext | null, req: Request) => {
+export const setSessionContext = (req: Request, sessionContext: SessionContext | null) => {
   req[SessionFieldName] = sessionContext;
   req[SessionAccountFieldName] = undefined;
 };
@@ -85,6 +85,9 @@ export const tokenAuthMiddleware = authMiddleware((req: Request) => {
   }
 
   const token = parseAuthHeader(Array.isArray(authHeaderValue) ? authHeaderValue[authHeaderValue.length - 1] : authHeaderValue);
+  if (!token) {
+    return null;
+  }
 
   return (): Promise<SessionContext | null> => {
     return findSessionWithToken(token);

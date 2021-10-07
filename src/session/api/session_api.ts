@@ -12,7 +12,7 @@ import {
   SessionContext,
   refreshSession,
   revokeSession
-} from '../providers/session_provider';
+} from '../../providers/session';
 
 const sessionAPI = Router();
 
@@ -53,7 +53,7 @@ sessionAPI.put(
 
     try {
       const sessionContext = await refreshSession(oldSessionContext);
-      setSessionContext(sessionContext, req);
+      setSessionContext(req, sessionContext);
 
       sendSessionCookie(req, res);
 
@@ -92,7 +92,7 @@ sessionAPI.post(
           });
       }
 
-      setSessionContext(null, req);
+      setSessionContext(req, null);
       sendSessionCookie(req, res);
 
       return res

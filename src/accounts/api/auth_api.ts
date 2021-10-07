@@ -10,7 +10,7 @@ import {
 } from '../../session/middlewares/authorization_middleware';
 import {
   startSession
-} from '../../session/providers/session_provider';
+} from '../../providers/session';
 import { ratelimiterMiddleware } from '../../providers/rate_limiter';
 
 const PasswordAuthRequestValidators = [
@@ -89,7 +89,7 @@ authAPI.post(
         roles: account.roles
       });
 
-      setSessionContext(sessionContext, req);
+      setSessionContext(req, sessionContext);
       sendSessionCookie(req, res);
 
       return res
