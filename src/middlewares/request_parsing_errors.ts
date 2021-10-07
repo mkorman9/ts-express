@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 
-const requestParsingErrorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
+const requestParsingErrors = (err: Error, req: Request, res: Response, next: NextFunction) => {
   if (res.headersSent) {
     return next(err);
   }
@@ -24,4 +24,4 @@ const requestParsingErrorHandler = (err: Error, req: Request, res: Response, nex
   }
 };
 
-export default requestParsingErrorHandler;
+export default requestParsingErrors;

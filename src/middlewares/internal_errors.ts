@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 
 import { log } from '../providers/logging';
 
-const internalErrorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
+const internalErrors = (err: Error, req: Request, res: Response, next: NextFunction) => {
   if (res.headersSent) {
     return next(err);
   }
@@ -19,4 +19,4 @@ const internalErrorHandler = (err: Error, req: Request, res: Response, next: Nex
   }
 };
 
-export default internalErrorHandler;
+export default internalErrors;

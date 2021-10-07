@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 
-const healthcheckHandler = (req: Request, res: Response, next: NextFunction) => {
+const healthcheck = (req: Request, res: Response, next: NextFunction) => {
   if (res.headersSent) {
     return next();
   }
@@ -12,4 +12,4 @@ const healthcheckHandler = (req: Request, res: Response, next: NextFunction) => 
     });
 };
 
-export default healthcheckHandler;
+export default healthcheck;

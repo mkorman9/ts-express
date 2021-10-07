@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 
-const notFoundHandler = (req: Request, res: Response, next: NextFunction) => {
+const notFound = (req: Request, res: Response, next: NextFunction) => {
   if (res.headersSent) {
     return next();
   }
@@ -13,4 +13,4 @@ const notFoundHandler = (req: Request, res: Response, next: NextFunction) => {
     });
 };
 
-export default notFoundHandler;
+export default notFound;

@@ -8,10 +8,10 @@ import authAPI from './accounts/api/auth_api';
 import accountAPI from './accounts/api/account_api';
 import captchaAPI from './captcha/api/captcha_api';
 
-import healthcheckHandler from './handlers/healthcheck_handler';
-import requestParsingErrorHandler from './handlers/request_parsing_error_handler';
-import internalErrorHandler from './handlers/internal_error_handler';
-import notFoundHandler from './handlers/not_found_handler';
+import healthcheck from './middlewares/healthcheck';
+import requestParsingErrors from './middlewares/request_parsing_errors';
+import internalErrors from './middlewares/internal_errors';
+import notFound from './middlewares/not_found';
 import { accessLogger } from './providers/access_logger';
 
 const app = express();
@@ -28,9 +28,9 @@ app.use(prometheusMiddleware({
   requestDurationBuckets: [],
   normalizeStatus: false
 }));
-app.use(requestParsingErrorHandler);
+app.use(requestParsingErrors);
 
-app.get('/health', healthcheckHandler);
+app.get('/health', healthcheck);
 
 // API v1
 const apiV1 = Router();
@@ -41,7 +41,7 @@ apiV1.use('/login/account', accountAPI);
 apiV1.use('/captcha', captchaAPI);
 app.use('/api/v1', apiV1);
 
-app.use(internalErrorHandler);
-app.use(notFoundHandler);
+app.use(internalErrors);
+app.use(notFound);
 
 export default app;
