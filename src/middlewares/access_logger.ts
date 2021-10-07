@@ -2,14 +2,14 @@ import { Request, Response, NextFunction } from 'express';
 import onHeaders from 'on-headers';
 import moment from 'moment';
 
-import { log } from './logging';
+import { log } from '../providers/logging';
 
 const IgnoredPaths = new Set([
   '/health',
   '/metrics'
 ]);
 
-export const accessLogger = () => {
+const accessLogger = () => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const fullPath = req.baseUrl + req.path;
     if (IgnoredPaths.has(fullPath)) {
@@ -33,3 +33,5 @@ export const accessLogger = () => {
     next();
   };
 };
+
+export default accessLogger;
