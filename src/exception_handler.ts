@@ -1,5 +1,5 @@
 import { log } from './providers/logging';
-import { ConfigurationError } from './providers/common';
+import { ConfigurationError } from './providers/config';
 
 process.on('uncaughtException', (err) => {
   if (err instanceof ConfigurationError) {

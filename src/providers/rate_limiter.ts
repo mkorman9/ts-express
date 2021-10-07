@@ -3,13 +3,14 @@ import onHeaders from 'on-headers';
 
 import { log } from './logging';
 import redisClient from './redis';
-import { RatelimiterEnabled } from './config';
+import config from './config';
 
 export interface RatelimiterMiddlewareProps {
   countStatusCodes?: number[];
 }
 
 const RatelimiterRedisPrefix = 'ratelimit';
+const RatelimiterDisabled = config.ratelimiter?.disabled || false;
 const BucketsConfig = {
   general: {
     maxRequests: 45,
@@ -36,7 +37,7 @@ export const ratelimiterMiddleware = (bucketName: string, props?: RatelimiterMid
   }
 
   return async (req: Request, res: Response, next: NextFunction) => {
-    if (!RatelimiterEnabled) {
+    if (RatelimiterDisabled) {
       return next();
     }
 

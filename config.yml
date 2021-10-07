@@ -1,0 +1,11 @@
+logging:
+  level: debug
+
+database:
+  uri: postgres://username:password@localhost:5432/tsexpress?sslmode=disable
+  queryLogging: true
+
+redis:
+  host: 127.0.0.1
+  port: 6379
+  password: password

@@ -2,16 +2,20 @@ import winston from 'winston';
 import { Syslog } from 'winston-syslog';
 import os from 'os';
 
-import {
-  LogLevel,
-  LogSyslogEnabled,
-  LogSyslogHost,
-  LogSyslogPort
-} from './config';
+import config from './config';
 
 export const log = (() => {
+  const props = {
+    level: config.logging?.level || 'info',
+    syslog: {
+      enabled: config.logging?.syslog?.host !== undefined && config.logging?.syslog?.port !== undefined,
+      host: config.logging?.syslog?.host || '127.0.0.1',
+      port: config.logging?.syslog?.port || 514
+    }
+  };
+
   const l = winston.createLogger({
-    level: LogLevel,
+    level: props.level,
     transports: [
       new winston.transports.Console()
     ],
@@ -21,16 +25,16 @@ export const log = (() => {
     )
   });
 
-  if (LogSyslogEnabled) {
-    l.info(`syslog logger enabled, endpoint - ${LogSyslogHost}:${LogSyslogPort}`);
+  if (props.syslog.enabled) {
+    l.info(`syslog logger enabled, endpoint - ${props.syslog.host}:${props.syslog.port}`);
 
     l.add(new Syslog({
       localhost: os.hostname(),
       appName: 'ts-express',
 
       protocol: 'udp',
-      host: LogSyslogHost,
-      port: LogSyslogPort,
+      host: props.syslog.host,
+      port: props.syslog.port,
 
       format: winston.format.combine(
         winston.format.timestamp(),

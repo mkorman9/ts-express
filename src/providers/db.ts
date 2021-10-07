@@ -1,17 +1,8 @@
 import path from 'path/posix';
 import { Sequelize } from 'sequelize-typescript';
 
-import {
-  InTestingMode,
-  DatabaseURI,
-  DatabaseQueryLogging,
-  DatabasePoolMax,
-  DatabasePoolMin,
-  DatabasePoolAcquireMs,
-  DatabasePoolIdleMs
-} from './config';
+import config, { ConfigurationError } from './config';
 import { log } from './logging';
-import { ConfigurationError } from './common';
 
 const modelsDirs = [
   'clients/models',
@@ -19,24 +10,35 @@ const modelsDirs = [
 ];
 
 const initSequelize = () => {
-  if (!DatabaseURI) {
+  const props = {
+    uri: config.database?.uri,
+    queryLogging: config.database?.queryLogging || false,
+    pool: {
+      max: config.database?.pool?.max || 5,
+      min: config.database?.pool?.min || 0,
+      acquireMs: config.database?.pool?.acquireMs || 30000,
+      idleMs: config.database?.pool?.idleMs || 10000
+    }
+  };
+
+  if (!props.uri) {
     throw new ConfigurationError('Database URI needs to be specified');
   }
 
-  return new Sequelize(DatabaseURI, {
+  return new Sequelize(props.uri, {
     dialect: 'postgres',
-    logging: DatabaseQueryLogging ? ((s: string) => log.debug(s)) : false,
+    logging: props.queryLogging ? ((s: string) => log.debug(s)) : false,
     pool: {
-      max: DatabasePoolMax,
-      min: DatabasePoolMin,
-      acquire: DatabasePoolAcquireMs,
-      idle: DatabasePoolIdleMs
+      max: props.pool.max,
+      min: props.pool.min,
+      acquire: props.pool.acquireMs,
+      idle: props.pool.idleMs
     },
     models: modelsDirs.map(dir => path.resolve(__dirname, '..', dir))
   });
 };
 
-const DB = !InTestingMode ? initSequelize() : ({} as Sequelize);
+const DB = !config.testing ? initSequelize() : ({} as Sequelize);
 
 export const testDBConnection = (): Promise<void> => {
   return DB

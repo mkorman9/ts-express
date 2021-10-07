@@ -2,7 +2,7 @@ import { Request, Response, NextFunction, CookieOptions } from 'express';
 import moment from 'moment';
 
 import { SessionContext, findSession, findSessionWithToken } from '../providers/session';
-import { BehindTLSProxy } from '../providers/config';
+import config from '../providers/config';
 
 export type AccountResolver<T> = (context: SessionContext) => Promise<T>;
 
@@ -179,7 +179,7 @@ export const sendSessionCookie = (req: Request, res: Response) => {
   const options: CookieOptions = {
     httpOnly: true,
     sameSite: 'strict',
-    secure: BehindTLSProxy
+    secure: config.server?.behindTLSProxy || false
   };
 
   if (sessionContext) {

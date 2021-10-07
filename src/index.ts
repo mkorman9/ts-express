@@ -1,4 +1,4 @@
-import { Mode, ServerPort, ServerHost } from './providers/config';
+import config from './providers/config';
 import './exception_handler';
 import app from './app';
 import { log } from './providers/logging';
@@ -6,7 +6,7 @@ import { log } from './providers/logging';
 import { testDBConnection } from './providers/db';
 import { testRedisConnection } from './providers/redis';
 
-log.info(`starting up in '${Mode}' mode`);
+log.info(`starting up in '${config.mode}' mode`);
 
 testDBConnection()
   .then(() => {
@@ -26,8 +26,12 @@ testRedisConnection()
     process.exit(1);
   });
 
-const server = app.listen(ServerPort, ServerHost, () => {
-  log.info(`server listening on ${ServerHost}:${ServerPort}`);
+const props = {
+  address: config.server?.address || '0.0.0.0',
+  port: config.server?.port || 5000
+};
+const server = app.listen(props.port, props.address, () => {
+  log.info(`server listening on ${props.address}:${props.port}`);
 });
 
 process.on('SIGINT', () => {
