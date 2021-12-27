@@ -1,10 +1,10 @@
-import config from './providers/config';
+import config from './common/providers/config';
 import './exception_handler';
 import app from './app';
-import { log } from './providers/logging';
+import { log } from './common/providers/logging';
 
-import { testDBConnection } from './providers/db';
-import { testRedisConnection } from './providers/redis';
+import { testDBConnection } from './common/providers/db';
+import { testRedisConnection } from './common/providers/redis';
 
 log.info(`starting up in '${config.mode}' mode`);
 

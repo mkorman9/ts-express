@@ -8,11 +8,11 @@ import authAPI from './accounts/api/auth_api';
 import accountAPI from './accounts/api/account_api';
 import captchaAPI from './captcha/api/captcha_api';
 
-import healthcheck from './middlewares/healthcheck';
-import requestParsingErrors from './middlewares/request_parsing_errors';
-import internalErrors from './middlewares/internal_errors';
-import notFound from './middlewares/not_found';
-import accessLogger from './middlewares/access_logger';
+import healthcheck from './common/middlewares/healthcheck';
+import requestParsingErrors from './common/middlewares/request_parsing_errors';
+import internalErrors from './common/middlewares/internal_errors';
+import notFound from './common/middlewares/not_found';
+import accessLogger from './common/middlewares/access_logger';
 
 const app = express();
 app.set('trust proxy', ['loopback', 'linklocal', 'uniquelocal']);

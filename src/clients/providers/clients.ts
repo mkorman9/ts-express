@@ -3,7 +3,7 @@ import moment, { Moment } from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { Transaction } from 'sequelize';
 
-import DB from '../../providers/db';
+import DB from '../../common/providers/db';
 import Client from '../models/client';
 import CreditCard from '../models/credit_card';
 import ClientChange from '../models/client_change';

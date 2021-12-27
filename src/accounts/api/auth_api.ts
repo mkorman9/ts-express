@@ -11,7 +11,7 @@ import {
 import {
   startSession
 } from '../../session/providers/session';
-import { ratelimiterMiddleware } from '../../providers/rate_limiter';
+import { ratelimiterMiddleware } from '../../common/providers/rate_limiter';
 
 const PasswordAuthRequestValidators = [
   body('email')

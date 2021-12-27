@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import captcha from 'nodejs-captcha';
 import axios from 'axios';
 
-import redisClient from '../../providers/redis';
+import redisClient from '../../common/providers/redis';
 
 export interface GetCaptchaImageProps {
   width: number;

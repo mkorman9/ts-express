@@ -5,8 +5,8 @@ import config, { ConfigurationError } from './config';
 import { log } from './logging';
 
 const modelsDirs = [
-  'clients/models',
-  'accounts/models'
+  './clients/models',
+  './accounts/models'
 ];
 
 const initSequelize = () => {
@@ -34,7 +34,7 @@ const initSequelize = () => {
       acquire: props.pool.acquireMs,
       idle: props.pool.idleMs
     },
-    models: modelsDirs.map(dir => path.resolve(__dirname, '..', dir))
+    models: modelsDirs.map(dir => path.resolve(__dirname, '../..', dir))
   });
 };
 
