@@ -3,14 +3,14 @@ import { body, validationResult } from 'express-validator';
 import moment from 'moment';
 import bcrypt from 'bcrypt';
 
-import { findAccountByCredentialsEmail } from '../providers/accounts_provider';
+import { findAccountByCredentialsEmail } from '../providers/accounts';
 import {
   setSessionContext,
   sendSessionCookie
-} from '../../middlewares/authorization';
+} from '../../session/middlewares/authorization';
 import {
   startSession
-} from '../../providers/session';
+} from '../../session/providers/session';
 import { ratelimiterMiddleware } from '../../providers/rate_limiter';
 
 const PasswordAuthRequestValidators = [

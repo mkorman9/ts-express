@@ -4,9 +4,9 @@ import {
   tokenAuthMiddleware,
   includeSessionAccount,
   getSessionAccount
-} from '../../middlewares/authorization';
+} from '../../session/middlewares/authorization';
 import Account from '../models/account';
-import { findAccountById } from '../providers/accounts_provider';
+import { findAccountById } from '../providers/accounts';
 
 const accountAPI = Router();
 

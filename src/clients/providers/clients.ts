@@ -7,7 +7,7 @@ import DB from '../../providers/db';
 import Client from '../models/client';
 import CreditCard from '../models/credit_card';
 import ClientChange from '../models/client_change';
-import { generateClientChangeset } from './client_changes_helper';
+import { generateClientChangeset } from './clients_changes';
 
 export enum FindClientsSortFields {
   id = 'id',

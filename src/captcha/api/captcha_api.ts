@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 
 import { ratelimiterMiddleware } from '../../providers/rate_limiter';
-import { generateCaptcha, getCaptchaAudio, getCaptchaImage } from '../providers/captcha_provider';
+import { generateCaptcha, getCaptchaAudio, getCaptchaImage } from '../providers/captcha';
 
 const captchaAPI = Router();
 

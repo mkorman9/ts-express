@@ -1,7 +1,7 @@
 import moment, { Moment } from 'moment';
 import { randomBytes } from 'crypto';
 
-import redisClient from './redis';
+import redisClient from '../../providers/redis';
 
 export interface SessionContext {
   id: string;

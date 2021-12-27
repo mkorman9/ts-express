@@ -13,17 +13,17 @@ import {
   updateClient,
   deleteClientById,
   findChangelogForClient
-} from '../providers/clients_provider';
+} from '../providers/clients';
 import Client from '../models/client';
-import { ClientChangeItem } from '../providers/client_changes_helper';
+import { ClientChangeItem } from '../providers/clients_changes';
 import {
   tokenAuthMiddleware,
   requireRoles,
   includeSessionAccount,
   getSessionAccount
-} from '../../middlewares/authorization';
+} from '../../session/middlewares/authorization';
 import Account from '../../accounts/models/account';
-import { findAccountById } from '../../accounts/providers/accounts_provider';
+import { findAccountById } from '../../accounts/providers/accounts';
 
 interface CreditCardView {
   number: string;

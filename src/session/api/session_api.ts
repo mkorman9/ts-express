@@ -7,12 +7,12 @@ import {
   requireAuthentication,
   setSessionContext,
   sendSessionCookie
-} from '../../middlewares/authorization';
+} from '../middlewares/authorization';
 import {
   SessionContext,
   refreshSession,
   revokeSession
-} from '../../providers/session';
+} from '../providers/session';
 
 const sessionAPI = Router();
 

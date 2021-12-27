@@ -2,7 +2,7 @@ import { Request, Response, NextFunction, CookieOptions } from 'express';
 import moment from 'moment';
 
 import { SessionContext, findSession, findSessionWithToken } from '../providers/session';
-import config from '../providers/config';
+import config from '../../providers/config';
 
 export type AccountResolver<T> = (context: SessionContext) => Promise<T>;
 
