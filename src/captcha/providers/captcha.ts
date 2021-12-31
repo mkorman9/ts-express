@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import captcha from 'nodejs-captcha';
+import captchapng3 from 'captchapng3';
 import axios from 'axios';
 
 import redisClient from '../../common/providers/redis';
@@ -37,16 +37,8 @@ export const getCaptchaImage = async (id: string, props: GetCaptchaImageProps): 
     return null;
   }
 
-  const captchaValue = result.toString();
-
-  const captchaObj = captcha({
-    value: captchaValue,
-    length: captchaValue.length,
-    width: props.width,
-    height: props.height
-  });
-  const data = captchaObj.image.replace(/^data:image\/\w+;base64,/, '');
-  return Buffer.from(data, 'base64');
+  const captcha = new captchapng3(props.width, props.height, result.toString(), '#ffffff');
+  return captcha.getBuffer();
 };
 
 export const getCaptchaAudio = async (id: string, props: GetCaptchaAudioProps): Promise<Buffer | null> => {
