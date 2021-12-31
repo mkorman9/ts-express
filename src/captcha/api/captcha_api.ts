@@ -53,7 +53,7 @@ captchaAPI.get(
 
       return res
         .status(200)
-        .contentType('image/jpeg')
+        .contentType('image/png')
         .send(image);
     } catch (err) {
       next(err);
