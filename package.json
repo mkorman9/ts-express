@@ -10,7 +10,7 @@
     "lint": "eslint src/ --ext .ts",
     "compile": "tsc -p tsconfig.json",
     "build": "npm-run-all clean lint compile",
-    "test": "NODE_ENV=testing ts-mocha -p tsconfig.json src/**/*.spec.ts",
+    "test": "ts-mocha",
     "serve": "NODE_ENV=development node --enable-source-maps ./dist",
     "start": "tsc-watch --onSuccess \"npm-run-all lint serve\""
   },
