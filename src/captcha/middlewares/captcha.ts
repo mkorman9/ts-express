@@ -18,10 +18,10 @@ export const captchaMiddleware = (fieldName: string) => {
         .json({
           status: 'error',
           message: 'Missing or malformed captcha answer',
-          causes: {
+          causes: [{
             field: fieldName,
             code: 'captcha'
-          }
+          }]
         });
     }
 
@@ -34,10 +34,10 @@ export const captchaMiddleware = (fieldName: string) => {
           .json({
             status: 'error',
             message: 'Invalid captcha answer',
-            causes: {
+            causes: [{
               field: fieldName,
               code: 'captcha'
-            }
+            }]
           });
       }
     } catch(err) {

@@ -5,7 +5,7 @@ import type { Language } from './templates';
 type MailBackend = (subjects: string[], content: string) => void;
 
 const fakeMailBackend: MailBackend = async (subjects: string[], content: string) => {
-  log.info(`Sending e-mail to ${subjects}: ${content}`);
+  log.info(`Sending fake e-mail to ${subjects}:\n${content}`);
 };
 
 const mailBackend = fakeMailBackend;

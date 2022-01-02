@@ -1,4 +1,7 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
+import { body, validationResult } from 'express-validator';
+import { captchaMiddleware } from '../../captcha/middlewares/captcha';
+import { ratelimiterMiddleware } from '../../common/providers/rate_limiter';
 
 import {
   tokenAuthMiddleware,
@@ -6,7 +9,36 @@ import {
   getSessionAccount
 } from '../../session/middlewares/authorization';
 import Account from '../models/account';
-import { findAccountById } from '../providers/accounts';
+import { addAccount, EmailAlreadyInUseError, findAccountById, UsernameAlreadyInUseError } from '../providers/accounts';
+
+const AccountRegisterValidators = [
+  body('username')
+    .exists().withMessage('required')
+    .bail()
+    .isString().withMessage('format')
+    .bail()
+    .isLength({ min: 3 }).withMessage('lt')
+    .bail()
+    .matches(/^[a-zA-Z\d ]+$/).withMessage('accountname'),
+  body('email')
+    .exists().withMessage('required')
+    .bail()
+    .isString().withMessage('format')
+    .bail()
+    .isEmail().withMessage('email'),
+  body('password')
+    .exists().withMessage('required')
+    .bail()
+    .isString().withMessage('format')
+    .bail()
+    .isLength({ min: 3 }).withMessage('lt'),
+  body('language')
+    .exists().withMessage('required')
+    .bail()
+    .isString().withMessage('format')
+    .bail()
+    .isIn(['en-US', 'pl-PL']).withMessage('oneof')
+];
 
 const accountAPI = Router();
 
@@ -37,6 +69,72 @@ accountAPI.get(
             defined: account.githubCredentials ? true : false
           }
         }
+      });
+  }
+);
+
+accountAPI.post(
+  '/register/password',
+  ratelimiterMiddleware('general'),
+  ...AccountRegisterValidators,
+  captchaMiddleware('captcha'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    const validationErrors = validationResult(req);
+    if (!validationErrors.isEmpty()) {
+      return res
+        .status(400)
+        .json({
+          status: 'error',
+          message: 'Validation error',
+          causes: validationErrors.array().map(e => ({
+            field: e.param,
+            code: e.msg
+          }))
+        });
+    }
+
+    try {
+      await addAccount({
+        username: req.body['username'],
+        email: req.body['email'],
+        password: req.body['password'],
+        language: req.body['language']
+      }, {
+        ip: req.ip
+      });
+    } catch (err) {
+      if (err instanceof UsernameAlreadyInUseError) {
+        return res
+          .status(400)
+          .json({
+            status: 'error',
+            message: 'Validation error',
+            causes: [{
+              field: 'username',
+              code: 'unique'
+            }]
+          });
+      }
+      if (err instanceof EmailAlreadyInUseError) {
+        return res
+          .status(400)
+          .json({
+            status: 'error',
+            message: 'Validation error',
+            causes: [{
+              field: 'email',
+              code: 'unique'
+            }]
+          });
+      }
+
+      return next(err);
+    }
+
+    return res
+      .status(200)
+      .json({
+        status: 'OK'
       });
   }
 );
