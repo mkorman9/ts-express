@@ -22,7 +22,7 @@ const initTedis = () => {
   });
 };
 
-const redisClient = !config.inTestingMode ? initTedis() : ({} as Tedis);
+const redisClient = !config.inTestMode ? initTedis() : ({} as Tedis);
 
 export const testRedisConnection = (): Promise<unknown> => {
   return redisClient.command('PING');

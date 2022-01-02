@@ -8,11 +8,11 @@ export class ConfigurationError extends Error {
 }
 
 const Mode = process.env.NODE_ENV || 'development';
-const InTestingMode = Mode === 'testing';
+const InTestMode = Mode === 'test';
 const ConfigPath = process.env.CONFIG_PATH || './config.yml';
 
 const readConfig = () => {
-  if (InTestingMode) {
+  if (InTestMode) {
     return {};
   }
 
@@ -40,6 +40,6 @@ const readConfig = () => {
 
 export default {
   mode: Mode,
-  inTestingMode: InTestingMode,
+  inTestMode: InTestMode,
   ...readConfig()
 };
