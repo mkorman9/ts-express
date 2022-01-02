@@ -40,6 +40,6 @@ const readConfig = () => {
 
 export default {
   mode: Mode,
-  testing: InTestingMode,
+  inTestingMode: InTestingMode,
   ...readConfig()
 };

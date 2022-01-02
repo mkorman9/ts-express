@@ -38,7 +38,7 @@ const initSequelize = () => {
   });
 };
 
-const DB = !config.testing ? initSequelize() : ({} as Sequelize);
+const DB = !config.inTestingMode ? initSequelize() : ({} as Sequelize);
 
 export const testDBConnection = (): Promise<void> => {
   return DB
