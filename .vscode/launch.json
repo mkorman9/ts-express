@@ -23,15 +23,6 @@
             "type": "pwa-node",
             "request": "launch",
             "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/ts-mocha",
-            "runtimeArgs": [
-              "-p",
-              "tsconfig.json",
-              "src/**/*.spec.ts"
-            ],
-            "env": {
-              "NODE_ENV": "testing",
-              "TZ": "UTC"
-            },
             "cwd": "${workspaceFolder}",
             "protocol": "inspector",
             "outputCapture": "std"

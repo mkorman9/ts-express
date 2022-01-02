@@ -11,7 +11,7 @@
     "compile": "tsc -p tsconfig.json",
     "build": "npm-run-all clean lint compile",
     "test": "ts-mocha",
-    "serve": "NODE_ENV=development node --enable-source-maps ./dist",
+    "serve": "node --enable-source-maps ./dist",
     "start": "tsc-watch --onSuccess \"npm-run-all lint serve\""
   },
   "dependencies": {
