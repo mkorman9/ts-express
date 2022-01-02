@@ -16,7 +16,6 @@ USER app
 RUN yarn install --production && \
     yarn cache clean
 
-ENV TZ UTC
 ENV NODE_ENV production
 
 CMD exec node --enable-source-maps ./dist
