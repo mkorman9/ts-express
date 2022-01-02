@@ -24,9 +24,8 @@ const initTedis = () => {
 
 const redisClient = !config.testing ? initTedis() : ({} as Tedis);
 
-export const testRedisConnection = (): Promise<void> => {
-  return redisClient.command('PING')
-    .then(() => {});
+export const testRedisConnection = (): Promise<unknown> => {
+  return redisClient.command('PING');
 };
 
 export default redisClient;

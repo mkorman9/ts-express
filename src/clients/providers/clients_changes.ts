@@ -39,7 +39,7 @@ export const generateClientChangeset = (oldData: ClientDescriptor, newData: Clie
     creditCards: (newData.creditCards || []).map(cc => cc.number).sort().join(',')
   };
 
-  let ret: ClientChangeItem[] = [];
+  const ret: ClientChangeItem[] = [];
 
   if (oldDataPayload.gender !== newDataPayload.gender) {
     ret.push({

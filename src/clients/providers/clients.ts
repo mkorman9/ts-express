@@ -91,99 +91,95 @@ export const findClientsPaged = async (opts?: FindClientsPagedOptions): Promise<
     filters: opts.filters || {}
   };
 
-  try {
-    let filters: WhereAttributeHash<any>[] = [];
+  const filters: WhereAttributeHash<unknown>[] = [];
 
-    if (options.filters.gender) {
-      filters.push({
-        gender: options.filters.gender
-      });
-    }
-    if (options.filters.firstName) {
-      filters.push({
-        firstName: {
-          [Op.iLike]: `%${options.filters.firstName}%`
-        }
-      });
-    }
-    if (options.filters.lastName) {
-      filters.push({
-        lastName: {
-          [Op.iLike]: `%${options.filters.lastName}%`
-        }
-      });
-    }
-    if (options.filters.address) {
-      filters.push({
-        address: {
-          [Op.iLike]: `%${options.filters.address}%`
-        }
-      });
-    }
-    if (options.filters.phoneNumber) {
-      filters.push({
-        phoneNumber: {
-          [Op.iLike]: `%${options.filters.phoneNumber}%`
-        }
-      });
-    }
-    if (options.filters.email) {
-      filters.push({
-        email: {
-          [Op.iLike]: `%${options.filters.email}%`
-        }
-      });
-    }
-    if (options.filters.bornAfter) {
-      filters.push({
-        birthDate: {
-          [Op.gte]: options.filters.bornAfter.toDate()
-        }
-      });
-    }
-    if (options.filters.bornBefore) {
-      filters.push({
-        birthDate: {
-          [Op.lte]: options.filters.bornBefore.toDate()
-        }
-      });
-    }
-    if (options.filters.creditCardNumber) {
-      const clientWithCreditCard = await CreditCard.findAll({
-        where: {
-          number: {
-            [Op.like]: `%${options.filters.creditCardNumber}%`
-          }
-        }
-      });
-
-      filters.push({
-        id: {
-          [Op.in]: clientWithCreditCard.map(cc => cc.clientId)
-        }
-      });
-    }
-
-    return await Client.findAndCountAll({
-      limit: options.pageSize,
-      offset: options.pageSize * options.pageNumber,
-      where: {
-        [Op.and]: [{
-          isDeleted: false
-        }, {
-          [Op.and]: [...filters]
-        }]
-      },
-      order: [
-        [options.sortBy, options.sortReverse ? 'DESC' : 'ASC']
-      ],
-      include: [
-        CreditCard
-      ]
+  if (options.filters.gender) {
+    filters.push({
+      gender: options.filters.gender
     });
-  } catch (err) {
-    throw err;
   }
+  if (options.filters.firstName) {
+    filters.push({
+      firstName: {
+        [Op.iLike]: `%${options.filters.firstName}%`
+      }
+    });
+  }
+  if (options.filters.lastName) {
+    filters.push({
+      lastName: {
+        [Op.iLike]: `%${options.filters.lastName}%`
+      }
+    });
+  }
+  if (options.filters.address) {
+    filters.push({
+      address: {
+        [Op.iLike]: `%${options.filters.address}%`
+      }
+    });
+  }
+  if (options.filters.phoneNumber) {
+    filters.push({
+      phoneNumber: {
+        [Op.iLike]: `%${options.filters.phoneNumber}%`
+      }
+    });
+  }
+  if (options.filters.email) {
+    filters.push({
+      email: {
+        [Op.iLike]: `%${options.filters.email}%`
+      }
+    });
+  }
+  if (options.filters.bornAfter) {
+    filters.push({
+      birthDate: {
+        [Op.gte]: options.filters.bornAfter.toDate()
+      }
+    });
+  }
+  if (options.filters.bornBefore) {
+    filters.push({
+      birthDate: {
+        [Op.lte]: options.filters.bornBefore.toDate()
+      }
+    });
+  }
+  if (options.filters.creditCardNumber) {
+    const clientWithCreditCard = await CreditCard.findAll({
+      where: {
+        number: {
+          [Op.like]: `%${options.filters.creditCardNumber}%`
+        }
+      }
+    });
+
+    filters.push({
+      id: {
+        [Op.in]: clientWithCreditCard.map(cc => cc.clientId)
+      }
+    });
+  }
+
+  return await Client.findAndCountAll({
+    limit: options.pageSize,
+    offset: options.pageSize * options.pageNumber,
+    where: {
+      [Op.and]: [{
+        isDeleted: false
+      }, {
+        [Op.and]: [...filters]
+      }]
+    },
+    order: [
+      [options.sortBy, options.sortReverse ? 'DESC' : 'ASC']
+    ],
+    include: [
+      CreditCard
+    ]
+  });
 };
 
 export const findClientById = async (id: string, findOptions?: FindClientByIdOptions): Promise<Client | null> => {
@@ -191,7 +187,7 @@ export const findClientById = async (id: string, findOptions?: FindClientByIdOpt
     includeDeleted: (findOptions?.includeDeleted === undefined) ? false : (findOptions?.includeDeleted === true)
   };
 
-  let filters = {};
+  const filters = {};
   if (!options.includeDeleted) {
     filters['isDeleted'] = {
       [Op.ne]: true
@@ -220,48 +216,44 @@ export const findClientById = async (id: string, findOptions?: FindClientByIdOpt
 };
 
 export const addClient = async (clientPayload: ClientAddPayload, props: AddClientProps): Promise<Client> => {
-  try {
-    const id = uuidv4();
+  const id = uuidv4();
 
-    return await DB.transaction(async (t: Transaction) => {
-      const client = await Client.create({
-        id: id,
-        gender: clientPayload.gender || '-',
-        firstName: clientPayload.firstName,
-        lastName: clientPayload.lastName,
-        address: clientPayload.address || '',
-        phoneNumber: clientPayload.phoneNumber || '',
-        email: clientPayload.email || '',
-        birthDate: clientPayload.birthDate || null,
-        isDeleted: false,
-        creditCards: clientPayload.creditCards.map(cc => ({
-          clientId: id,
-          number: cc.number
-        }))
-      }, {
-        include: [
-          CreditCard
-        ],
-        transaction: t
-      });
-
-      const changeset = generateClientChangeset({}, client);
-      await ClientChange.create({
-        id: uuidv4(),
+  return await DB.transaction(async (t: Transaction) => {
+    const client = await Client.create({
+      id: id,
+      gender: clientPayload.gender || '-',
+      firstName: clientPayload.firstName,
+      lastName: clientPayload.lastName,
+      address: clientPayload.address || '',
+      phoneNumber: clientPayload.phoneNumber || '',
+      email: clientPayload.email || '',
+      birthDate: clientPayload.birthDate || null,
+      isDeleted: false,
+      creditCards: clientPayload.creditCards.map(cc => ({
         clientId: id,
-        type: 'CREATED',
-        timestamp: moment(),
-        author: props.author,
-        changeset: JSON.stringify(changeset)
-      }, {
-        transaction: t
-      });
-
-      return client;
+        number: cc.number
+      }))
+    }, {
+      include: [
+        CreditCard
+      ],
+      transaction: t
     });
-  } catch (err) {
-    throw err;
-  }
+
+    const changeset = generateClientChangeset({}, client);
+    await ClientChange.create({
+      id: uuidv4(),
+      clientId: id,
+      type: 'CREATED',
+      timestamp: moment(),
+      author: props.author,
+      changeset: JSON.stringify(changeset)
+    }, {
+      transaction: t
+    });
+
+    return client;
+  });
 };
 
 export const updateClient = async (id: string, clientPayload: ClientUpdatePayload, props: UpdateClientProps): Promise<boolean> => {

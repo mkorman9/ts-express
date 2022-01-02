@@ -19,7 +19,7 @@ const sessionAPI = Router();
 sessionAPI.get(
   '/token',
   cookieAuthMiddleware(),
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response) => {
     const sessionContext = getSessionContext(req);
     if (!sessionContext) {
       return res

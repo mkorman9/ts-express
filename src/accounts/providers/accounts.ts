@@ -26,31 +26,27 @@ export const findAccountById = async (id: string): Promise<Account | null> => {
 };
 
 export const findAccountByCredentialsEmail = async (email: string): Promise<Account | null> => {
-  try {
-    const credentials = await PasswordCredentials.findOne({
-      where: {
-        email: email
-      },
-      include: [
-        Account
-      ]
-    });
+  const credentials = await PasswordCredentials.findOne({
+    where: {
+      email: email
+    },
+    include: [
+      Account
+    ]
+  });
 
-    if (!credentials) {
-      return null;
-    }
-
-    return await Account.findOne({
-      where: {
-        id: credentials.accountId,
-        isDeleted: false
-      },
-      include: [
-        PasswordCredentials,
-        GithubCredentials
-      ]
-    });
-  } catch (err) {
-    throw err;
+  if (!credentials) {
+    return null;
   }
+
+  return await Account.findOne({
+    where: {
+      id: credentials.accountId,
+      isDeleted: false
+    },
+    include: [
+      PasswordCredentials,
+      GithubCredentials
+    ]
+  });
 };

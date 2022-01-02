@@ -42,8 +42,7 @@ const DB = !config.testing ? initSequelize() : ({} as Sequelize);
 
 export const testDBConnection = (): Promise<void> => {
   return DB
-    .authenticate()
-    .then(() => {});
+    .authenticate();
 };
 
 export default DB;

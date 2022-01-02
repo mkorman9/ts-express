@@ -130,7 +130,7 @@ const buildSessionContext = (sessionData: {[prop: string]: string}): SessionCont
 };
 
 const serializeSessionContext = (sessionContext: SessionContext): {[prop: string]: string} => {
-  let d = {
+  const d = {
     id: sessionContext.id,
     issuedAt: sessionContext.issuedAt.unix().toString(),
     duration: sessionContext.duration.toString(),

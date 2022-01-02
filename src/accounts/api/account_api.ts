@@ -1,4 +1,4 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, Request, Response } from 'express';
 
 import {
   tokenAuthMiddleware,
@@ -14,7 +14,7 @@ accountAPI.get(
   '/info',
   tokenAuthMiddleware(),
   includeSessionAccount(ctx => findAccountById(ctx.subject)),
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response) => {
     const account = getSessionAccount<Account>(req);
 
     return res

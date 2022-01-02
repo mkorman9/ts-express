@@ -168,7 +168,7 @@ clientsAPI.get(
       }
     }
 
-    let sortReverse = 'sortReverse' in req.query;
+    const sortReverse = 'sortReverse' in req.query;
 
     let filters: FindClientsFilters = {};
     try {
@@ -482,13 +482,13 @@ class ClientsFiltersParsingError extends Error {
   }
 }
 
-const parseClientsFilters = (query: {}): FindClientsFilters => {
+const parseClientsFilters = (query: unknown): FindClientsFilters => {
   const queryFilters = query['filter'];
   if (!queryFilters) {
     return {};
   }
 
-  let ret: FindClientsFilters = {};
+  const ret: FindClientsFilters = {};
 
   Object.keys(queryFilters).forEach(k => {
     let value = queryFilters[k];
@@ -517,6 +517,7 @@ const parseClientsFilters = (query: {}): FindClientsFilters => {
       try {
         dt = moment(value, true);
       } catch (err) {
+        // ignore
       }
 
       if (!dt || !dt.isValid()) {
@@ -529,6 +530,7 @@ const parseClientsFilters = (query: {}): FindClientsFilters => {
       try {
         dt = moment(value, true);
       } catch (err) {
+        // ignore
       }
 
       if (!dt || !dt.isValid()) {
