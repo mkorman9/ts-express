@@ -8,7 +8,7 @@
   "scripts": {
     "clean": "rimraf dist/*",
     "lint": "eslint src/ --ext .ts",
-    "compile": "tsc -p tsconfig.json",
+    "compile": "tsc",
     "build": "npm-run-all clean lint compile",
     "test": "ts-mocha",
     "serve": "node --enable-source-maps ./dist",
