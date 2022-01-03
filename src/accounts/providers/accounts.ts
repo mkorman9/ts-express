@@ -107,7 +107,7 @@ export const addAccount = async (payload: AccountAddPayload, props: AccountAddPr
         transaction: t
       });
 
-      await sendMail([payload.email], 'new_account.twing', payload.language as Language, {
+      await sendMail([payload.email], 'new_account.twig', payload.language as Language, {
         subject: payload.username,
         url: buildExternalEndpointPath(`/account/activate/${account.id}`)
       });
