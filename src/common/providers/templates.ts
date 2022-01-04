@@ -15,5 +15,14 @@ export const resolveTemplate = async (name: string, language: Language, props: u
 };
 
 export const buildExternalEndpointPath = (endpoint: string): string => {
+  let url = externalUrl;
+  if (url.endsWith('/')) {
+    url = url.slice(0, url.length - 1);
+  }
+
+  if (!endpoint.startsWith('/')) {
+    endpoint = '/' + endpoint;
+  }
+
   return `${externalUrl}${endpoint}`;
 };
