@@ -22,9 +22,14 @@
             "name": "test",
             "type": "pwa-node",
             "request": "launch",
-            "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/ts-mocha",
+            "runtimeExecutable": "yarn",
+            "runtimeArgs": [
+                "test"
+            ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
             "cwd": "${workspaceFolder}",
-            "protocol": "inspector",
             "outputCapture": "std"
         },
         {
