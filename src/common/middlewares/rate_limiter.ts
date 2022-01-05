@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import onHeaders from 'on-headers';
 
-import { log } from './logging';
-import redisClient from './redis';
-import config from './config';
+import { log } from '../providers/logging';
+import redisClient from '../providers/redis';
+import config from '../providers/config';
 
 export interface RatelimiterMiddlewareProps {
   countStatusCodes?: number[];
