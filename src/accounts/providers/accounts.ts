@@ -127,3 +127,18 @@ export const addAccount = async (payload: AccountAddPayload, props: AccountAddPr
     throw err;
   }
 };
+
+export const activateAccount = async (account: Account): Promise<boolean> => {
+  if (account.isActive) {
+    return false;
+  }
+
+  if (!account.passwordCredentials) {
+    return false;
+  }
+
+  account.isActive = true;
+  await account.save();
+
+  return true;
+};

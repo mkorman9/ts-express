@@ -9,7 +9,7 @@ import {
   getSessionAccount
 } from '../../session/middlewares/authorization';
 import Account from '../models/account';
-import { addAccount, EmailAlreadyInUseError, findAccountById, UsernameAlreadyInUseError } from '../providers/accounts';
+import { activateAccount, addAccount, EmailAlreadyInUseError, findAccountById, UsernameAlreadyInUseError } from '../providers/accounts';
 
 const AccountRegisterValidators = [
   body('username')
@@ -38,6 +38,13 @@ const AccountRegisterValidators = [
     .isString().withMessage('format')
     .bail()
     .isIn(['en-US', 'pl-PL']).withMessage('oneof')
+];
+
+const AccountActivateValidators = [
+  body('accountID')
+    .exists().withMessage('required')
+    .bail()
+    .isString().withMessage('format')
 ];
 
 const accountAPI = Router();
@@ -136,6 +143,65 @@ accountAPI.post(
       .json({
         status: 'OK'
       });
+  }
+);
+
+accountAPI.post(
+  '/activate',
+  ratelimiterMiddleware('general', { countStatusCodes: [400] }),
+  ...AccountActivateValidators,
+  async (req: Request, res: Response, next: NextFunction) => {
+    const validationErrors = validationResult(req);
+    if (!validationErrors.isEmpty()) {
+      return res
+        .status(400)
+        .json({
+          status: 'error',
+          message: 'Validation error',
+          causes: validationErrors.array().map(e => ({
+            field: e.param,
+            code: e.msg
+          }))
+        });
+    }
+
+    try {
+      const account = await findAccountById(req.body['accountID']);
+      if (!account) {
+        return res
+          .status(400)
+          .json({
+            status: 'error',
+            message: 'Account does not exist',
+            causes: [{
+              field: 'account',
+              code: 'invalid'
+            }]
+          });
+      }
+
+      const ok = await activateAccount(account);
+      if (!ok) {
+        return res
+          .status(400)
+          .json({
+            status: 'error',
+            message: 'Invalid account type',
+            causes: [{
+              field: 'account',
+              code: 'invalid'
+            }]
+          });
+      }
+
+      return res
+        .status(200)
+        .json({
+          status: 'OK'
+        });
+    } catch (err) {
+      next(err);
+    }
   }
 );
 
