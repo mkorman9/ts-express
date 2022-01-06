@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { body, validationResult } from 'express-validator';
 import moment, { Moment } from 'moment';
+import ws from 'ws';
 
 import {
   findClientsPaged,
@@ -24,6 +25,7 @@ import {
 } from '../../session/middlewares/authorization';
 import Account from '../../accounts/models/account';
 import { findAccountById } from '../../accounts/providers/accounts';
+import { log } from '../../common/providers/logging';
 
 interface CreditCardView {
   number: string;
@@ -468,6 +470,17 @@ clientsAPI.get(
     } catch (err) {
       next(err);
     }
+  }
+);
+
+clientsAPI.ws(
+  '/events',
+  async (ws: ws) => {
+    log.info('client connected to websocket');
+
+    ws.on('close', () => {
+      log.info('client disconnected from websocket');
+    });
   }
 );
 

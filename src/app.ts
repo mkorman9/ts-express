@@ -1,4 +1,8 @@
 import express, { Router } from 'express';
+import expressWs from 'express-ws';
+
+export const appWs = expressWs(express());
+
 import cookieParser from 'cookie-parser';
 import prometheusMiddleware from 'express-prometheus-middleware';
 
@@ -14,7 +18,8 @@ import internalErrors from './common/middlewares/internal_errors';
 import notFound from './common/middlewares/not_found';
 import accessLogger from './common/middlewares/access_logger';
 
-const app = express();
+const app = appWs.app;
+
 app.set('trust proxy', ['loopback', 'linklocal', 'uniquelocal']);
 app.disable('x-powered-by');
 app.disable('etag');
