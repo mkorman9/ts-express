@@ -27,6 +27,7 @@ import Account from '../../accounts/models/account';
 import { findAccountById } from '../../accounts/providers/accounts';
 import { log } from '../../common/providers/logging';
 import { addSubscriber, removeSubscriber } from '../listeners/subscribers_store';
+import { publishMessage } from '../../common/providers/redis';
 
 interface CreditCardView {
   number: string;
@@ -311,6 +312,9 @@ clientsAPI.post(
 
     try {
       const client = await addClient(clientPayload, { author: account.id });
+
+      await publishMessage('clients_events', { event: 'added', id: client.id, author: account.id });
+
       return res
         .status(200)
         .json({
@@ -381,6 +385,8 @@ clientsAPI.put(
           });
       }
 
+      await publishMessage('clients_events', { event: 'modified', id: req.params['id'], author: account.id });
+
       return res
         .status(200)
         .json({
@@ -422,6 +428,8 @@ clientsAPI.delete(
             message: 'Client not found'
           });
       }
+
+      await publishMessage('clients_events', { event: 'deleted', id: req.params['id'], author: account.id });
 
       return res
         .status(200)

@@ -30,6 +30,10 @@ export const initRedis = (): Promise<void> => {
 };
 
 export const subscribeChannel = async <M = unknown>(patterns: string | string[], listener: (data: unknown, channel: string) => void, parser: (s: string) => M = JSON.parse): Promise<() => void> => {
+  if (config.inTestMode) {
+    return;
+  }
+
   const subClient = redisClient.duplicate();
   await subClient.connect();
 
@@ -43,6 +47,10 @@ export const subscribeChannel = async <M = unknown>(patterns: string | string[],
 };
 
 export const publishMessage = async <M = unknown>(channel: string, data: M, parser: (m: M) => string = JSON.stringify) => {
+  if (config.inTestMode) {
+    return;
+  }
+
   await redisClient.PUBLISH(channel, parser(data));
 };
 

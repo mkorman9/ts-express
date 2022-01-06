@@ -15,5 +15,5 @@ export const removeSubscriber = (id: string) => {
 
 export const listSubscribers = (): ws[] => {
   return Array.from(globalStore.values())
-    .filter(socket => socket.readyState === WebSocket.OPEN);
+    .filter(socket => socket.readyState === ws.OPEN);
 };

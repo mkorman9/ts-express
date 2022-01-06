@@ -18,6 +18,8 @@ import internalErrors from './common/middlewares/internal_errors';
 import notFound from './common/middlewares/not_found';
 import accessLogger from './common/middlewares/access_logger';
 
+import './clients/listeners/clients_events_listener';
+
 const app = appWs.app;
 
 app.set('trust proxy', ['loopback', 'linklocal', 'uniquelocal']);
