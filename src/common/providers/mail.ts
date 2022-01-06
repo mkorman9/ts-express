@@ -8,7 +8,7 @@ interface MailProps {
   props?: unknown;
 }
 
-type MailBackend = (subjects: string[], props: MailProps) => void;
+type MailBackend = (subjects: string[], props: MailProps) => Promise<void>;
 
 const fakeMailBackend: MailBackend = async (subjects: string[], props: MailProps) => {
   const content = await resolveTemplate(props.template, props.language, props.props);
