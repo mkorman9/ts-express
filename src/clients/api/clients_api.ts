@@ -26,6 +26,7 @@ import {
 import Account from '../../accounts/models/account';
 import { findAccountById } from '../../accounts/providers/accounts';
 import { log } from '../../common/providers/logging';
+import { addSubscriber, removeSubscriber } from '../listeners/subscribers_store';
 
 interface CreditCardView {
   number: string;
@@ -477,9 +478,11 @@ clientsAPI.ws(
   '/events',
   async (ws: ws) => {
     log.info('client connected to websocket');
+    const subsriptionId = addSubscriber(ws);
 
     ws.on('close', () => {
       log.info('client disconnected from websocket');
+      removeSubscriber(subsriptionId);
     });
   }
 );
