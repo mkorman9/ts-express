@@ -1,7 +1,7 @@
 import express, { Router } from 'express';
 import expressWs from 'express-ws';
 
-export const appWs = expressWs(express());
+const appWs = expressWs(express());
 
 import cookieParser from 'cookie-parser';
 import prometheusMiddleware from 'express-prometheus-middleware';
