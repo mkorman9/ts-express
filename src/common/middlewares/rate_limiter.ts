@@ -44,7 +44,7 @@ export const ratelimiterMiddleware = (bucketName: string, props?: RatelimiterMid
     const key = `${RatelimiterRedisPrefix}:${bucketName}:${req.ip}`;
 
     try {
-      let requestsCount = await redisClient.get(key);
+      let requestsCount = parseInt(await redisClient.GET(key));
       if (!requestsCount) {
         requestsCount = 0;
       }
@@ -59,7 +59,7 @@ export const ratelimiterMiddleware = (bucketName: string, props?: RatelimiterMid
       }
 
       if (requestsCount === 0) {
-        await redisClient.setex(key, config.timeWindow, '0');
+        await redisClient.SETEX(key, config.timeWindow, '0');
       }
     } catch (err) {
       return next(err);

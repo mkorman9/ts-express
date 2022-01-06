@@ -1,32 +1,37 @@
-import { Tedis } from 'tedis';
+import { createClient, RedisClientType } from 'redis';
+import NRP from 'node-redis-pubsub';
 
 import config, { ConfigurationError } from './config';
 
-const initTedis = () => {
+const initRedis = () => {
   const props = {
-    host: config.redis?.host,
-    port: config.redis?.port || 6379,
+    url: config.redis?.url,
     password: config.redis?.password,
     tls: config.redis?.tls || false
   };
 
-  if (!props.host) {
+  if (!props.url) {
     throw new ConfigurationError('Redis host needs to be specified');
   }
 
-  return new Tedis({
-    host: props.host,
-    port: props.port,
+  return createClient({
+    url: props.url,
     password: props.password,
-    tls: props.tls ? ({ key: undefined, cert: undefined }) : undefined
+    socket: {
+      tls: props.tls
+    }
   });
 };
 
-const redisClient = !config.inTestMode ? initTedis() : ({} as Tedis);
+const redisClient = !config.inTestMode ? initRedis() : ({} as RedisClientType);
+
+export const redisPubsub = new NRP({
+  emitter: redisClient,
+  receiver: redisClient
+});
 
 export const testRedisConnection = (): Promise<void> => {
-  return redisClient
-    .command('PING');
+  return redisClient.connect();
 };
 
 export default redisClient;

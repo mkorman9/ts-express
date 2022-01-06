@@ -26,7 +26,7 @@ export const generateCaptcha = async (): Promise<string> => {
     captchaValue += CaptchaCharset[Math.floor(Math.random() * CaptchaCharset.length)];
   }
 
-  await redisClient.setex(`${CaptchaRedisPrefix}:${id}`, CaptchaExpirationSeconds, captchaValue);
+  await redisClient.SETEX(`${CaptchaRedisPrefix}:${id}`, CaptchaExpirationSeconds, captchaValue);
 
   return id;
 };

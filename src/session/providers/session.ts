@@ -30,7 +30,7 @@ const SessionIdLength = 48;
 const SessionTokenLength = 48;
 
 export const findSession = async (subject: string, sessionId: string): Promise<SessionContext | null> => {
-  const sessionData = await redisClient.hgetall(`${SessionRedisKeyPrefix}:${subject}:${sessionId}`);
+  const sessionData = await redisClient.HGETALL(`${SessionRedisKeyPrefix}:${subject}:${sessionId}`);
   if (Object.keys(sessionData).length === 0) {
     return null;
   }
@@ -39,12 +39,12 @@ export const findSession = async (subject: string, sessionId: string): Promise<S
 };
 
 export const findSessionWithToken = async (token: string): Promise<SessionContext | null> => {
-  const sessionKey = await redisClient.get(`${TokenRedisKeyPrefix}:${token}`);
+  const sessionKey = await redisClient.GET(`${TokenRedisKeyPrefix}:${token}`);
   if (!sessionKey) {
     return null;
   }
 
-  const sessionData = await redisClient.hgetall(`${SessionRedisKeyPrefix}:${sessionKey.toString()}`);
+  const sessionData = await redisClient.HGETALL(`${SessionRedisKeyPrefix}:${sessionKey.toString()}`);
   if (Object.keys(sessionData).length === 0) {
     return null;
   }
@@ -70,12 +70,12 @@ export const startSession = async (subject: string, props: NewSessionProps = {})
   const sessionKey = `${SessionRedisKeyPrefix}:${subject}:${sessionContext.id}`;
   const tokenKey = `${TokenRedisKeyPrefix}:${sessionContext.raw}`;
 
-  await redisClient.hmset(sessionKey, sessionData);
-  await redisClient.set(tokenKey, `${subject}:${sessionContext.id}`);
+  await redisClient.HSET(sessionKey, sessionData);
+  await redisClient.SET(tokenKey, `${subject}:${sessionContext.id}`);
 
   if (props.duration && props.duration > 0) {
-    await redisClient.expire(sessionKey, props.duration);
-    await redisClient.expire(tokenKey, props.duration);
+    await redisClient.EXPIRE(sessionKey, props.duration);
+    await redisClient.EXPIRE(tokenKey, props.duration);
   }
 
   return sessionContext;
@@ -85,8 +85,8 @@ export const revokeSession = async (sessionContext: SessionContext): Promise<boo
   const sessionKey = `${SessionRedisKeyPrefix}:${sessionContext.subject}:${sessionContext.id}`;
   const tokenKey = `${TokenRedisKeyPrefix}:${sessionContext.raw}`;
 
-  const deleted = await redisClient.del(sessionKey);
-  await redisClient.del(tokenKey);
+  const deleted = await redisClient.DEL(sessionKey);
+  await redisClient.DEL(tokenKey);
 
   return deleted > 0;
 };
@@ -101,15 +101,15 @@ export const refreshSession = async (sessionContext: SessionContext): Promise<Se
   const sessionKey = `${SessionRedisKeyPrefix}:${sessionContext.subject}:${sessionContext.id}`;
   const tokenKey = `${TokenRedisKeyPrefix}:${sessionContext.raw}`;
 
-  await redisClient.del(sessionKey);
-  await redisClient.del(tokenKey);
+  await redisClient.DEL(sessionKey);
+  await redisClient.DEL(tokenKey);
 
   const sessionData = serializeSessionContext(sessionContext);
-  await redisClient.hmset(sessionKey, sessionData);
-  await redisClient.set(tokenKey, `${sessionContext.subject}:${sessionContext.id}`);
+  await redisClient.HSET(sessionKey, sessionData);
+  await redisClient.SET(tokenKey, `${sessionContext.subject}:${sessionContext.id}`);
 
-  await redisClient.expire(sessionKey, sessionContext.duration);
-  await redisClient.expire(tokenKey, sessionContext.duration);
+  await redisClient.EXPIRE(sessionKey, sessionContext.duration);
+  await redisClient.EXPIRE(tokenKey, sessionContext.duration);
 
   return sessionContext;
 };
