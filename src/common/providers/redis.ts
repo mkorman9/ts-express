@@ -1,5 +1,4 @@
 import { createClient, RedisClientType } from 'redis';
-import NRP from 'node-redis-pubsub';
 
 import config, { ConfigurationError } from './config';
 
@@ -25,13 +24,21 @@ const initRedis = () => {
 
 const redisClient = !config.inTestMode ? initRedis() : ({} as RedisClientType);
 
-export const redisPubsub = new NRP({
-  emitter: redisClient,
-  receiver: redisClient
-});
-
 export const testRedisConnection = (): Promise<void> => {
   return redisClient.connect();
+};
+
+export const subscribeChannel = async <M = unknown>(patterns: string | string[], listener: (data: unknown, channel: string) => void, parser: (s: string) => M = JSON.parse) => {
+  const subClient = redisClient.duplicate();
+  await subClient.connect();
+
+  await subClient.pSubscribe(patterns, (data, channel) => {
+    listener(parser(data), channel);
+  });
+};
+
+export const publishMessage = async <M = unknown>(channel: string, data: M, parser: (m: M) => string = JSON.stringify) => {
+  await redisClient.PUBLISH(channel, parser(data));
 };
 
 export default redisClient;
