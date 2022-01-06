@@ -40,7 +40,7 @@ const initSequelize = () => {
 
 const DB = !config.inTestMode ? initSequelize() : ({} as Sequelize);
 
-export const testDBConnection = (): Promise<void> => {
+export const initDB = (): Promise<void> => {
   return DB
     .authenticate();
 };

@@ -3,12 +3,12 @@ import './exception_handler';
 import app from './app';
 import { log } from './common/providers/logging';
 
-import { testDBConnection } from './common/providers/db';
-import { testRedisConnection } from './common/providers/redis';
+import { initDB } from './common/providers/db';
+import { initRedis } from './common/providers/redis';
 
 log.info(`starting up in '${config.mode}' mode`);
 
-testDBConnection()
+initDB()
   .then(() => {
     log.info('successfully connected to postgres');
   })
@@ -17,7 +17,7 @@ testDBConnection()
     process.exit(1);
   });
 
-testRedisConnection()
+initRedis()
   .then(() => {
     log.info('successfully connected to redis');
   })

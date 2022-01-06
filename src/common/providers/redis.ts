@@ -2,19 +2,19 @@ import { createClient, RedisClientType } from 'redis';
 
 import config, { ConfigurationError } from './config';
 
-const initRedis = () => {
+const createRedisClient = () => {
   const props = {
-    url: config.redis?.url,
+    uri: config.redis?.uri,
     password: config.redis?.password,
     tls: config.redis?.tls || false
   };
 
-  if (!props.url) {
-    throw new ConfigurationError('Redis host needs to be specified');
+  if (!props.uri) {
+    throw new ConfigurationError('Redis URI needs to be specified');
   }
 
   return createClient({
-    url: props.url,
+    url: props.uri,
     password: props.password,
     socket: {
       tls: props.tls
@@ -22,10 +22,11 @@ const initRedis = () => {
   });
 };
 
-const redisClient = !config.inTestMode ? initRedis() : ({} as RedisClientType);
+const redisClient = !config.inTestMode ? createRedisClient() : ({} as RedisClientType);
 
-export const testRedisConnection = (): Promise<void> => {
-  return redisClient.connect();
+export const initRedis = (): Promise<void> => {
+  return redisClient
+    .connect();
 };
 
 export const subscribeChannel = async <M = unknown>(patterns: string | string[], listener: (data: unknown, channel: string) => void, parser: (s: string) => M = JSON.parse) => {
