@@ -478,11 +478,11 @@ clientsAPI.ws(
   '/events',
   async (ws: ws) => {
     log.info('client connected to websocket');
-    const subsriptionId = addSubscriber(ws);
+    const subscriptionId = addSubscriber(ws);
 
     ws.on('close', () => {
       log.info('client disconnected from websocket');
-      removeSubscriber(subsriptionId);
+      removeSubscriber(subscriptionId);
     });
   }
 );
