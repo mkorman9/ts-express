@@ -29,13 +29,17 @@ export const initRedis = (): Promise<void> => {
     .connect();
 };
 
-export const subscribeChannel = async <M = unknown>(patterns: string | string[], listener: (data: unknown, channel: string) => void, parser: (s: string) => M = JSON.parse) => {
+export const subscribeChannel = async <M = unknown>(patterns: string | string[], listener: (data: unknown, channel: string) => void, parser: (s: string) => M = JSON.parse): Promise<() => void> => {
   const subClient = redisClient.duplicate();
   await subClient.connect();
 
   await subClient.pSubscribe(patterns, (data, channel) => {
     listener(parser(data), channel);
   });
+
+  return async () => {
+    await subClient.pUnsubscribe(patterns);
+  };
 };
 
 export const publishMessage = async <M = unknown>(channel: string, data: M, parser: (m: M) => string = JSON.stringify) => {
