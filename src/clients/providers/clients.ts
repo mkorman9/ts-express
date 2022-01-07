@@ -8,6 +8,7 @@ import Client from '../models/client';
 import CreditCard from '../models/credit_card';
 import ClientChange from '../models/client_change';
 import { generateClientChangeset } from './clients_changes';
+import { publishMessage } from '../../common/providers/redis';
 
 export enum FindClientsSortFields {
   id = 'id',
@@ -252,6 +253,8 @@ export const addClient = async (clientPayload: ClientAddPayload, props: AddClien
       transaction: t
     });
 
+    await publishMessage('clients_events', { event: 'added', id: client.id, author: props.author });
+
     return client;
   });
 };
@@ -345,6 +348,8 @@ export const updateClient = async (id: string, clientPayload: ClientUpdatePayloa
         transaction: t
       });
 
+      await publishMessage('clients_events', { event: 'modified', id: id, author: props.author });
+
       return true;
     });
   } catch (err) {
@@ -389,6 +394,8 @@ export const deleteClientById = async (id: string, props: DeleteClientProps): Pr
       }, {
         transaction: t
       });
+
+      await publishMessage('clients_events', { event: 'deleted', id: id, author: props.author });
 
       return true;
     });
