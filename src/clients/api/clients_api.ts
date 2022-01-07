@@ -25,7 +25,7 @@ import {
 } from '../../session/middlewares/authorization';
 import Account from '../../accounts/models/account';
 import { findAccountById } from '../../accounts/providers/accounts';
-import { log } from '../../common/providers/logging';
+import log from '../../common/providers/logging';
 import { addSubscriber, removeSubscriber } from '../listeners/subscribers_store';
 
 interface CreditCardView {

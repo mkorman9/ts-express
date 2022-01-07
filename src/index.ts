@@ -1,7 +1,7 @@
 import config from './common/providers/config';
 import './exception_handler';
 import app from './app';
-import { log } from './common/providers/logging';
+import log from './common/providers/logging';
 
 import { initDB } from './common/providers/db';
 import { initRedis } from './common/providers/redis';

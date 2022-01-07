@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 
-import { log } from '../providers/logging';
+import log from '../providers/logging';
 
 const internalErrors = (err: Error, req: Request, res: Response, next: NextFunction) => {
   if (res.headersSent) {

@@ -4,7 +4,7 @@ import os from 'os';
 
 import config from './config';
 
-export const log = (() => {
+const log = (() => {
   const props = {
     level: config.logging?.level || 'info',
     syslog: {
@@ -45,3 +45,5 @@ export const log = (() => {
 
   return l;
 })();
+
+export default log;

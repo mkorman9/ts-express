@@ -1,5 +1,5 @@
 import { resolveTemplate } from './templates';
-import { log } from './logging';
+import log from './logging';
 import type { Language } from './templates';
 
 interface MailProps {

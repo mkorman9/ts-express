@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import onHeaders from 'on-headers';
 
-import { log } from '../providers/logging';
+import log from '../providers/logging';
 import redisClient from '../providers/redis';
 import config from '../providers/config';
 

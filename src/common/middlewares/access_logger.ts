@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import onHeaders from 'on-headers';
 import moment from 'moment';
 
-import { log } from '../providers/logging';
+import log from '../providers/logging';
 
 const IgnoredPaths = new Set([
   '/health',

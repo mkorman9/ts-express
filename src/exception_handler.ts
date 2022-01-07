@@ -1,4 +1,4 @@
-import { log } from './common/providers/logging';
+import log from './common/providers/logging';
 import { ConfigurationError } from './common/providers/config';
 
 process.on('uncaughtException', (err) => {

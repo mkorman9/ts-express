@@ -2,7 +2,7 @@ import path from 'path/posix';
 import { Sequelize } from 'sequelize-typescript';
 
 import config, { ConfigurationError } from './config';
-import { log } from './logging';
+import log from './logging';
 
 const modelsDirs = [
   './clients/models',
