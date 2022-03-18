@@ -9,5 +9,8 @@ redis:
   uri: redis://localhost:6379
   password: password
 
+amqp:
+  uri: amqp://username:password@localhost:5672/
+
 templates:
   externalUrl: http://localhost:3000

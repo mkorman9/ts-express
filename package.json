@@ -15,6 +15,7 @@
     "start": "tsc-watch --onSuccess 'npm-run-all lint serve'"
   },
   "dependencies": {
+    "amqplib": "^0.8.0",
     "axios": "^0.21.4",
     "bcrypt": "^5.0.1",
     "captchapng3": "^1.0.7",
@@ -39,6 +40,7 @@
     "yaml": "^1.10.2"
   },
   "devDependencies": {
+    "@types/amqplib": "^0.8.2",
     "@types/chai": "^4.2.21",
     "@types/express": "^4.17.13",
     "@types/express-ws": "^3.0.1",
