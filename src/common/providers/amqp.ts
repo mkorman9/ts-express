@@ -23,12 +23,17 @@ interface ConsumerQueueProps {
   options: amqp.Options.AssertQueue;
 }
 
-interface ConsumerProps {
+interface ConsumerProps<M = unknown> {
   exchange?: ExchangeProps;
   queue?: ConsumerQueueProps;
   bindKeys?: string[];
   options?: amqp.Options.Consume;
-  parser?: (s: string) => unknown;
+  parser?: (s: string) => M;
+}
+
+interface PublishProps<M = undefined> {
+  parser?: (m: M) => string;
+  options?: amqp.Options.Publish;
 }
 
 type ConsumerFunc = <M = unknown>(msg: M, raw: amqp.ConsumeMessage) => void;
@@ -44,10 +49,10 @@ export class Publisher {
     exchange: string,
     key: string,
     message: M,
-    parser: (m: M) => string = JSON.stringify,
-    options?: amqp.Options.Publish
+    props?: PublishProps<M>
   ): boolean {
-    return this.channel.publish(exchange, key, Buffer.from(parser(message)), options);
+    const parser = props?.parser || JSON.stringify;
+    return this.channel.publish(exchange, key, Buffer.from(parser(message)), props?.options);
   }
 }
 
@@ -86,7 +91,7 @@ export const getPublisher = (name: string): Publisher => {
   return publishers.get(name);
 };
 
-export const createConsumer = <M = unknown>(props?: ConsumerProps): ((func: ConsumerFunc) => void) => {
+export const createConsumer = <M = unknown>(props?: ConsumerProps<M>): ((func: ConsumerFunc) => void) => {
   if (!connection) {
     return () => () => undefined;
   }
@@ -123,7 +128,7 @@ export const createConsumer = <M = unknown>(props?: ConsumerProps): ((func: Cons
       .then(([channel, queue]) => {
         channel.consume(queue.queue, (raw: amqp.ConsumeMessage) => {
           const parser = props?.parser || JSON.parse;
-          func(parser(raw.content.toString()) as M, raw);
+          func(parser(raw.content.toString()), raw);
         }, props?.options);
       })
       .catch(err => {
