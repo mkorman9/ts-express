@@ -2,13 +2,15 @@ import { Op, WhereAttributeHash } from 'sequelize';
 import moment, { Moment } from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { Transaction } from 'sequelize';
+import amqp from 'amqplib';
 
 import DB from '../../common/providers/db';
 import Client from '../models/client';
 import CreditCard from '../models/credit_card';
 import ClientChange from '../models/client_change';
 import { generateClientChangeset } from './clients_changes';
-import { publishMessage } from '../../common/providers/redis';
+import { createChannel } from '../../common/providers/amqp';
+import log from '../../common/providers/logging';
 
 export enum FindClientsSortFields {
   id = 'id',
@@ -80,6 +82,23 @@ export interface UpdateClientProps {
 export interface DeleteClientProps {
   author: string;
 }
+
+let publishChannel: amqp.Channel = null;
+createChannel({
+  exchanges: [{
+    name: 'clients_events',
+    type: 'fanout',
+    options: {
+      durable: false
+    }
+  }]
+})
+  .then(channel => {
+    publishChannel = channel;
+  })
+  .catch(err => {
+    log.error(`failed to create amqp channel for clients: ${err}`);
+  });
 
 export const findClientsPaged = async (opts?: FindClientsPagedOptions): Promise<{ rows: Client[], count: number }> => {
   const options: FindClientsPagedOptions = {
@@ -253,7 +272,7 @@ export const addClient = async (clientPayload: ClientAddPayload, props: AddClien
       transaction: t
     });
 
-    await publishMessage('clients_events', { event: 'added', id: client.id, author: props.author });
+    await publishChannel.publish('clients_events', '', Buffer.from(JSON.stringify({ event: 'added', id: client.id, author: props.author })));
 
     return client;
   });
@@ -348,7 +367,7 @@ export const updateClient = async (id: string, clientPayload: ClientUpdatePayloa
         transaction: t
       });
 
-      await publishMessage('clients_events', { event: 'modified', id: id, author: props.author });
+      await publishChannel.publish('clients_events', '', Buffer.from(JSON.stringify({ event: 'modified', id: client.id, author: props.author })));
 
       return true;
     });
@@ -395,7 +414,7 @@ export const deleteClientById = async (id: string, props: DeleteClientProps): Pr
         transaction: t
       });
 
-      await publishMessage('clients_events', { event: 'deleted', id: id, author: props.author });
+      await publishChannel.publish('clients_events', '', Buffer.from(JSON.stringify({ event: 'deleted', id: client.id, author: props.author })));
 
       return true;
     });
