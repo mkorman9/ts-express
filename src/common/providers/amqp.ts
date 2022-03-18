@@ -96,7 +96,7 @@ export const createConsumer = <M = unknown>(props?: ConsumerProps<M>): ((func: C
     return () => () => undefined;
   }
 
-  const init = async (): Promise<[amqp.Channel, amqp.Replies.AssertQueue]> => {
+  const init = async (): Promise<[amqp.Channel, string]> => {
     const channel = await connection.createChannel();
 
     if (props?.exchange) {
@@ -120,13 +120,13 @@ export const createConsumer = <M = unknown>(props?: ConsumerProps<M>): ((func: C
       );
     }
 
-    return [channel, queue];
+    return [channel, queue.queue];
   };
 
   return (func: ConsumerFunc) => {
     init()
       .then(([channel, queue]) => {
-        channel.consume(queue.queue, (raw: amqp.ConsumeMessage) => {
+        channel.consume(queue, (raw: amqp.ConsumeMessage) => {
           const parser = props?.parser || JSON.parse;
           func(parser(raw.content.toString()), raw);
         }, props?.options);
