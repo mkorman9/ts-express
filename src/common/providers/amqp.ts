@@ -40,7 +40,13 @@ export class Publisher {
     this.channel = channel;
   }
 
-  public publish<M = unknown>(exchange: string, key: string, message: M, parser: (m: M) => string = JSON.stringify, options?: amqp.Options.Publish): boolean {
+  public publish<M = unknown>(
+    exchange: string,
+    key: string,
+    message: M,
+    parser: (m: M) => string = JSON.stringify,
+    options?: amqp.Options.Publish
+  ): boolean {
     return this.channel.publish(exchange, key, Buffer.from(parser(message)), options);
   }
 }
