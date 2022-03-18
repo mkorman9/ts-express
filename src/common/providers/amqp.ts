@@ -98,7 +98,7 @@ export const createConsumer = async (props?: ConsumerProps): Promise<(func: Cons
     props?.queue?.options
   );
 
-  for (const key of (props?.bindKeys || [])) {
+  for (const key of (props?.bindKeys || [''])) {
     await channel.bindQueue(
       queue.queue,
       props?.exchange?.name || '',
