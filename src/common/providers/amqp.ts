@@ -71,7 +71,7 @@ export const definePublisher = (name: string, props?: ChannelProps) => {
       publishers.set(name, new Publisher(channel));
     })
     .catch(err => {
-      log.error(`failed to define published ${name}: ${err}`);
+      log.error(`failed to define publisher ${name}: ${err}`);
     });
 };
 
@@ -79,36 +79,46 @@ export const getPublisher = (name: string): Publisher => {
   return publishers.get(name);
 };
 
-export const createConsumer = async (props?: ConsumerProps): Promise<(func: ConsumerFunc) => void> => {
+export const createConsumer = (props?: ConsumerProps): ((func: ConsumerFunc) => void) => {
   if (!connection) {
     return () => () => undefined;
   }
 
-  const channel = await connection.createChannel();
+  const init = async (): Promise<[amqp.Channel, amqp.Replies.AssertQueue]> => {
+    const channel = await connection.createChannel();
 
-  if (props?.exchange) {
-    await channel.assertExchange(
-      props.exchange.name,
-      props.exchange.type,
-      props.exchange.options
+    if (props?.exchange) {
+      await channel.assertExchange(
+        props.exchange.name,
+        props.exchange.type,
+        props.exchange.options
+      );
+    }
+
+    const queue = await channel.assertQueue(
+      props?.queue?.name || '',
+      props?.queue?.options
     );
-  }
 
-  const queue = await channel.assertQueue(
-    props?.queue?.name || '',
-    props?.queue?.options
-  );
+    for (const key of (props?.bindKeys || [''])) {
+      await channel.bindQueue(
+        queue.queue,
+        props?.exchange?.name || '',
+        key
+      );
+    }
 
-  for (const key of (props?.bindKeys || [''])) {
-    await channel.bindQueue(
-      queue.queue,
-      props?.exchange?.name || '',
-      key
-    );
-  }
+    return [channel, queue];
+  };
 
   return (func: ConsumerFunc) => {
-    channel.consume(queue.queue, func, props?.options);
+    init()
+      .then(([channel, queue]) => {
+        channel.consume(queue.queue, func, props?.options);
+      })
+      .catch(err => {
+        log.error(`failed to define consumer: ${err}`);
+      });
   };
 };
 
