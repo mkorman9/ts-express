@@ -1,5 +1,6 @@
 import amqp from 'amqplib';
 import config, { ConfigurationError } from './config';
+import log from './logging';
 
 interface QueueProps {
   name: string;
@@ -32,6 +33,7 @@ interface ConsumerProps {
 type ConsumerFunc = (msg: amqp.ConsumeMessage) => void;
 
 let connection: amqp.Connection = null;
+const publishers = new Map<string, amqp.Channel>();
 
 export const initAMQP = async () => {
   const props = {
@@ -51,31 +53,18 @@ export const closeAMQP = async () => {
   }
 };
 
-export const createChannel = async (props?: ChannelProps): Promise<amqp.Channel> => {
-  if (!connection) {
-    return {} as amqp.Channel;
-  }
+export const definePublisher = (name: string, props?: ChannelProps) => {
+  createChannel(props)
+    .then(channel => {
+      publishers.set(name, channel);
+    })
+    .catch(err => {
+      log.error(`failed to define published ${name}: ${err}`);
+    });
+};
 
-  const channel = await connection.createChannel();
-  const queuesToDeclare = props?.queues || [];
-  const exchangesToDeclare = props?.exchanges || [];
-
-  for (const queue of queuesToDeclare) {
-    await channel.assertQueue(
-      queue.name,
-      queue.options
-    );
-  }
-
-  for (const exchange of exchangesToDeclare) {
-    await channel.assertExchange(
-      exchange.name,
-      exchange.type,
-      exchange.options
-    );
-  }
-
-  return channel;
+export const getPublisher = (name: string): amqp.Channel => {
+  return publishers.get(name);
 };
 
 export const createConsumer = async (props?: ConsumerProps): Promise<(func: ConsumerFunc) => void> => {
@@ -111,4 +100,29 @@ export const createConsumer = async (props?: ConsumerProps): Promise<(func: Cons
   };
 };
 
-export default connection;
+const createChannel = async (props?: ChannelProps): Promise<amqp.Channel> => {
+  if (!connection) {
+    return {} as amqp.Channel;
+  }
+
+  const channel = await connection.createChannel();
+  const queuesToDeclare = props?.queues || [];
+  const exchangesToDeclare = props?.exchanges || [];
+
+  for (const queue of queuesToDeclare) {
+    await channel.assertQueue(
+      queue.name,
+      queue.options
+    );
+  }
+
+  for (const exchange of exchangesToDeclare) {
+    await channel.assertExchange(
+      exchange.name,
+      exchange.type,
+      exchange.options
+    );
+  }
+
+  return channel;
+};
