@@ -10,8 +10,8 @@ createConsumer({
       durable: false
     }
   }
-})((msg: amqp.ConsumeMessage) => {
+})((_, raw: amqp.ConsumeMessage) => {
   listSubscribers().forEach(sub => {
-    sub.send(msg.content.toJSON());
+    sub.send(raw.content.toJSON());
   });
 });

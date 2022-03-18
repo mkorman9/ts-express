@@ -28,9 +28,10 @@ interface ConsumerProps {
   queue?: ConsumerQueueProps;
   bindKeys?: string[];
   options?: amqp.Options.Consume;
+  parser?: (s: string) => unknown;
 }
 
-type ConsumerFunc = (msg: amqp.ConsumeMessage) => void;
+type ConsumerFunc = <M = unknown>(msg: M, raw: amqp.ConsumeMessage) => void;
 
 export class Publisher {
   private channel: amqp.Channel;
@@ -79,7 +80,7 @@ export const getPublisher = (name: string): Publisher => {
   return publishers.get(name);
 };
 
-export const createConsumer = (props?: ConsumerProps): ((func: ConsumerFunc) => void) => {
+export const createConsumer = <M = unknown>(props?: ConsumerProps): ((func: ConsumerFunc) => void) => {
   if (!connection) {
     return () => () => undefined;
   }
@@ -114,7 +115,10 @@ export const createConsumer = (props?: ConsumerProps): ((func: ConsumerFunc) => 
   return (func: ConsumerFunc) => {
     init()
       .then(([channel, queue]) => {
-        channel.consume(queue.queue, func, props?.options);
+        channel.consume(queue.queue, (raw: amqp.ConsumeMessage) => {
+          const parser = props?.parser || JSON.parse;
+          func(parser(raw.content.toString()) as M, raw);
+        }, props?.options);
       })
       .catch(err => {
         log.error(`failed to define consumer: ${err}`);
