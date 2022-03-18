@@ -32,8 +32,20 @@ interface ConsumerProps {
 
 type ConsumerFunc = (msg: amqp.ConsumeMessage) => void;
 
+export class Publisher {
+  private channel: amqp.Channel;
+
+  constructor(channel: amqp.Channel) {
+    this.channel = channel;
+  }
+
+  public publish<M = unknown>(exchange: string, key: string, message: M, parser: (m: M) => string = JSON.stringify, options?: amqp.Options.Publish): boolean {
+    return this.channel.publish(exchange, key, Buffer.from(parser(message)), options);
+  }
+}
+
 let connection: amqp.Connection = null;
-const publishers = new Map<string, amqp.Channel>();
+const publishers = new Map<string, Publisher>();
 
 export const initAMQP = async () => {
   const props = {
@@ -56,14 +68,14 @@ export const closeAMQP = async () => {
 export const definePublisher = (name: string, props?: ChannelProps) => {
   createChannel(props)
     .then(channel => {
-      publishers.set(name, channel);
+      publishers.set(name, new Publisher(channel));
     })
     .catch(err => {
       log.error(`failed to define published ${name}: ${err}`);
     });
 };
 
-export const getPublisher = (name: string): amqp.Channel => {
+export const getPublisher = (name: string): Publisher => {
   return publishers.get(name);
 };
 

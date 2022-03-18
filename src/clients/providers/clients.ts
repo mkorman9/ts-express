@@ -263,11 +263,11 @@ export const addClient = async (clientPayload: ClientAddPayload, props: AddClien
       transaction: t
     });
 
-    getPublisher('clients_events').publish('clients_events', '', Buffer.from(JSON.stringify({
+    getPublisher('clients_events').publish('clients_events', '', {
       event: 'added',
       id: client.id,
       author: props.author
-    })));
+    });
 
     return client;
   });
@@ -362,11 +362,11 @@ export const updateClient = async (id: string, clientPayload: ClientUpdatePayloa
         transaction: t
       });
 
-      getPublisher('clients_events').publish('clients_events', '', Buffer.from(JSON.stringify({
+      getPublisher('clients_events').publish('clients_events', '', {
         event: 'modified',
         id: client.id,
         author: props.author
-      })));
+      });
 
       return true;
     });
@@ -413,11 +413,11 @@ export const deleteClientById = async (id: string, props: DeleteClientProps): Pr
         transaction: t
       });
 
-      getPublisher('clients_events').publish('clients_events', '', Buffer.from(JSON.stringify({
+      getPublisher('clients_events').publish('clients_events', '', {
         event: 'deleted',
         id: client.id,
         author: props.author
-      })));
+      });
 
       return true;
     });
