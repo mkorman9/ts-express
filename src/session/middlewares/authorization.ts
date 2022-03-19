@@ -52,7 +52,7 @@ export const setSessionContext = (req: Request, sessionContext: SessionContext |
   req[SessionAccountFieldName] = undefined;
 };
 
-export const getSessionAccount = <T = unknown>(req: Request): T | null => {
+export const getSessionAccount = <T = unknown>(req: Request): T => {
   if (req[SessionAccountFieldName]) {
     return req[SessionAccountFieldName] as T;
   }
