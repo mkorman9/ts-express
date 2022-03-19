@@ -39,7 +39,7 @@ const authMiddleware = (sessionExtractor: (req: Request) => (() => Promise<Sessi
   };
 };
 
-export const getSessionContext = (req: Request): SessionContext | null => {
+export const getSessionContext = (req: Request): SessionContext => {
   if (req[SessionFieldName]) {
     return req[SessionFieldName] as SessionContext;
   }
@@ -131,7 +131,7 @@ export const requireRoles = (roles: string[]) => {
 
   return async (req: Request, res: Response, next: NextFunction) => {
     await a(req, res, async () => {
-      const sessionContext = getSessionContext(req) as SessionContext;
+      const sessionContext = getSessionContext(req);
       if (roles.some(r => sessionContext.roles.has(r))) {
         return next();
       }

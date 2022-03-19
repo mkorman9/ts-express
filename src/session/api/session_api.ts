@@ -9,7 +9,6 @@ import {
   sendSessionCookie
 } from '../middlewares/authorization';
 import {
-  SessionContext,
   refreshSession,
   revokeSession
 } from '../providers/session';
@@ -49,7 +48,7 @@ sessionAPI.put(
   tokenAuthMiddleware(),
   requireAuthentication(),
   async (req: Request, res: Response, next: NextFunction) => {
-    const oldSessionContext = getSessionContext(req) as SessionContext;
+    const oldSessionContext = getSessionContext(req);
 
     try {
       const sessionContext = await refreshSession(oldSessionContext);
@@ -79,7 +78,7 @@ sessionAPI.post(
   tokenAuthMiddleware(),
   requireAuthentication(),
   async (req: Request, res: Response, next: NextFunction) => {
-    const sessionContext = getSessionContext(req) as SessionContext;
+    const sessionContext = getSessionContext(req);
 
     try {
       const isRevoked = await revokeSession(sessionContext);
