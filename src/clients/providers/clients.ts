@@ -195,7 +195,7 @@ export const findClientsPaged = async (opts?: FindClientsPagedOptions): Promise<
 
 export const findClientById = async (id: string, findOptions?: FindClientByIdOptions): Promise<Client | null> => {
   const options = {
-    includeDeleted: (findOptions?.includeDeleted === undefined) ? false : (findOptions?.includeDeleted === true)
+    includeDeleted: (findOptions?.includeDeleted === true)
   };
 
   const filters = {};
