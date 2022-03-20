@@ -28,16 +28,36 @@ interface ConsumerProps<M = unknown> {
   queue?: ConsumerQueueProps;
   bindKeys?: string[];
   options?: amqp.Options.Consume;
-  parser?: (s: string) => M;
+  parser?: MessageParser<M>;
   prefetch?: number;
 }
 
 interface PublishProps<M = undefined> {
-  parser?: (m: M) => string;
+  parser?: MessageParser<M>;
   options?: amqp.Options.Publish;
 }
 
+export interface MessageParser<M = unknown> {
+  serialize(m: M): Buffer
+  deserialize(buffer: Buffer): M
+  contentType(): string
+}
+
 type ConsumerFunc<M = unknown> = (msg: M, channel: amqp.Channel, raw: amqp.ConsumeMessage) => void;
+
+export class JSONMessageParser<M = unknown> implements MessageParser<M> {
+  serialize(m: M): Buffer {
+    return Buffer.from(JSON.stringify(m));
+  }
+
+  deserialize(buffer: Buffer): M {
+    return JSON.parse(buffer.toString());
+  }
+
+  contentType(): string {
+    return 'application/json';
+  }
+}
 
 export class Publisher {
   private channel: amqp.Channel;
@@ -57,8 +77,12 @@ export class Publisher {
       return true;
     }
 
-    const parser = props?.parser || JSON.stringify;
-    return this.channel.publish(exchange, key, Buffer.from(parser(message)), props?.options);
+    const parser = props?.parser || new JSONMessageParser<M>();
+
+    return this.channel.publish(exchange, key, parser.serialize(message), {
+      contentType: parser.contentType(),
+      ...props?.options
+    });
   }
 }
 
@@ -137,6 +161,8 @@ export const createConsumer = <M = unknown>(props?: ConsumerProps<M>): ((func: C
   return (func: ConsumerFunc<M>) => {
     init()
       .then(([channel, queue]) => {
+        const parser = props?.parser || new JSONMessageParser<M>();
+
         if (props?.prefetch) {
           channel.prefetch(props.prefetch);
         }
@@ -145,8 +171,7 @@ export const createConsumer = <M = unknown>(props?: ConsumerProps<M>): ((func: C
           let message: M;
 
           try {
-            const parser = props?.parser || JSON.parse;
-            message = parser(raw.content.toString());
+            message = parser.deserialize(raw.content);
           } catch (err) {
             log.error(`failed to parse AMQP message ${raw.properties.messageId}: ${err}`);
             return;
