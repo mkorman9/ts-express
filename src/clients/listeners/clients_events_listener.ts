@@ -1,6 +1,6 @@
+import amqp from 'amqplib';
 import { createConsumer } from '../../common/providers/amqp';
 import { listSubscribers } from './subscribers_store';
-import amqp from 'amqplib';
 
 createConsumer({
   exchange: {
@@ -9,9 +9,14 @@ createConsumer({
     options: {
       durable: false
     }
+  },
+  options: {
+    noAck: false
   }
-})((_, raw: amqp.ConsumeMessage) => {
+})((msg: unknown, channel: amqp.Channel, raw: amqp.ConsumeMessage) => {
   listSubscribers().forEach(sub => {
-    sub.send(raw.content.toJSON());
+    sub.send(JSON.stringify(msg));
   });
+
+  channel.ack(raw);
 });

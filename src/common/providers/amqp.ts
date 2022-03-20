@@ -36,7 +36,7 @@ interface PublishProps<M = undefined> {
   options?: amqp.Options.Publish;
 }
 
-type ConsumerFunc<M = unknown> = (msg: M, raw: amqp.ConsumeMessage) => void;
+type ConsumerFunc<M = unknown> = (msg: M, channel: amqp.Channel, raw: amqp.ConsumeMessage) => void;
 
 export class Publisher {
   private channel: amqp.Channel;
@@ -128,7 +128,7 @@ export const createConsumer = <M = unknown>(props?: ConsumerProps<M>): ((func: C
       .then(([channel, queue]) => {
         channel.consume(queue, (raw: amqp.ConsumeMessage) => {
           const parser = props?.parser || JSON.parse;
-          func(parser(raw.content.toString()), raw);
+          func(parser(raw.content.toString()), channel, raw);
         }, props?.options);
       })
       .catch(err => {
