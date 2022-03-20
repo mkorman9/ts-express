@@ -29,6 +29,7 @@ interface ConsumerProps<M = unknown> {
   bindKeys?: string[];
   options?: amqp.Options.Consume;
   parser?: (s: string) => M;
+  prefetch?: number;
 }
 
 interface PublishProps<M = undefined> {
@@ -136,6 +137,10 @@ export const createConsumer = <M = unknown>(props?: ConsumerProps<M>): ((func: C
   return (func: ConsumerFunc<M>) => {
     init()
       .then(([channel, queue]) => {
+        if (props?.prefetch) {
+          channel.prefetch(props.prefetch);
+        }
+
         channel.consume(queue, (raw: amqp.ConsumeMessage) => {
           let message: M;
 
