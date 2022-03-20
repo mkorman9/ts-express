@@ -51,6 +51,11 @@ export class Publisher {
     message: M,
     props?: PublishProps<M>
   ): boolean {
+    if (!this.channel) {
+      log.warn('not publishing AMQP message due to no active connection');
+      return true;
+    }
+
     const parser = props?.parser || JSON.stringify;
     return this.channel.publish(exchange, key, Buffer.from(parser(message)), props?.options);
   }
@@ -78,6 +83,11 @@ export const closeAMQP = async () => {
 };
 
 export const definePublisher = (name: string, props?: ChannelProps) => {
+  if (!connection) {
+    publishers.set(name, new Publisher(null));
+    return;
+  }
+
   createChannel(props)
     .then(channel => {
       publishers.set(name, new Publisher(channel));
@@ -127,8 +137,21 @@ export const createConsumer = <M = unknown>(props?: ConsumerProps<M>): ((func: C
     init()
       .then(([channel, queue]) => {
         channel.consume(queue, (raw: amqp.ConsumeMessage) => {
-          const parser = props?.parser || JSON.parse;
-          func(parser(raw.content.toString()), channel, raw);
+          let message: M;
+
+          try {
+            const parser = props?.parser || JSON.parse;
+            message = parser(raw.content.toString());
+          } catch (err) {
+            log.error(`failed to parse AMQP message ${raw.properties.messageId}: ${err}`);
+            return;
+          }
+
+          try {
+            func(message, channel, raw);
+          } catch (err) {
+            log.error(`error while executing AMQP consumer for message ${raw.properties.messageId}: ${err}`);
+          }
         }, props?.options);
       })
       .catch(err => {
@@ -138,10 +161,6 @@ export const createConsumer = <M = unknown>(props?: ConsumerProps<M>): ((func: C
 };
 
 const createChannel = async (props?: ChannelProps): Promise<amqp.Channel> => {
-  if (!connection) {
-    return {} as amqp.Channel;
-  }
-
   const channel = await connection.createChannel();
   const queuesToDeclare = props?.queues || [];
   const exchangesToDeclare = props?.exchanges || [];
