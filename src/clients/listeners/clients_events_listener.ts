@@ -1,4 +1,3 @@
-import amqp from 'amqplib';
 import { createConsumer } from '../../common/providers/amqp';
 import { listSubscribers } from './subscribers_store';
 
@@ -9,14 +8,9 @@ createConsumer({
     options: {
       durable: false
     }
-  },
-  options: {
-    noAck: false
   }
-})((msg: unknown, channel: amqp.Channel, raw: amqp.ConsumeMessage) => {
+})((msg: unknown) => {
   listSubscribers().forEach(sub => {
     sub.send(JSON.stringify(msg));
   });
-
-  channel.ack(raw);
 });

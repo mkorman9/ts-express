@@ -30,6 +30,7 @@ interface ConsumerProps<M = unknown> {
   options?: amqp.Options.Consume;
   parser?: MessageParser<M>;
   prefetch?: number;
+  autoConfirm?: boolean;
 }
 
 interface PublishProps<M = undefined> {
@@ -167,6 +168,15 @@ export const createConsumer = <M = unknown>(props?: ConsumerProps<M>): ((func: C
           channel.prefetch(props.prefetch);
         }
 
+        const autoConfirm = (props?.autoConfirm === undefined) ? true : props?.autoConfirm;
+        const consumeOptions = {
+          ...props?.options
+        };
+
+        if (autoConfirm) {
+          consumeOptions.noAck = false;
+        }
+
         channel.consume(queue, (raw: amqp.ConsumeMessage) => {
           let message: M;
 
@@ -179,10 +189,14 @@ export const createConsumer = <M = unknown>(props?: ConsumerProps<M>): ((func: C
 
           try {
             func(message, channel, raw);
+
+            if (autoConfirm) {
+              channel.ack(raw);
+            }
           } catch (err) {
             log.error(`error while executing AMQP consumer for message ${raw.properties.messageId}: ${err}`);
           }
-        }, props?.options);
+        }, consumeOptions);
       })
       .catch(err => {
         log.error(`failed to define consumer: ${err}`);
