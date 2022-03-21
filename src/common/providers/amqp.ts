@@ -195,6 +195,10 @@ export const createConsumer = <M = unknown>(props?: ConsumerProps<M>): ((func: C
             }
           } catch (err) {
             log.error(`error while executing AMQP consumer for message ${raw.properties.messageId}: ${err}`);
+
+            if (autoConfirm) {
+              channel.nack(raw);
+            }
           }
         }, consumeOptions);
       })
