@@ -16,6 +16,7 @@ USER app
 
 RUN yarn install --production && \
     yarn cache clean
+RUN yarn version < /dev/null | grep 'Current version:' | awk '{print $4}' | tr -d '\n' > .version
 
 ENV NODE_ENV production
 CMD exec node --enable-source-maps ./dist

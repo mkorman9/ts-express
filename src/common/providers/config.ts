@@ -40,8 +40,22 @@ const readConfig = () => {
   }
 };
 
+const resolveVersion = () => {
+  const envVersion = process.env.npm_package_version;
+  if (envVersion) {
+    return envVersion;
+  }
+
+  try {
+    return fs.readFileSync('.version', 'utf8');
+  } catch (err) {
+    return 'unknown';
+  }
+};
+
 export default {
   mode: Mode,
+  version: resolveVersion(),
   inTestMode: InTestMode,
   inDevMode: InDevMode,
   inProdMode: InProdMode,

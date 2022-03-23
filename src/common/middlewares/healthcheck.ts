@@ -1,4 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
+import moment from 'moment';
+import config from '../providers/config';
+
+const startupTime = moment();
 
 const healthcheck = (req: Request, res: Response, next: NextFunction) => {
   if (res.headersSent) {
@@ -8,7 +12,9 @@ const healthcheck = (req: Request, res: Response, next: NextFunction) => {
   return res
     .status(200)
     .send({
-      status: 'healthy'
+      status: 'healthy',
+      appVersion: config.version,
+      startupTime: startupTime
     });
 };
 
