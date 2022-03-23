@@ -1,4 +1,5 @@
 import path from 'path/posix';
+import { QueryTypes } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
 
 import config, { ConfigurationError } from './config';
@@ -43,6 +44,45 @@ const DB = !config.inTestMode ? initSequelize() : ({} as Sequelize);
 export const initDB = (): Promise<void> => {
   return DB
     .authenticate();
+};
+
+export const advisoryLock = async (lock: number, callback: () => Promise<void>) => {
+  const acquire = async (): Promise<boolean> => {
+    const result = await DB.query('SELECT pg_try_advisory_lock(?)', {
+      replacements: [lock],
+      type: QueryTypes.SELECT
+    });
+
+    return result[0]['pg_try_advisory_lock'];
+  };
+
+  const release = async () => {
+    await DB.query('SELECT pg_advisory_unlock(?)', {
+      replacements: [lock]
+    });
+  };
+
+  let ok = false;
+
+  try {
+    ok = await acquire();
+
+    if (ok) {
+      await callback();
+    } else {
+      log.warn(`advisory lock ${lock} not acquired`);
+    }
+  } catch (err) {
+    log.error(`error while acquiring advisory lock ${lock}: ${err}`);
+  } finally {
+    if (ok) {
+      try {
+        await release();
+      } catch (err) {
+        log.error(`error while releasing advisory lock ${lock}: ${err}`);
+      }
+    }
+  }
 };
 
 export default DB;
