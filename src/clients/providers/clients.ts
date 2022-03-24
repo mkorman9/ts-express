@@ -174,7 +174,17 @@ export const findClientsPaged = async (opts?: FindClientsPagedOptions): Promise<
     });
   }
 
-  return await Client.findAndCountAll({
+  const count = await Client.count({
+    where: {
+      [Op.and]: [{
+        isDeleted: false
+      }, {
+        [Op.and]: [...filters]
+      }]
+    }
+  });
+
+  const rows = await Client.findAll({
     limit: options.pageSize,
     offset: options.pageSize * options.pageNumber,
     where: {
@@ -191,6 +201,11 @@ export const findClientsPaged = async (opts?: FindClientsPagedOptions): Promise<
       CreditCard
     ]
   });
+
+  return {
+    rows,
+    count
+  };
 };
 
 export const findClientById = async (id: string, findOptions?: FindClientByIdOptions): Promise<Client | null> => {
