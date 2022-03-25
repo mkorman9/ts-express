@@ -8,6 +8,11 @@ createConsumer({
     options: {
       durable: false
     }
+  },
+  queue: {
+    options: {
+      autoDelete: true
+    }
   }
 })((msg: unknown) => {
   listSubscribers().forEach(sub => {
