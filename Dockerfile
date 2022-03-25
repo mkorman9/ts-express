@@ -1,4 +1,4 @@
-FROM node:16.3.0
+FROM node:16.14.2-bullseye-slim
 
 RUN addgroup --gid 9000 app && \
     adduser --disabled-password --gecos "" --shell /bin/false --home /app --uid 9000 --gid 9000 app && \
