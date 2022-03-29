@@ -61,11 +61,9 @@ export class JSONMessageParser<M = unknown> implements MessageParser<M> {
 }
 
 export class Publisher {
-  private channel: amqp.Channel;
-
-  constructor(channel: amqp.Channel) {
-    this.channel = channel;
-  }
+  constructor(
+    private channel: amqp.Channel
+  ) { }
 
   public publish<M = unknown>(
     exchange: string,

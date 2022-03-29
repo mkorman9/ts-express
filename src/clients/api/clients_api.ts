@@ -489,13 +489,11 @@ clientsAPI.ws(
 );
 
 class ClientsFiltersParsingError extends Error {
-  public code: string;
-  public field: string;
-
-  constructor(code: string, field: string) {
+  constructor(
+    public code: string,
+    public field: string
+    ) {
     super('ClientsFiltersParsingError');
-    this.code = code;
-    this.field = field;
   }
 }
 
