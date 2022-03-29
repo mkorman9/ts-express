@@ -3,17 +3,11 @@ import { body, validationResult } from 'express-validator';
 import moment, { Moment } from 'moment';
 import ws from 'ws';
 
-import {
-  findClientsPaged,
+import clientsProvider, {
   FindClientsSortFields,
   FindClientsFilters,
-  findClientById,
   ClientAddPayload,
-  addClient,
-  ClientUpdatePayload,
-  updateClient,
-  deleteClientById,
-  findChangelogForClient
+  ClientUpdatePayload
 } from '../providers/clients';
 import Client from '../models/client';
 import { ClientChangeItem } from '../providers/clients_changes';
@@ -192,7 +186,7 @@ clientsAPI.get(
     }
 
     try {
-      const clientsPage = await findClientsPaged({
+      const clientsPage = await clientsProvider.findClientsPaged({
         pageNumber,
         pageSize,
 
@@ -230,7 +224,7 @@ clientsAPI.get(
   '/:id',
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const client = await findClientById(req.params['id']);
+      const client = await clientsProvider.findClientById(req.params['id']);
       if (!client) {
         return res
           .status(404)
@@ -310,7 +304,7 @@ clientsAPI.post(
     }
 
     try {
-      const client = await addClient(clientPayload, { author: account.id });
+      const client = await clientsProvider.addClient(clientPayload, { author: account.id });
 
       return res
         .status(200)
@@ -372,7 +366,7 @@ clientsAPI.put(
     }
 
     try {
-      const result = await updateClient(req.params['id'], clientPayload, { author: account.id });
+      const result = await clientsProvider.updateClient(req.params['id'], clientPayload, { author: account.id });
       if (!result) {
         return res
           .status(404)
@@ -414,7 +408,7 @@ clientsAPI.delete(
     }
 
     try {
-      const result = await deleteClientById(req.params['id'], { author: account.id });
+      const result = await clientsProvider.deleteClientById(req.params['id'], { author: account.id });
       if (!result) {
         return res
           .status(404)
@@ -441,7 +435,7 @@ clientsAPI.get(
   requireRoles(['CLIENTS_EDITOR']),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const changelog = await findChangelogForClient(req.params['id']);
+      const changelog = await clientsProvider.findChangelogForClient(req.params['id']);
       if (changelog === null) {
         return res
           .status(404)
