@@ -3,7 +3,7 @@ import { body, validationResult } from 'express-validator';
 import moment from 'moment';
 import bcrypt from 'bcrypt';
 
-import { findAccountByCredentialsEmail } from '../providers/accounts';
+import accountsProvider from '../providers/accounts';
 import {
   setSessionContext,
   sendSessionCookie
@@ -44,7 +44,7 @@ authAPI.post(
     const rememberMe = 'rememberMe' in req.query;
 
     try {
-      const account = await findAccountByCredentialsEmail(req.body['email']);
+      const account = await accountsProvider.findAccountByCredentialsEmail(req.body['email']);
 
       if (!account || !account.passwordCredentials) {
         return res

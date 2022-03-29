@@ -9,7 +9,10 @@ import {
   getSessionAccount
 } from '../../session/middlewares/authorization';
 import Account from '../models/account';
-import { activateAccount, addAccount, EmailAlreadyInUseError, findAccountById, UsernameAlreadyInUseError } from '../providers/accounts';
+import accountsProvider, {
+  EmailAlreadyInUseError,
+  UsernameAlreadyInUseError
+} from '../providers/accounts';
 
 const AccountRegisterValidators = [
   body('username')
@@ -52,7 +55,7 @@ const accountAPI = Router();
 accountAPI.get(
   '/info',
   tokenAuthMiddleware(),
-  includeSessionAccount(ctx => findAccountById(ctx.subject)),
+  includeSessionAccount(ctx => accountsProvider.findAccountById(ctx.subject)),
   async (req: Request, res: Response) => {
     const account = getSessionAccount<Account>(req);
 
@@ -101,7 +104,7 @@ accountAPI.post(
     }
 
     try {
-      await addAccount({
+      await accountsProvider.addAccount({
         username: req.body['username'],
         email: req.body['email'],
         password: req.body['password'],
@@ -166,7 +169,7 @@ accountAPI.post(
     }
 
     try {
-      const account = await findAccountById(req.body['accountID']);
+      const account = await accountsProvider.findAccountById(req.body['accountID']);
       if (!account) {
         return res
           .status(400)
@@ -180,7 +183,7 @@ accountAPI.post(
           });
       }
 
-      const ok = await activateAccount(account);
+      const ok = await accountsProvider.activateAccount(account);
       if (!ok) {
         return res
           .status(400)

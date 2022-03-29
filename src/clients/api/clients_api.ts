@@ -18,7 +18,7 @@ import {
   getSessionAccount
 } from '../../session/middlewares/authorization';
 import Account from '../../accounts/models/account';
-import { findAccountById } from '../../accounts/providers/accounts';
+import accountsProvider from '../../accounts/providers/accounts';
 import log from '../../common/providers/logging';
 import { addSubscriber, removeSubscriber } from '../listeners/subscribers_store';
 
@@ -259,7 +259,7 @@ clientsAPI.post(
   '',
   tokenAuthMiddleware(),
   requireRoles(['CLIENTS_EDITOR']),
-  includeSessionAccount(ctx => findAccountById(ctx.subject)),
+  includeSessionAccount(ctx => accountsProvider.findAccountById(ctx.subject)),
   ...ClientAddRequestValidators,
   async (req: Request, res: Response, next: NextFunction) => {
     const validationErrors = validationResult(req);
@@ -321,7 +321,7 @@ clientsAPI.put(
   '/:id',
   tokenAuthMiddleware(),
   requireRoles(['CLIENTS_EDITOR']),
-  includeSessionAccount(ctx => findAccountById(ctx.subject)),
+  includeSessionAccount(ctx => accountsProvider.findAccountById(ctx.subject)),
   ClientUpdateRequestValidators,
   async (req: Request, res: Response, next: NextFunction) => {
     const validationErrors = validationResult(req);
@@ -391,7 +391,7 @@ clientsAPI.delete(
   '/:id',
   tokenAuthMiddleware(),
   requireRoles(['CLIENTS_EDITOR']),
-  includeSessionAccount(ctx => findAccountById(ctx.subject)),
+  includeSessionAccount(ctx => accountsProvider.findAccountById(ctx.subject)),
   async (req: Request, res: Response, next: NextFunction) => {
     const account = getSessionAccount<Account>(req);
     if (account.isBanned) {
@@ -448,7 +448,7 @@ clientsAPI.get(
       const authorsIds = new Set(changelog.map(c => c.author));
       const authorsUsernames = new Map<string, string>();
       for (const id of authorsIds) {
-        const author = await findAccountById(id);
+        const author = await accountsProvider.findAccountById(id);
         if (author) {
           authorsUsernames[id] = author.username;
         }
