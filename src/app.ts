@@ -29,6 +29,7 @@ app.disable('etag');
 app.use(accessLogger());
 app.use(cookieParser());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(prometheusMiddleware({
   metricsPath: '/metrics',
   collectDefaultMetrics: true,
