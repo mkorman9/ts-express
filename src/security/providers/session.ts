@@ -9,7 +9,6 @@ import Account from '../models/account';
 import DB from '../../common/providers/db';
 
 export interface NewSessionProps {
-  issuer?: string;
   ip?: string;
   duration?: number;
   roles?: string[];
