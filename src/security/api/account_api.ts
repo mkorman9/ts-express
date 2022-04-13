@@ -7,7 +7,7 @@ import {
   tokenAuthMiddleware,
   includeSessionAccount,
   getSessionAccount
-} from '../../session/middlewares/authorization';
+} from '../middlewares/authorization';
 import Account from '../models/account';
 import accountsProvider, {
   EmailAlreadyInUseError,

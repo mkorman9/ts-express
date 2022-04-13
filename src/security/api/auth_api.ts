@@ -7,10 +7,10 @@ import accountsProvider from '../providers/accounts';
 import {
   setSessionContext,
   sendSessionCookie
-} from '../../session/middlewares/authorization';
+} from '../../security/middlewares/authorization';
 import {
   startSession
-} from '../../session/providers/session';
+} from '../../security/providers/session';
 import { ratelimiterMiddleware } from '../../common/middlewares/rate_limiter';
 
 const PasswordAuthRequestValidators = [

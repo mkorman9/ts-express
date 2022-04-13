@@ -16,9 +16,9 @@ import {
   requireRoles,
   includeSessionAccount,
   getSessionAccount
-} from '../../session/middlewares/authorization';
-import Account from '../../accounts/models/account';
-import accountsProvider from '../../accounts/providers/accounts';
+} from '../../security/middlewares/authorization';
+import Account from '../../security/models/account';
+import accountsProvider from '../../security/providers/accounts';
 import log from '../../common/providers/logging';
 import { addSubscriber, removeSubscriber } from '../listeners/subscribers_store';
 

@@ -7,9 +7,9 @@ import cookieParser from 'cookie-parser';
 import prometheusMiddleware from 'express-prometheus-middleware';
 
 import clientsAPI from './clients/api/clients_api';
-import sessionAPI from './session/api/session_api';
-import authAPI from './accounts/api/auth_api';
-import accountAPI from './accounts/api/account_api';
+import sessionAPI from './security/api/session_api';
+import authAPI from './security/api/auth_api';
+import accountAPI from './security/api/account_api';
 import captchaAPI from './captcha/api/captcha_api';
 
 import healthcheck from './common/middlewares/healthcheck';

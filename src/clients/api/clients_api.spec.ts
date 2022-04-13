@@ -4,11 +4,11 @@ import sinon from 'sinon';
 import moment from 'moment';
 
 import app from '../../app';
-import * as authProvider from '../../session/middlewares/authorization';
+import * as authProvider from '../../security/middlewares/authorization';
 import clientsProvider from '../providers/clients';
 import Client from '../models/client';
-import { SessionContext } from '../../session/providers/session';
-import Account from '../../accounts/models/account';
+import { SessionContext } from '../../security/providers/session';
+import Account from '../../security/models/account';
 
 chai.use(chaiHttp);
 
