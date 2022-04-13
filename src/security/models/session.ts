@@ -7,7 +7,7 @@ import Account from './account';
 
 @Table({ tableName: 'sessions', freezeTableName: true, timestamps: false })
 class Session extends Model {
-  @Column({ field: 'id', type: DataTypes.UUID, primaryKey: true })
+  @Column({ field: 'id', type: DataTypes.STRING(64), primaryKey: true })
   id: string;
 
   @ForeignKey(() => Account)
@@ -17,7 +17,7 @@ class Session extends Model {
   @BelongsTo(() => Account, 'accountId')
   account: Account;
 
-  @Column({ field: 'token', type: DataTypes.STRING(1024), unique: true })
+  @Column({ field: 'token', type: DataTypes.STRING(128), unique: true })
   token: string;
 
   @Column({ field: 'roles', type: DataTypes.STRING(1024) })

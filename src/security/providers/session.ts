@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import { Transaction } from 'sequelize';
 import { randomBytes } from 'crypto';
@@ -15,34 +14,25 @@ export interface NewSessionProps {
 }
 
 class SessionProvider {
+  private static readonly SessionIdLength = 24;
   private static readonly SessionTokenLength = 48;
 
   async findById(id: string): Promise<Session> {
-    try {
-      return await Session.findOne({
-        where: {
-          id: id,
-          expiresAt: {
-            [Op.or]: [{
-              [Op.eq]: null
-            }, {
-              [Op.gte]: moment().toDate()
-            }]
-          }
-        },
-        include: [
-          Account
-        ]
-      });
-    } catch (err) {
-      if (err.name === 'SequelizeDatabaseError' &&
-        err.original &&
-        err.original.code === '22P02') {  // invalid UUID format
-        return null;
-      } else {
-        throw err;
-      }
-    }
+    return await Session.findOne({
+      where: {
+        id: id,
+        expiresAt: {
+          [Op.or]: [{
+            [Op.eq]: null
+          }, {
+            [Op.gte]: moment().toDate()
+          }]
+        }
+      },
+      include: [
+        Account
+      ]
+    });
   }
 
   async findByToken(token: string): Promise<Session> {
@@ -64,13 +54,11 @@ class SessionProvider {
   }
 
   async startSession(account: Account, props: NewSessionProps = {}): Promise<Session> {
-    const id = uuidv4();
     const now = moment();
 
     return await DB.transaction(async (t: Transaction) => {
       const session = await Session.create({
-        id: id,
-        account: account,
+        id: SessionProvider.generateSecureRandomString(SessionProvider.SessionIdLength),
         accountId: account.id,
         token: SessionProvider.generateSecureRandomString(SessionProvider.SessionTokenLength),
         rolesString: (props.roles || []).join(';'),

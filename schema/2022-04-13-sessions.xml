@@ -7,13 +7,13 @@
 
     <changeSet author="mkorman" id="2022-04-13-sessions">
         <createTable tableName="sessions">
-            <column name="id" type="uuid">
+            <column name="id" type="varchar(64)">
                 <constraints nullable="false" />
             </column>
             <column name="account_id" type="uuid">
                 <constraints nullable="false" />
             </column>
-            <column name="token" type="varchar(1024)">
+            <column name="token" type="varchar(128)">
                 <constraints nullable="false" unique="true" />
             </column>
             <column name="roles" type="varchar(1024)">
