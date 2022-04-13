@@ -3,15 +3,12 @@ import { Router, Request, Response, NextFunction } from 'express';
 import {
   cookieAuthMiddleware,
   tokenAuthMiddleware,
-  getSessionContext,
+  getSession,
   requireAuthentication,
-  setSessionContext,
+  setSession,
   sendSessionCookie
 } from '../middlewares/authorization';
-import {
-  refreshSession,
-  revokeSession
-} from '../providers/session';
+import sessionProvider from '../providers/session';
 
 const sessionAPI = Router();
 
@@ -19,8 +16,8 @@ sessionAPI.get(
   '/token',
   cookieAuthMiddleware(),
   async (req: Request, res: Response) => {
-    const sessionContext = getSessionContext(req);
-    if (!sessionContext) {
+    const session = getSession(req);
+    if (!session) {
       return res
         .status(401)
         .json({
@@ -32,13 +29,13 @@ sessionAPI.get(
     return res
       .status(200)
       .json({
-        id: sessionContext.id,
-        startTime: sessionContext.issuedAt,
-        expiresAt: sessionContext.expiresAt,
-        subject: sessionContext.subject,
-        loginIp: sessionContext.ip,
-        roles: Array.from(sessionContext.roles),
-        accessToken: sessionContext.raw
+        id: session.id,
+        startTime: session.issuedAt,
+        expiresAt: session.expiresAt,
+        subject: session.account.id,
+        loginIp: session.ip,
+        roles: Array.from(session.roles),
+        accessToken: session.token
       });
   }
 );
@@ -48,24 +45,24 @@ sessionAPI.put(
   tokenAuthMiddleware(),
   requireAuthentication(),
   async (req: Request, res: Response, next: NextFunction) => {
-    const oldSessionContext = getSessionContext(req);
+    const oldSession = getSession(req);
 
     try {
-      const sessionContext = await refreshSession(oldSessionContext);
-      setSessionContext(req, sessionContext);
+      const session = await sessionProvider.refreshSession(oldSession);
+      setSession(req, session);
 
       sendSessionCookie(req, res);
 
       return res
         .status(200)
         .json({
-          id: sessionContext.id,
-          startTime: sessionContext.issuedAt,
-          expiresAt: sessionContext.expiresAt,
-          subject: sessionContext.subject,
-          loginIp: sessionContext.ip,
-          roles: Array.from(sessionContext.roles),
-          accessToken: sessionContext.raw
+          id: session.id,
+          startTime: session.issuedAt,
+          expiresAt: session.expiresAt,
+          subject: session.account.id,
+          loginIp: session.ip,
+          roles: Array.from(session.roles),
+          accessToken: session.token
         });
     } catch (err) {
       next(err);
@@ -78,10 +75,10 @@ sessionAPI.post(
   tokenAuthMiddleware(),
   requireAuthentication(),
   async (req: Request, res: Response, next: NextFunction) => {
-    const sessionContext = getSessionContext(req);
+    const session = getSession(req);
 
     try {
-      const isRevoked = await revokeSession(sessionContext);
+      const isRevoked = await sessionProvider.revokeSession(session);
 
       if (!isRevoked) {
         return res
@@ -91,7 +88,7 @@ sessionAPI.post(
           });
       }
 
-      setSessionContext(req, null);
+      setSession(req, null);
       sendSessionCookie(req, res);
 
       return res

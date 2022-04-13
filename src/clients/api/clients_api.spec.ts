@@ -7,8 +7,8 @@ import app from '../../app';
 import * as authProvider from '../../security/middlewares/authorization';
 import clientsProvider from '../providers/clients';
 import Client from '../models/client';
-import { SessionContext } from '../../security/providers/session';
 import Account from '../../security/models/account';
+import Session from '../../security/models/session';
 
 chai.use(chaiHttp);
 
@@ -52,19 +52,6 @@ const InsertedRecord = {
   creditCards: []
 } as Client;
 
-const TestSessionContext = {
-  id: 'c3373b3f-e49c-40ce-b694-3c3801220165',
-  issuedAt: moment(),
-  expiresAt: moment().add(1, 'hour'),
-  duration: 3600,
-  issuer: '',
-  subject: 'testuser',
-  ip: '127.0.0.1',
-  roles: new Set<string>(['CLIENTS_EDITOR']),
-  resources: null,
-  raw: 'c9cf6558-d8df-42cf-9099-81273fd76550'
-} as SessionContext;
-
 const TestSessionAccount = {
   id: 'e9fa80e1-d978-4430-8f44-904f741e13d0',
   username: 'testuser',
@@ -76,6 +63,18 @@ const TestSessionAccount = {
   passwordCredentials: null,
   githubCredentials: null
 } as Account;
+
+const TestSession = {
+  id: 'c3373b3f-e49c-40ce-b694-3c3801220165',
+  account: TestSessionAccount,
+  accountId: TestSessionAccount.id,
+  token: 'c9cf6558-d8df-42cf-9099-81273fd76550',
+  roles: new Set<string>(['CLIENTS_EDITOR']),
+  issuedAt: moment(),
+  duration: 3600,
+  expiresAt: moment().add(1, 'hour'),
+  ip: '127.0.0.1',
+} as Session;
 
 describe('Clients API Tests', () => {
   it('should use default parameters when called for page without parameters', async () => {
@@ -233,10 +232,8 @@ describe('Clients API Tests', () => {
       lastName: 'Doe'
     };
 
-    const getSessionContextMock = sinon.stub(authProvider, 'getSessionContext')
-      .returns(TestSessionContext);
-    const getSessionAccountMock = sinon.stub(authProvider, 'getSessionAccount')
-      .returns(TestSessionAccount);
+    const getSessionMock = sinon.stub(authProvider, 'getSession')
+      .returns(TestSession);
     const addClientMock = sinon.stub(clientsProvider, 'addClient')
       .returns(Promise.resolve(InsertedRecord));
 
@@ -263,8 +260,7 @@ describe('Clients API Tests', () => {
     expect(response.status).equal(200);
     expect(response.body.id).equal(InsertedRecord.id);
 
-    getSessionContextMock.restore();
-    getSessionAccountMock.restore();
+    getSessionMock.restore();
     addClientMock.restore();
   });
 
@@ -276,10 +272,8 @@ describe('Clients API Tests', () => {
       lastName: 'Doe'
     };
 
-    const getSessionContextMock = sinon.stub(authProvider, 'getSessionContext')
-      .returns(TestSessionContext);
-    const getSessionAccountMock = sinon.stub(authProvider, 'getSessionAccount')
-      .returns(TestSessionAccount);
+    const getSessionMock = sinon.stub(authProvider, 'getSession')
+      .returns(TestSession);
 
     // when
     const response = await chai.request(app)
@@ -291,8 +285,7 @@ describe('Clients API Tests', () => {
     expect(response.status).equal(400);
     expect(response.body.causes).eql([{ field: 'gender', code: 'oneof' }]);
 
-    getSessionContextMock.restore();
-    getSessionAccountMock.restore();
+    getSessionMock.restore();
   });
 
   it('should return error when trying to add client without firstName', async () => {
@@ -301,10 +294,8 @@ describe('Clients API Tests', () => {
       lastName: 'Doe'
     };
 
-    const getSessionContextMock = sinon.stub(authProvider, 'getSessionContext')
-      .returns(TestSessionContext);
-    const getSessionAccountMock = sinon.stub(authProvider, 'getSessionAccount')
-      .returns(TestSessionAccount);
+    const getSessionMock = sinon.stub(authProvider, 'getSession')
+      .returns(TestSession);
 
     // when
     const response = await chai.request(app)
@@ -316,8 +307,7 @@ describe('Clients API Tests', () => {
     expect(response.status).equal(400);
     expect(response.body.causes).eql([{ field: 'firstName', code: 'required' }]);
 
-    getSessionContextMock.restore();
-    getSessionAccountMock.restore();
+    getSessionMock.restore();
   });
 
   it('should return error when trying to add client without lastName', async () => {
@@ -326,10 +316,8 @@ describe('Clients API Tests', () => {
       firstName: 'Jane'
     };
 
-    const getSessionContextMock = sinon.stub(authProvider, 'getSessionContext')
-      .returns(TestSessionContext);
-    const getSessionAccountMock = sinon.stub(authProvider, 'getSessionAccount')
-      .returns(TestSessionAccount);
+    const getSessionMock = sinon.stub(authProvider, 'getSession')
+      .returns(TestSession);
 
     // when
     const response = await chai.request(app)
@@ -341,8 +329,7 @@ describe('Clients API Tests', () => {
     expect(response.status).equal(400);
     expect(response.body.causes).eql([{ field: 'lastName', code: 'required' }]);
 
-    getSessionContextMock.restore();
-    getSessionAccountMock.restore();
+    getSessionMock.restore();
   });
 
   it('should return error when trying to add client with invalid birth date', async () => {
@@ -353,10 +340,8 @@ describe('Clients API Tests', () => {
       birthDate: 'XXX'
     };
 
-    const getSessionContextMock = sinon.stub(authProvider, 'getSessionContext')
-      .returns(TestSessionContext);
-    const getSessionAccountMock = sinon.stub(authProvider, 'getSessionAccount')
-      .returns(TestSessionAccount);
+    const getSessionMock = sinon.stub(authProvider, 'getSession')
+      .returns(TestSession);
 
     // when
     const response = await chai.request(app)
@@ -368,8 +353,7 @@ describe('Clients API Tests', () => {
     expect(response.status).equal(400);
     expect(response.body.causes).eql([{ field: 'birthDate', code: 'format' }]);
 
-    getSessionContextMock.restore();
-    getSessionAccountMock.restore();
+    getSessionMock.restore();
   });
 
   it('should return error when trying to add client with invalid credit card number', async () => {
@@ -382,10 +366,8 @@ describe('Clients API Tests', () => {
       }]
     };
 
-    const getSessionContextMock = sinon.stub(authProvider, 'getSessionContext')
-      .returns(TestSessionContext);
-    const getSessionAccountMock = sinon.stub(authProvider, 'getSessionAccount')
-      .returns(TestSessionAccount);
+    const getSessionMock = sinon.stub(authProvider, 'getSession')
+      .returns(TestSession);
 
     // when
     const response = await chai.request(app)
@@ -397,8 +379,7 @@ describe('Clients API Tests', () => {
     expect(response.status).equal(400);
     expect(response.body.causes).eql([{ field: 'creditCards[0].number', code: 'ccnumber' }]);
 
-    getSessionContextMock.restore();
-    getSessionAccountMock.restore();
+    getSessionMock.restore();
   });
 });
 

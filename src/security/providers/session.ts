@@ -1,157 +1,125 @@
-import moment, { Moment } from 'moment';
+import { v4 as uuidv4 } from 'uuid';
+import moment from 'moment';
+import { Transaction } from 'sequelize';
 import { randomBytes } from 'crypto';
+import { Op } from 'sequelize';
 
-import redisClient from '../../common/providers/redis';
-
-export interface SessionContext {
-  id: string;
-  issuedAt: Moment;
-  expiresAt: Moment | null;
-  duration: number;
-  issuer: string;
-  subject: string;
-  ip: string;
-  roles: Set<string>;
-  resources: Set<string> | null;
-  raw: string;
-}
+import Session from '../models/session';
+import Account from '../models/account';
+import DB from '../../common/providers/db';
 
 export interface NewSessionProps {
   issuer?: string;
   ip?: string;
   duration?: number;
   roles?: string[];
-  resources?: string[];
 }
 
-const SessionRedisKeyPrefix = 'session';
-const TokenRedisKeyPrefix = 'token';
-const SessionIdLength = 48;
-const SessionTokenLength = 48;
+class SessionProvider {
+  private static readonly SessionTokenLength = 48;
 
-export const findSession = async (subject: string, sessionId: string): Promise<SessionContext | null> => {
-  const sessionData = await redisClient.HGETALL(`${SessionRedisKeyPrefix}:${subject}:${sessionId}`);
-  if (Object.keys(sessionData).length === 0) {
-    return null;
+  async findById(id: string): Promise<Session> {
+    try {
+      return await Session.findOne({
+        where: {
+          id: id,
+          expiresAt: {
+            [Op.or]: [{
+              [Op.eq]: null
+            }, {
+              [Op.gte]: moment().toDate()
+            }]
+          }
+        },
+        include: [
+          Account
+        ]
+      });
+    } catch (err) {
+      if (err.name === 'SequelizeDatabaseError' &&
+        err.original &&
+        err.original.code === '22P02') {  // invalid UUID format
+        return null;
+      } else {
+        throw err;
+      }
+    }
   }
 
-  return buildSessionContext(sessionData);
-};
-
-export const findSessionWithToken = async (token: string): Promise<SessionContext | null> => {
-  const sessionKey = await redisClient.GET(`${TokenRedisKeyPrefix}:${token}`);
-  if (!sessionKey) {
-    return null;
+  async findByToken(token: string): Promise<Session> {
+    return await Session.findOne({
+      where: {
+        token: token,
+        expiresAt: {
+          [Op.or]: [{
+            [Op.eq]: null
+          }, {
+            [Op.gte]: moment().toDate()
+          }]
+        }
+      },
+      include: [
+        Account
+      ]
+    });
   }
 
-  const sessionData = await redisClient.HGETALL(`${SessionRedisKeyPrefix}:${sessionKey.toString()}`);
-  if (Object.keys(sessionData).length === 0) {
-    return null;
+  async startSession(account: Account, props: NewSessionProps = {}): Promise<Session> {
+    const id = uuidv4();
+    const now = moment();
+
+    return await DB.transaction(async (t: Transaction) => {
+      const session = await Session.create({
+        id: id,
+        account: account,
+        accountId: account.id,
+        token: SessionProvider.generateSecureRandomString(SessionProvider.SessionTokenLength),
+        rolesString: (props.roles || []).join(';'),
+        ip: props.ip,
+        issuedAt: now,
+        duration: (props.duration && props.duration > 0) ? props.duration : null,
+        expiresAt: (props.duration && props.duration > 0) ? moment(now).add(props.duration, 'seconds') : null
+      }, {
+        transaction: t
+      });
+
+      session.account = account;
+
+      return session;
+    });
   }
 
-  return buildSessionContext(sessionData);
-};
+  async revokeSession(session: Session): Promise<boolean> {
+    return await DB.transaction(async (t: Transaction) => {
+      const deleted = await Session.destroy({
+        where: {
+          id: session.id
+        },
+        transaction: t
+      });
 
-export const startSession = async (subject: string, props: NewSessionProps = {}): Promise<SessionContext> => {
-  const now = moment();
-  const sessionContext: SessionContext = {
-    id: generateSecureRandomString(SessionIdLength),
-    issuedAt: now,
-    expiresAt: (props.duration && props.duration > 0) ? moment(now).add(props.duration, 'seconds') : null,
-    duration: props.duration || 0,
-    issuer: props.issuer || '',
-    subject: subject,
-    ip: props.ip || '',
-    roles: new Set(props.roles || []),
-    resources: props.resources ? new Set(props.resources) : null,
-    raw: generateSecureRandomString(SessionTokenLength)
-  };
-  const sessionData = serializeSessionContext(sessionContext);
-  const sessionKey = `${SessionRedisKeyPrefix}:${subject}:${sessionContext.id}`;
-  const tokenKey = `${TokenRedisKeyPrefix}:${sessionContext.raw}`;
-
-  await redisClient.HSET(sessionKey, sessionData);
-  await redisClient.SET(tokenKey, `${subject}:${sessionContext.id}`);
-
-  if (props.duration && props.duration > 0) {
-    await redisClient.EXPIRE(sessionKey, props.duration);
-    await redisClient.EXPIRE(tokenKey, props.duration);
+      return deleted > 0;
+    });
   }
 
-  return sessionContext;
-};
+  async refreshSession(session: Session): Promise<Session> {
+    if (!session.expiresAt || !session.duration) {
+      return session;
+    }
 
-export const revokeSession = async (sessionContext: SessionContext): Promise<boolean> => {
-  const sessionKey = `${SessionRedisKeyPrefix}:${sessionContext.subject}:${sessionContext.id}`;
-  const tokenKey = `${TokenRedisKeyPrefix}:${sessionContext.raw}`;
+    return await DB.transaction(async (t: Transaction) => {
+      session.expiresAt = moment().add(session.duration, 'seconds');
+      session.save({
+        transaction: t
+      });
 
-  const deleted = await redisClient.DEL(sessionKey);
-  await redisClient.DEL(tokenKey);
-
-  return deleted > 0;
-};
-
-export const refreshSession = async (sessionContext: SessionContext): Promise<SessionContext> => {
-  if (!sessionContext.expiresAt) {
-    return sessionContext;
+      return session;
+    });
   }
 
-  sessionContext.expiresAt = moment().add(sessionContext.duration, 'seconds');
-
-  const sessionKey = `${SessionRedisKeyPrefix}:${sessionContext.subject}:${sessionContext.id}`;
-  const tokenKey = `${TokenRedisKeyPrefix}:${sessionContext.raw}`;
-
-  await redisClient.DEL(sessionKey);
-  await redisClient.DEL(tokenKey);
-
-  const sessionData = serializeSessionContext(sessionContext);
-  await redisClient.HSET(sessionKey, sessionData);
-  await redisClient.SET(tokenKey, `${sessionContext.subject}:${sessionContext.id}`);
-
-  await redisClient.EXPIRE(sessionKey, sessionContext.duration);
-  await redisClient.EXPIRE(tokenKey, sessionContext.duration);
-
-  return sessionContext;
-};
-
-const buildSessionContext = (sessionData: {[prop: string]: string}): SessionContext => {
-  return {
-    id: sessionData['id'],
-    issuedAt: moment.unix(parseInt(sessionData['issuedAt'])),
-    expiresAt: sessionData['expiresAt'] ? moment.unix(parseInt(sessionData['expiresAt'])) : null,
-    duration: parseInt(sessionData['duration']),
-    issuer: sessionData['issuer'],
-    subject: sessionData['subject'],
-    ip: sessionData['ip'],
-    roles: new Set(sessionData['roles'].split(';')),
-    resources: sessionData['resources'] ? new Set(sessionData['resources'].split(';')) : null,
-    raw: sessionData['raw']
-  };
-};
-
-const serializeSessionContext = (sessionContext: SessionContext): {[prop: string]: string} => {
-  const d = {
-    id: sessionContext.id,
-    issuedAt: sessionContext.issuedAt.unix().toString(),
-    duration: sessionContext.duration.toString(),
-    issuer: sessionContext.issuer,
-    subject: sessionContext.subject,
-    ip: sessionContext.ip,
-    roles: Array.from(sessionContext.roles).join(';'),
-    raw: sessionContext.raw
-  };
-
-  if (sessionContext.expiresAt) {
-    d['expiresAt'] = sessionContext.expiresAt.unix().toString();
+  private static generateSecureRandomString(n: number): string {
+    return randomBytes(n).toString('hex');
   }
+}
 
-  if (sessionContext.resources) {
-    d['resources'] = Array.from(sessionContext.resources).join(';');
-  }
-
-  return d;
-};
-
-const generateSecureRandomString = (n: number): string => {
-  return randomBytes(n).toString('hex');
-};
+export default new SessionProvider();

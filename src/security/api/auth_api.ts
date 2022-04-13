@@ -5,12 +5,10 @@ import bcrypt from 'bcrypt';
 
 import accountsProvider from '../providers/accounts';
 import {
-  setSessionContext,
+  setSession,
   sendSessionCookie
 } from '../../security/middlewares/authorization';
-import {
-  startSession
-} from '../../security/providers/session';
+import sessionProvider from '../../security/providers/session';
 import { ratelimiterMiddleware } from '../../common/middlewares/rate_limiter';
 
 const PasswordAuthRequestValidators = [
@@ -83,25 +81,25 @@ authAPI.post(
           });
       }
 
-      const sessionContext = await startSession(account.id, {
+      const session = await sessionProvider.startSession(account, {
         ip: req.ip,
         duration: rememberMe ? moment.duration(14, 'days').asSeconds() : moment.duration(4, 'hours').asSeconds(),
         roles: account.roles
       });
 
-      setSessionContext(req, sessionContext);
+      setSession(req, session);
       sendSessionCookie(req, res);
 
       return res
         .status(200)
         .json({
-          id: sessionContext.id,
-          startTime: sessionContext.issuedAt,
-          expiresAt: sessionContext.expiresAt,
-          subject: sessionContext.subject,
-          loginIp: sessionContext.ip,
-          roles: Array.from(sessionContext.roles),
-          accessToken: sessionContext.raw
+          id: session.id,
+          startTime: session.issuedAt,
+          expiresAt: session.expiresAt,
+          subject: session.account.id,
+          loginIp: session.ip,
+          roles: Array.from(session.roles),
+          accessToken: session.token
         });
     } catch (err) {
       next(err);

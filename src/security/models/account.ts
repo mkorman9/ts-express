@@ -14,7 +14,7 @@ class Account extends Model {
   @Column({ field: 'username', type: DataTypes.STRING(255), unique: true })
   username: string;
 
-  @Column({ field: 'roles', type: DataTypes.STRING(255) })
+  @Column({ field: 'roles', type: DataTypes.STRING(1024) })
   rolesString: string;
 
   @Column({ field: 'active', type: DataTypes.BOOLEAN })

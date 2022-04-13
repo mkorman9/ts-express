@@ -14,10 +14,8 @@ import { ClientChangeItem } from '../providers/clients_changes';
 import {
   tokenAuthMiddleware,
   requireRoles,
-  includeSessionAccount,
-  getSessionAccount
+  getSession
 } from '../../security/middlewares/authorization';
-import Account from '../../security/models/account';
 import accountsProvider from '../../security/providers/accounts';
 import log from '../../common/providers/logging';
 import { addSubscriber, removeSubscriber } from '../listeners/subscribers_store';
@@ -259,7 +257,6 @@ clientsAPI.post(
   '',
   tokenAuthMiddleware(),
   requireRoles(['CLIENTS_EDITOR']),
-  includeSessionAccount(ctx => accountsProvider.findAccountById(ctx.subject)),
   ...ClientAddRequestValidators,
   async (req: Request, res: Response, next: NextFunction) => {
     const validationErrors = validationResult(req);
@@ -289,7 +286,7 @@ clientsAPI.post(
       }))
     };
 
-    const account = getSessionAccount<Account>(req);
+    const account = getSession(req).account;
     if (account.isBanned) {
       return res
           .status(400)
@@ -321,7 +318,6 @@ clientsAPI.put(
   '/:id',
   tokenAuthMiddleware(),
   requireRoles(['CLIENTS_EDITOR']),
-  includeSessionAccount(ctx => accountsProvider.findAccountById(ctx.subject)),
   ClientUpdateRequestValidators,
   async (req: Request, res: Response, next: NextFunction) => {
     const validationErrors = validationResult(req);
@@ -351,7 +347,7 @@ clientsAPI.put(
       }))
     };
 
-    const account = getSessionAccount<Account>(req);
+    const account = getSession(req).account;
     if (account.isBanned) {
       return res
           .status(400)
@@ -391,9 +387,8 @@ clientsAPI.delete(
   '/:id',
   tokenAuthMiddleware(),
   requireRoles(['CLIENTS_EDITOR']),
-  includeSessionAccount(ctx => accountsProvider.findAccountById(ctx.subject)),
   async (req: Request, res: Response, next: NextFunction) => {
-    const account = getSessionAccount<Account>(req);
+    const account = getSession(req).account;
     if (account.isBanned) {
       return res
           .status(400)

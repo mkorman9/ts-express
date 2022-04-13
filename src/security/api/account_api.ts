@@ -5,10 +5,9 @@ import { ratelimiterMiddleware } from '../../common/middlewares/rate_limiter';
 
 import {
   tokenAuthMiddleware,
-  includeSessionAccount,
-  getSessionAccount
+  requireAuthentication,
+  getSession
 } from '../middlewares/authorization';
-import Account from '../models/account';
 import accountsProvider, {
   EmailAlreadyInUseError,
   UsernameAlreadyInUseError
@@ -55,9 +54,9 @@ const accountAPI = Router();
 accountAPI.get(
   '/info',
   tokenAuthMiddleware(),
-  includeSessionAccount(ctx => accountsProvider.findAccountById(ctx.subject)),
+  requireAuthentication(),
   async (req: Request, res: Response) => {
-    const account = getSessionAccount<Account>(req);
+    const account = getSession(req).account;
 
     return res
       .status(200)

@@ -1,19 +1,17 @@
 import { Request, Response, NextFunction, CookieOptions } from 'express';
 import moment from 'moment';
 
-import { SessionContext, findSession, findSessionWithToken } from '../providers/session';
+import sessionProvider from '../providers/session';
 import config from '../../common/providers/config';
-
-export type AccountResolver<T> = (context: SessionContext) => Promise<T>;
+import Session from '../models/session';
 
 const SessionCookieName = 'SESSION_ID';
-const SessionFieldName = 'sessionContext';
-const SessionExtractionStatusFieldName = 'sessionContextExtraction';
-const SessionAccountFieldName = 'sessionAccount';
+const SessionFieldName = 'session';
+const SessionExtractionStatusFieldName = 'sessionExtraction';
 
-const authMiddleware = (sessionExtractor: (req: Request) => (() => Promise<SessionContext | null> | null)) => () => {
+const authMiddleware = (sessionExtractor: (req: Request) => (() => Promise<Session | null> | null)) => () => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    if (getSessionContext(req)) {
+    if (getSession(req)) {
       return next();
     }
 
@@ -24,13 +22,13 @@ const authMiddleware = (sessionExtractor: (req: Request) => (() => Promise<Sessi
         return next();
       }
 
-      const sessionContext = await fn();
-      if (!sessionContext) {
+      const session = await fn();
+      if (!session) {
         req[SessionExtractionStatusFieldName] = 'invalid_credentials';
         return next();
       }
 
-      setSessionContext(req, sessionContext);
+      setSession(req, session);
     } catch (err) {
       return next(err);
     }
@@ -39,42 +37,26 @@ const authMiddleware = (sessionExtractor: (req: Request) => (() => Promise<Sessi
   };
 };
 
-export const getSessionContext = (req: Request): SessionContext => {
+export const getSession = (req: Request): Session => {
   if (req[SessionFieldName]) {
-    return req[SessionFieldName] as SessionContext;
+    return req[SessionFieldName] as Session;
   }
 
   return null;
 };
 
-export const setSessionContext = (req: Request, sessionContext: SessionContext | null) => {
-  req[SessionFieldName] = sessionContext;
-  req[SessionAccountFieldName] = undefined;
-};
-
-export const getSessionAccount = <T = unknown>(req: Request): T => {
-  if (req[SessionAccountFieldName]) {
-    return req[SessionAccountFieldName] as T;
-  }
-
-  return null;
+export const setSession = (req: Request, session: Session | null) => {
+  req[SessionFieldName] = session;
 };
 
 export const cookieAuthMiddleware = authMiddleware((req: Request) => {
-  const cookieValue = req.cookies[SessionCookieName];
-  if (!cookieValue) {
+  const sessionId = req.cookies[SessionCookieName];
+  if (!sessionId) {
     return null;
   }
 
-  const parsed = parseSessionCookie(cookieValue);
-  if (!parsed) {
-    return null;
-  }
-
-  const [subject, sessionId] = parsed;
-
-  return (): Promise<SessionContext | null> => {
-    return findSession(subject, sessionId);
+  return (): Promise<Session | null> => {
+    return sessionProvider.findById(sessionId);
   };
 });
 
@@ -89,14 +71,14 @@ export const tokenAuthMiddleware = authMiddleware((req: Request) => {
     return null;
   }
 
-  return (): Promise<SessionContext | null> => {
-    return findSessionWithToken(token);
+  return (): Promise<Session | null> => {
+    return sessionProvider.findByToken(token);
   };
 });
 
 export const requireAuthentication = () => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    if (getSessionContext(req)) {
+    if (getSession(req)) {
       return next();
     }
 
@@ -131,8 +113,8 @@ export const requireRoles = (roles: string[]) => {
 
   return async (req: Request, res: Response, next: NextFunction) => {
     await a(req, res, async () => {
-      const sessionContext = getSessionContext(req);
-      if (roles.some(r => sessionContext.roles.has(r))) {
+      const session = getSession(req);
+      if (roles.some(r => session.roles.has(r))) {
         return next();
       }
 
@@ -146,34 +128,8 @@ export const requireRoles = (roles: string[]) => {
   };
 };
 
-export const includeSessionAccount = <T = unknown>(resolver: AccountResolver<T>) => {
-  const a = requireAuthentication();
-
-  return async (req: Request, res: Response, next: NextFunction) => {
-    await a(req, res, async () => {
-      if (getSessionAccount(req)) {
-        return next();
-      }
-
-      const sessionContext = getSessionContext(req);
-      if (!sessionContext) {
-        return next();
-      }
-
-      try {
-        const account = await resolver(sessionContext);
-        req[SessionAccountFieldName] = account;
-      } catch (err) {
-        return next(err);
-      }
-
-      next();
-    });
-  };
-};
-
 export const sendSessionCookie = (req: Request, res: Response) => {
-  const sessionContext = getSessionContext(req);
+  const session = getSession(req);
   let value = '';
 
   const options: CookieOptions = {
@@ -182,34 +138,17 @@ export const sendSessionCookie = (req: Request, res: Response) => {
     secure: config.server?.behindTLSProxy || false
   };
 
-  if (sessionContext) {
-    if (sessionContext.expiresAt) {
-      options.expires = sessionContext.expiresAt.toDate();
+  if (session) {
+    if (session.expiresAt) {
+      options.expires = session.expiresAt.toDate();
     }
 
-    value = Buffer.from(`${sessionContext.subject}:${sessionContext.id}`).toString('base64');
+    value = session.id;
   } else {
     options.expires = moment(0).toDate();
   }
 
   res.cookie(SessionCookieName, value, options);
-};
-
-const parseSessionCookie = (cookieValue: string): [subject: string, sessionId: string] | null => {
-  try {
-    const buf = Buffer.from(cookieValue, 'base64');
-    const parts = buf.toString().split(':');
-
-    if (parts.length !== 2) {
-      return null;
-    }
-
-    return [parts[0], parts[1]];
-  } catch (err) {
-    if (err instanceof TypeError) {
-      return null;
-    }
-  }
 };
 
 const parseAuthHeader = (authHeaderValue: string): string | null => {
