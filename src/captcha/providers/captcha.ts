@@ -2,10 +2,9 @@ import { v4 as uuidv4 } from 'uuid';
 import captchapng3 from 'captchapng3';
 import axios from 'axios';
 import dayjs from 'dayjs';
-import { Op, Transaction } from 'sequelize';
+import { Op } from 'sequelize';
 
 import Captcha from '../models/captcha';
-import DB from '../../common/providers/db';
 
 export interface GetCaptchaImageProps {
   width: number;
@@ -30,15 +29,11 @@ class CaptchaProvider {
       code += CaptchaProvider.CaptchaCharset[Math.floor(Math.random() * CaptchaProvider.CaptchaCharset.length)];
     }
 
-    return await DB.transaction(async (t: Transaction) => {
-      return await Captcha.create({
-        id: id,
-        code: code,
-        createdAt: now,
-        expiresAt: dayjs(now).add(CaptchaProvider.CaptchaExpirationMinutes, 'minutes')
-      }, {
-        transaction: t
-      });
+    return await Captcha.create({
+      id: id,
+      code: code,
+      createdAt: now,
+      expiresAt: dayjs(now).add(CaptchaProvider.CaptchaExpirationMinutes, 'minutes')
     });
   }
 
@@ -86,28 +81,22 @@ class CaptchaProvider {
       return false;
     }
 
-    await DB.transaction(async (t: Transaction) => {
-      await Captcha.destroy({
-        where: {
-          id: id
-        },
-        transaction: t
-      });
+    await Captcha.destroy({
+      where: {
+        id: id
+      }
     });
 
     return result.code === answer;
   }
 
   async deleteExpiredRecords() {
-    await DB.transaction(async (t: Transaction) => {
-      await Captcha.destroy({
-        where: {
-          expiresAt: {
-            [Op.lt]: dayjs().toDate()
-          }
-        },
-        transaction: t
-      });
+    await Captcha.destroy({
+      where: {
+        expiresAt: {
+          [Op.lt]: dayjs().toDate()
+        }
+      }
     });
   }
 
