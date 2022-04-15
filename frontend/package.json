@@ -5,7 +5,7 @@
   "scripts": {
     "start": "BROWSER=none SKIP_PREFLIGHT_CHECK=true react-scripts start",
     "lint": "eslint --ext js --ext jsx --ext ts --ext tsx src/",
-    "build": "GENERATE_SOURCEMAP=false react-scripts build"
+    "build": "GENERATE_SOURCEMAP=false SKIP_PREFLIGHT_CHECK=true react-scripts build"
   },
   "devDependencies": {
     "@types/bootstrap": "^4.6.0",
