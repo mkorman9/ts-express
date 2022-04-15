@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 
 import { ratelimiterMiddleware } from '../../common/middlewares/rate_limiter';
-import { generateCaptcha, getCaptchaAudio, getCaptchaImage } from '../providers/captcha';
+import captchaProvider from '../providers/captcha';
 
 const captchaAPI = Router();
 
@@ -10,7 +10,7 @@ captchaAPI.get(
   ratelimiterMiddleware('general'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const captchaId = await generateCaptcha();
+      const captchaId = await captchaProvider.generate();
       return res
         .status(200)
         .json({
@@ -38,7 +38,7 @@ captchaAPI.get(
     }
 
     try {
-      const image = await getCaptchaImage(id, { width, height });
+      const image = await captchaProvider.getImage(id, { width, height });
       if (!image) {
         return res
           .status(404)
@@ -73,7 +73,7 @@ captchaAPI.get(
     }
 
     try {
-      const audio = await getCaptchaAudio(id, { language });
+      const audio = await captchaProvider.getAudio(id, { language });
       if (!audio) {
         return res
           .status(404)

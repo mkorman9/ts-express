@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifyCaptchaAnswer } from '../providers/captcha';
+import captchaProvider from '../providers/captcha';
 
 export interface CaptchaAnswer {
   id: string;
@@ -27,7 +27,7 @@ export const captchaMiddleware = (fieldName: string) => {
 
     const captchaAnswer = req.body[fieldName] as CaptchaAnswer;
     try {
-      const ok = await verifyCaptchaAnswer(captchaAnswer.id, captchaAnswer.answer);
+      const ok = await captchaProvider.verifyAnswer(captchaAnswer.id, captchaAnswer.answer);
       if (!ok) {
         return res
           .status(400)
