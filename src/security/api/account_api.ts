@@ -150,7 +150,7 @@ accountAPI.post(
 
 accountAPI.post(
   '/activate',
-  ratelimiterMiddleware('general', { countStatusCodes: [400] }),
+  ratelimiterMiddleware('general'),
   ...AccountActivateValidators,
   async (req: Request, res: Response, next: NextFunction) => {
     const validationErrors = validationResult(req);

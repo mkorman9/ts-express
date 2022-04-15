@@ -22,7 +22,7 @@ const authAPI = Router();
 
 authAPI.post(
   '/password',
-  ratelimiterMiddleware('login', { countStatusCodes: [401] }),
+  ratelimiterMiddleware('login'),
   ...PasswordAuthRequestValidators,
   async (req: Request, res: Response, next: NextFunction) => {
     const validationErrors = validationResult(req);
