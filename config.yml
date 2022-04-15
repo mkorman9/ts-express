@@ -5,10 +5,6 @@ database:
   uri: postgres://username:password@localhost:5432/tsexpress?sslmode=disable
   queryLogging: true
 
-redis:
-  uri: redis://localhost:6379
-  password: password
-
 amqp:
   uri: amqp://username:password@localhost:5672/
 

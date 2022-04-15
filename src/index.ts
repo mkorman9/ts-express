@@ -3,7 +3,6 @@ import './exception_handler';
 import log from './common/providers/logging';
 
 import { initDB } from './common/providers/db';
-import { initRedis } from './common/providers/redis';
 import { initAMQP, closeAMQP } from './common/providers/amqp';
 
 import type { Application } from 'express';
@@ -14,14 +13,6 @@ const createApp = async (): Promise<Application> => {
   try {
     await initDB();
     log.info('successfully connected to postgres');
-  } catch (err) {
-    log.error(`failed to connect to postgres: ${err}`);
-    throw err;
-  }
-
-  try {
-    await initRedis();
-    log.info('successfully connected to redis');
   } catch (err) {
     log.error(`failed to connect to postgres: ${err}`);
     throw err;

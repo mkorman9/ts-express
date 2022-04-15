@@ -30,7 +30,6 @@
     "on-headers": "^1.0.2",
     "pg": "^8.7.1",
     "prom-client": "^13.2.0",
-    "redis": "^4.0.1",
     "reflect-metadata": "^0.1.13",
     "sequelize": "6.6.2",
     "sequelize-typescript": "^2.1.0",
