@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { body, validationResult } from 'express-validator';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import bcrypt from 'bcrypt';
 
 import accountsProvider from '../providers/accounts';
@@ -83,7 +83,7 @@ authAPI.post(
 
       const session = await sessionProvider.startSession(account, {
         ip: req.ip,
-        duration: rememberMe ? moment.duration(14, 'days').asSeconds() : moment.duration(4, 'hours').asSeconds(),
+        duration: rememberMe ? dayjs.duration(14, 'days').asSeconds() : dayjs.duration(4, 'hours').asSeconds(),
         roles: account.roles
       });
 

@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { Table, Column, Model, HasMany } from 'sequelize-typescript';
-import moment from 'moment';
-import type { Moment } from 'moment';
+import dayjs from 'dayjs';
+import type { Dayjs } from 'dayjs';
 
 import CreditCard from './credit_card';
 
@@ -38,10 +38,10 @@ class Client extends Model {
         return null;
       }
 
-      return moment(value);
+      return dayjs(value);
     }
   })
-  birthDate: Moment | null;
+  birthDate: Dayjs | null;
 
   @Column({ field: 'deleted', type: DataTypes.BOOLEAN })
   isDeleted: boolean;

@@ -1,7 +1,7 @@
 import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
 import sinon from 'sinon';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 import app from '../../app';
 import * as authProvider from '../../security/middlewares/authorization';
@@ -20,7 +20,7 @@ const Records = [{
   address: 'Queens Road 1482, Bristol, Cambridgeshire ST7 9GA',
   phoneNumber: '0744-910-818',
   email: 'amelia.pierce@example.com',
-  birthDate: moment('1982-07-22T20:30:05.000Z'),
+  birthDate: dayjs('1982-07-22T20:30:05.000Z'),
   isDeleted: false,
   creditCards: []
 }, {
@@ -70,9 +70,9 @@ const TestSession = {
   accountId: TestSessionAccount.id,
   token: 'c9cf6558-d8df-42cf-9099-81273fd76550',
   roles: new Set<string>(['CLIENTS_EDITOR']),
-  issuedAt: moment(),
+  issuedAt: dayjs(),
   duration: 3600,
-  expiresAt: moment().add(1, 'hour'),
+  expiresAt: dayjs().add(1, 'hour'),
   ip: '127.0.0.1',
 } as Session;
 

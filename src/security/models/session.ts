@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { Table, Column, Model, ForeignKey, BelongsTo } from 'sequelize-typescript';
-import moment from 'moment';
-import type { Moment } from 'moment';
+import dayjs from 'dayjs';
+import type { Dayjs } from 'dayjs';
 
 import Account from './account';
 
@@ -35,10 +35,10 @@ class Session extends Model {
         return null;
       }
 
-      return moment(value);
+      return dayjs(value);
     }
   })
-  issuedAt: Moment;
+  issuedAt: Dayjs;
 
   @Column({ field: 'duration', type: DataTypes.INTEGER, allowNull: true })
   duration: number;
@@ -53,10 +53,10 @@ class Session extends Model {
         return null;
       }
 
-      return moment(value);
+      return dayjs(value);
     }
   })
-  expiresAt: Moment | null;
+  expiresAt: Dayjs | null;
 
   get roles(): Set<string> {
     if (!this.rolesString) {

@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { Table, Column, Model, BelongsTo, ForeignKey } from 'sequelize-typescript';
-import moment from 'moment';
-import type { Moment } from 'moment';
+import dayjs from 'dayjs';
+import type { Dayjs } from 'dayjs';
 
 import Account from './account';
 
@@ -30,10 +30,10 @@ class PasswordCredentials extends Model {
         return null;
       }
 
-      return moment(value);
+      return dayjs(value);
     }
   })
-  lastChangeAt: Moment | null;
+  lastChangeAt: Dayjs | null;
 
   @Column({ field: 'last_change_ip', type: DataTypes.STRING(255) })
   lastChangeIp: string;

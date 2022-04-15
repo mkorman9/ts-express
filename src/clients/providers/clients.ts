@@ -1,5 +1,5 @@
 import { Op, WhereAttributeHash } from 'sequelize';
-import moment, { Moment } from 'moment';
+import dayjs, { Dayjs } from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 import { Transaction } from 'sequelize';
 
@@ -28,8 +28,8 @@ export interface FindClientsFilters {
   address?: string;
   phoneNumber?: string;
   email?: string;
-  bornAfter?: Moment;
-  bornBefore?: Moment;
+  bornAfter?: Dayjs;
+  bornBefore?: Dayjs;
   creditCardNumber?: string;
 }
 
@@ -59,7 +59,7 @@ export interface ClientAddPayload {
   address?: string;
   phoneNumber?: string;
   email?: string;
-  birthDate?: Moment;
+  birthDate?: Dayjs;
   creditCards: { number: string }[];
 }
 
@@ -70,7 +70,7 @@ export interface ClientUpdatePayload {
   address?: string;
   phoneNumber?: string;
   email?: string;
-  birthDate?: Moment | null;
+  birthDate?: Dayjs | null;
   creditCards?: { number: string }[];
 }
 
@@ -279,7 +279,7 @@ export class ClientsProvider {
         id: uuidv4(),
         clientId: id,
         type: 'CREATED',
-        timestamp: moment(),
+        timestamp: dayjs(),
         author: props.author,
         changeset: JSON.stringify(changeset)
       }, {
@@ -321,7 +321,7 @@ export class ClientsProvider {
           address: client.address,
           phoneNumber: client.phoneNumber,
           email: client.email,
-          birthDate: client.birthDate ? moment(client.birthDate) : null,
+          birthDate: client.birthDate ? dayjs(client.birthDate) : null,
           creditCards: (client.creditCards || []).map(cc => ({ number: cc.number }))
         };
 
@@ -378,7 +378,7 @@ export class ClientsProvider {
           id: uuidv4(),
           clientId: id,
           type: 'UPDATED',
-          timestamp: moment(),
+          timestamp: dayjs(),
           author: props.author,
           changeset: JSON.stringify(changeset)
         }, {
@@ -429,7 +429,7 @@ export class ClientsProvider {
           id: uuidv4(),
           clientId: id,
           type: 'DELETED',
-          timestamp: moment(),
+          timestamp: dayjs(),
           author: props.author,
           changeset: ''
         }, {

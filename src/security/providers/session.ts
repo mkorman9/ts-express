@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { Transaction } from 'sequelize';
 import { randomBytes } from 'crypto';
 import { Op } from 'sequelize';
@@ -25,7 +25,7 @@ class SessionProvider {
           [Op.or]: [{
             [Op.eq]: null
           }, {
-            [Op.gte]: moment().toDate()
+            [Op.gte]: dayjs().toDate()
           }]
         }
       },
@@ -43,7 +43,7 @@ class SessionProvider {
           [Op.or]: [{
             [Op.eq]: null
           }, {
-            [Op.gte]: moment().toDate()
+            [Op.gte]: dayjs().toDate()
           }]
         }
       },
@@ -54,7 +54,7 @@ class SessionProvider {
   }
 
   async startSession(account: Account, props: NewSessionProps = {}): Promise<Session> {
-    const now = moment();
+    const now = dayjs();
 
     return await DB.transaction(async (t: Transaction) => {
       const session = await Session.create({
@@ -65,7 +65,7 @@ class SessionProvider {
         ip: props.ip,
         issuedAt: now,
         duration: (props.duration && props.duration > 0) ? props.duration : null,
-        expiresAt: (props.duration && props.duration > 0) ? moment(now).add(props.duration, 'seconds') : null
+        expiresAt: (props.duration && props.duration > 0) ? dayjs(now).add(props.duration, 'seconds') : null
       }, {
         transaction: t
       });
@@ -95,7 +95,7 @@ class SessionProvider {
     }
 
     return await DB.transaction(async (t: Transaction) => {
-      session.expiresAt = moment().add(session.duration, 'seconds');
+      session.expiresAt = dayjs().add(session.duration, 'seconds');
       session.save({
         transaction: t
       });

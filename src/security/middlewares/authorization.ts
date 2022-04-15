@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction, CookieOptions } from 'express';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 import sessionProvider from '../providers/session';
 import config from '../../common/providers/config';
@@ -145,7 +145,7 @@ export const sendSessionCookie = (req: Request, res: Response) => {
 
     value = session.id;
   } else {
-    options.expires = moment(0).toDate();
+    options.expires = dayjs(0).toDate();
   }
 
   res.cookie(SessionCookieName, value, options);

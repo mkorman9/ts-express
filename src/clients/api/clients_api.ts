@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { body, validationResult } from 'express-validator';
-import moment, { Moment } from 'moment';
+import dayjs, { Dayjs } from 'dayjs';
 import ws from 'ws';
 
 import clientsProvider, {
@@ -32,7 +32,7 @@ interface ClientView {
   address: string;
   phoneNumber: string;
   email: string;
-  birthDate: Moment | null;
+  birthDate: Dayjs | null;
   creditCards: CreditCardView[];
 }
 
@@ -280,7 +280,7 @@ clientsAPI.post(
       address: req.body['address'],
       phoneNumber: req.body['phoneNumber'],
       email: req.body['email'],
-      birthDate: req.body['birthDate'] ? moment(req.body['birthDate']) : undefined,
+      birthDate: req.body['birthDate'] ? dayjs(req.body['birthDate']) : undefined,
       creditCards: !req.body['creditCards'] ? [] : (req.body['creditCards'] as { number: string }[]).map(cc => ({
         number: cc['number']
       }))
@@ -341,7 +341,7 @@ clientsAPI.put(
       address: req.body['address'],
       phoneNumber: req.body['phoneNumber'],
       email: req.body['email'],
-      birthDate: req.body['birthDate'] ? moment(req.body['birthDate']) : req.body['birthDate'],
+      birthDate: req.body['birthDate'] ? dayjs(req.body['birthDate']) : req.body['birthDate'],
       creditCards: !req.body['creditCards'] ? undefined : (req.body['creditCards'] as { number: string }[]).map(cc => ({
         number: cc['number']
       }))
@@ -517,9 +517,9 @@ const parseClientsFilters = (query: unknown): FindClientsFilters => {
     } else if (k === 'email') {
       ret.email = value;
     } else if (k === 'bornAfter') {
-      let dt: Moment = null;
+      let dt: Dayjs = null;
       try {
-        dt = moment(value, true);
+        dt = dayjs(value);
       } catch (err) {
         // ignore
       }
@@ -530,9 +530,9 @@ const parseClientsFilters = (query: unknown): FindClientsFilters => {
 
       ret.bornAfter = dt;
     } else if (k === 'bornBefore') {
-      let dt: Moment = null;
+      let dt: Dayjs = null;
       try {
-        dt = moment(value, true);
+        dt = dayjs(value);
       } catch (err) {
         // ignore
       }

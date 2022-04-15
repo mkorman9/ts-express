@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { Table, Column, Model, HasOne } from 'sequelize-typescript';
-import moment from 'moment';
-import type { Moment } from 'moment';
+import dayjs from 'dayjs';
+import type { Dayjs } from 'dayjs';
 
 import PasswordCredentials from './password_credentials';
 import GithubCredentials from './github_credentials';
@@ -33,10 +33,10 @@ class Account extends Model {
         return null;
       }
 
-      return moment(value);
+      return dayjs(value);
     }
   })
-  bannedUntil: Moment | null;
+  bannedUntil: Dayjs | null;
 
   @Column({ field: 'preferred_language', type: DataTypes.STRING(32) })
   language: string;
@@ -50,10 +50,10 @@ class Account extends Model {
         return null;
       }
 
-      return moment(value);
+      return dayjs(value);
     }
   })
-  registeredAt: Moment;
+  registeredAt: Dayjs;
 
   @HasOne(() => PasswordCredentials)
   passwordCredentials: PasswordCredentials | null;
@@ -74,7 +74,7 @@ class Account extends Model {
   }
 
   get isBanned(): boolean {
-    return this.bannedUntil && moment().isBefore(this.bannedUntil);
+    return this.bannedUntil && dayjs().isBefore(this.bannedUntil);
   }
 
   get roles(): string[] {

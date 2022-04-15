@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { Table, Column, Model, ForeignKey } from 'sequelize-typescript';
-import moment from 'moment';
-import type { Moment } from 'moment';
+import dayjs from 'dayjs';
+import type { Dayjs } from 'dayjs';
 
 import Client from './client';
 
@@ -27,10 +27,10 @@ class ClientChange extends Model {
         return null;
       }
 
-      return moment(value);
+      return dayjs(value);
     }
   })
-  timestamp: Moment;
+  timestamp: Dayjs;
 
   @Column({ field: 'author', type: DataTypes.UUID })
   author: string;

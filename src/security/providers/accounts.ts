@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import bcrypt from 'bcrypt';
 import { Transaction } from 'sequelize';
 import Account from '../models/account';
@@ -80,7 +80,7 @@ export class AccountsProvider {
 
   async addAccount(payload: AccountAddPayload, props: AccountAddProps): Promise<Account> {
     const id = uuidv4();
-    const now = moment();
+    const now = dayjs();
 
     try {
       return await DB.transaction(async (t: Transaction) => {
@@ -90,7 +90,7 @@ export class AccountsProvider {
           rolesString: '',
           isActive: false,
           isDeleted: false,
-          bannedUntil: moment.unix(0),
+          bannedUntil: dayjs.unix(0),
           language: payload.language,
           registeredAt: now,
           passwordCredentials: {

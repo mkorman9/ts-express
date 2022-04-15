@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import config from '../providers/config';
 
-const startupTime = moment();
+const startupTime = dayjs();
 
 const healthcheck = (req: Request, res: Response, next: NextFunction) => {
   if (res.headersSent) {

@@ -1,4 +1,4 @@
-import { Moment } from 'moment';
+import { Dayjs } from 'dayjs';
 
 export interface ClientDescriptor {
   gender?: string;
@@ -7,7 +7,7 @@ export interface ClientDescriptor {
   address?: string;
   phoneNumber?: string;
   email?: string;
-  birthDate?: Moment | null;
+  birthDate?: Dayjs | null;
   creditCards?: { number: string }[];
 }
 

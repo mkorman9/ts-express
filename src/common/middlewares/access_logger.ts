@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import onHeaders from 'on-headers';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 import log from '../providers/logging';
 
@@ -16,10 +16,10 @@ const accessLogger = () => {
       return next();
     }
 
-    const startTime = moment();
+    const startTime = dayjs();
 
     onHeaders(res, () => {
-      const elapsedTime = moment().diff(startTime, 'ms');
+      const elapsedTime = dayjs().diff(startTime, 'ms');
 
       log.info(`${req.method} ${req.originalUrl} - ${res.statusCode} (${elapsedTime} ms) [${req.ip}]`, {
         tag: 'access_log',
