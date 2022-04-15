@@ -96,8 +96,7 @@ export const verifyCaptchaAnswer = async (id: string, answer: string): Promise<b
     });
   });
 
-  const code = result.toString();
-  return answer === code;
+  return result.code === answer;
 };
 
 const findCaptcha = async (id: string): Promise<Captcha> => {
