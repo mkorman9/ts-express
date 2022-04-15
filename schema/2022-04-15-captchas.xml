@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet author="mkorman" id="2022-04-15-captchas">
+        <createTable tableName="captchas">
+            <column name="id" type="uuid">
+                <constraints nullable="false" />
+            </column>
+            <column name="code" type="varchar(6)">
+                <constraints nullable="false" />
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+            <column name="expires_at" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="captchas" columnNames="id" constraintName="captchas_pkey" />
+
+    </changeSet>
+
+</databaseChangeLog>

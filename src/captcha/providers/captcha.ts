@@ -1,8 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import captchapng3 from 'captchapng3';
 import axios from 'axios';
+import dayjs from 'dayjs';
+import { Op, Transaction } from 'sequelize';
 
-import redisClient from '../../common/providers/redis';
+import Captcha from '../models/captcha';
+import DB from '../../common/providers/db';
 
 export interface GetCaptchaImageProps {
   width: number;
@@ -15,24 +18,33 @@ export interface GetCaptchaAudioProps {
 
 const CaptchaCharset = '1234567890'.split('');
 const CaptchaLength = 6;
-const CaptchaExpirationSeconds = 30 * 60;  // 30 min
-const CaptchaRedisPrefix = 'captcha';
+const CaptchaExpirationMinutes = 30;
 
 export const generateCaptcha = async (): Promise<string> => {
   const id = uuidv4();
-  let captchaValue = '';
+  const now = dayjs();
 
+  let code = '';
   for (let i = 0; i < CaptchaLength; i++) {
-    captchaValue += CaptchaCharset[Math.floor(Math.random() * CaptchaCharset.length)];
+    code += CaptchaCharset[Math.floor(Math.random() * CaptchaCharset.length)];
   }
 
-  await redisClient.SETEX(`${CaptchaRedisPrefix}:${id}`, CaptchaExpirationSeconds, captchaValue);
+  await DB.transaction(async (t: Transaction) => {
+    await Captcha.create({
+      id: id,
+      code: code,
+      createdAt: now,
+      expiresAt: dayjs(now).add(CaptchaExpirationMinutes, 'minutes')
+    }, {
+      transaction: t
+    });
+  });
 
   return id;
 };
 
 export const getCaptchaImage = async (id: string, props: GetCaptchaImageProps): Promise<Buffer | null> => {
-  const result = await redisClient.get(`${CaptchaRedisPrefix}:${id}`);
+  const result = await findCaptcha(id);
   if (!result) {
     return null;
   }
@@ -42,7 +54,7 @@ export const getCaptchaImage = async (id: string, props: GetCaptchaImageProps): 
 };
 
 export const getCaptchaAudio = async (id: string, props: GetCaptchaAudioProps): Promise<Buffer | null> => {
-  const result = await redisClient.get(`${CaptchaRedisPrefix}:${id}`);
+  const result = await findCaptcha(id);
   if (!result) {
     return null;
   }
@@ -70,13 +82,41 @@ export const getCaptchaAudio = async (id: string, props: GetCaptchaAudioProps): 
 };
 
 export const verifyCaptchaAnswer = async (id: string, answer: string): Promise<boolean> => {
-  const result = await redisClient.get(`${CaptchaRedisPrefix}:${id}`);
+  const result = await findCaptcha(id);
   if (!result) {
     return false;
   }
 
-  await redisClient.del(`${CaptchaRedisPrefix}:${id}`);
+  await DB.transaction(async (t: Transaction) => {
+    await Captcha.destroy({
+      where: {
+        id: id
+      },
+      transaction: t
+    });
+  });
 
-  const captchaValue = result.toString();
-  return answer === captchaValue;
+  const code = result.toString();
+  return answer === code;
+};
+
+const findCaptcha = async (id: string): Promise<Captcha> => {
+  try {
+    return await Captcha.findOne({
+      where: {
+        id: id,
+        expiresAt: {
+          [Op.gte]: dayjs().toDate()
+        }
+      }
+    });
+  } catch (err) {
+    if (err.name === 'SequelizeDatabaseError' &&
+      err.original &&
+      err.original.code === '22P02') {  // invalid UUID format
+      return null;
+    } else {
+      throw err;
+    }
+  }
 };

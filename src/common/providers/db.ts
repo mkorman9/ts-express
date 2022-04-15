@@ -7,7 +7,8 @@ import log from './logging';
 
 const modelsDirs = [
   './clients/models',
-  './security/models'
+  './security/models',
+  './captcha/models'
 ];
 
 const initSequelize = () => {

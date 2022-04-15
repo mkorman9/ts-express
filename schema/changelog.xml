@@ -8,5 +8,6 @@
     <include file="2021-04-26-clients.xml" relativeToChangelogFile="true" />
     <include file="2021-06-05-accounts.xml" relativeToChangelogFile="true" />
     <include file="2022-04-13-sessions.xml" relativeToChangelogFile="true" />
+    <include file="2022-04-15-captchas.xml" relativeToChangelogFile="true" />
 
 </databaseChangeLog>
