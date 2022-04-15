@@ -21,7 +21,7 @@ class CaptchaProvider {
   private static readonly CaptchaLength = 6;
   private static readonly CaptchaExpirationMinutes = 30;
 
-  async generate(): Promise<string> {
+  async generate(): Promise<Captcha> {
     const id = uuidv4();
     const now = dayjs();
 
@@ -30,8 +30,8 @@ class CaptchaProvider {
       code += CaptchaProvider.CaptchaCharset[Math.floor(Math.random() * CaptchaProvider.CaptchaCharset.length)];
     }
 
-    await DB.transaction(async (t: Transaction) => {
-      await Captcha.create({
+    return await DB.transaction(async (t: Transaction) => {
+      return await Captcha.create({
         id: id,
         code: code,
         createdAt: now,
@@ -40,8 +40,6 @@ class CaptchaProvider {
         transaction: t
       });
     });
-
-    return id;
   }
 
   async getImage(id: string, props: GetCaptchaImageProps): Promise<Buffer | null> {

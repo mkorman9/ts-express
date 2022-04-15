@@ -10,11 +10,11 @@ captchaAPI.get(
   ratelimiterMiddleware('general'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const captchaId = await captchaProvider.generate();
+      const captcha = await captchaProvider.generate();
       return res
         .status(200)
         .json({
-          id: captchaId
+          id: captcha.id
         });
     } catch (err) {
       next(err);
