@@ -98,6 +98,19 @@ class CaptchaProvider {
     return result.code === answer;
   }
 
+  async deleteExpiredRecords() {
+    await DB.transaction(async (t: Transaction) => {
+      await Captcha.destroy({
+        where: {
+          expiresAt: {
+            [Op.lt]: dayjs().toDate()
+          }
+        },
+        transaction: t
+      });
+    });
+  }
+
   private async findCaptcha(id: string): Promise<Captcha> {
     try {
       return await Captcha.findOne({

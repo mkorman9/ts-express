@@ -4,6 +4,7 @@ import log from './common/providers/logging';
 
 import { initDB } from './common/providers/db';
 import { initAMQP, closeAMQP } from './common/providers/amqp';
+import { startJobs } from './jobs';
 
 import type { Application } from 'express';
 
@@ -54,6 +55,8 @@ createApp()
           });
       });
     });
+
+    startJobs();
   })
   .catch(() => {
     process.exit(1);

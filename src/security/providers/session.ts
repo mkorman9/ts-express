@@ -104,6 +104,19 @@ class SessionProvider {
     });
   }
 
+  async deleteExpiredRecords() {
+    await DB.transaction(async (t: Transaction) => {
+      await Session.destroy({
+        where: {
+          expiresAt: {
+            [Op.lt]: dayjs().toDate()
+          }
+        },
+        transaction: t
+      });
+    });
+  }
+
   private static generateSecureRandomString(n: number): string {
     return randomBytes(n).toString('hex');
   }
