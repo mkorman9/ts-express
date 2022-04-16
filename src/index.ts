@@ -2,7 +2,7 @@ import config from './common/providers/config';
 import './exception_handler';
 import log from './common/providers/logging';
 
-import { initDB } from './common/providers/db';
+import { initDB, closeDB } from './common/providers/db';
 import { initAMQP, closeAMQP } from './common/providers/amqp';
 import { startJobs, stopJobs } from './jobs';
 
@@ -51,6 +51,12 @@ createApp()
           await closeAMQP();
         } catch (err) {
           log.warn(`failed to close amqp connection: ${err}`);
+        }
+
+        try {
+          await closeDB();
+        } catch (err) {
+          log.warn(`failed to close postgres connection: ${err}`);
         }
 
         process.exit(0);

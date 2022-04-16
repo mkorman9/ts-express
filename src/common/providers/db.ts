@@ -42,9 +42,12 @@ const initSequelize = () => {
 
 const DB = !config.inTestMode ? initSequelize() : ({} as Sequelize);
 
-export const initDB = (): Promise<void> => {
-  return DB
-    .authenticate();
+export const initDB = async (): Promise<void> => {
+  return await DB.authenticate();
+};
+
+export const closeDB = async (): Promise<void> => {
+  return await DB.close();
 };
 
 export const advisoryLock = async (lock: number, callback: () => Promise<void>) => {
