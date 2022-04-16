@@ -4,7 +4,7 @@ import log from './common/providers/logging';
 
 import { initDB } from './common/providers/db';
 import { initAMQP, closeAMQP } from './common/providers/amqp';
-import { startJobs } from './jobs';
+import { startJobs, stopJobs } from './jobs';
 
 import type { Application } from 'express';
 
@@ -42,17 +42,18 @@ createApp()
     });
 
     process.on('SIGINT', () => {
-      server.close(() => {
+      server.close(async () => {
         log.info('server stopped due to signal');
 
-        closeAMQP()
-          .then(() => {
-            process.exit(0);
-          })
-          .catch(err => {
-            log.error(`failed to close amqp connection: ${err}`);
-            process.exit(1);
-          });
+        await stopJobs();
+
+        try {
+          await closeAMQP();
+        } catch (err) {
+          log.warn(`failed to close amqp connection: ${err}`);
+        }
+
+        process.exit(0);
       });
     });
 
