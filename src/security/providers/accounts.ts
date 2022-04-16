@@ -5,8 +5,8 @@ import { Transaction } from 'sequelize';
 import Account from '../models/account';
 import PasswordCredentials from '../models/password_credentials';
 import GithubCredentials from '../models/github_credentials';
-import { sendMail } from '../../common/providers/mail';
-import { buildExternalEndpointPath, Language } from '../../common/providers/templates';
+import { sendMail, Language } from '../../common/providers/mail';
+import { buildExternalEndpointPath } from '../../common/providers/templates';
 import DB from '../../common/providers/db';
 
 export interface AccountAddPayload {

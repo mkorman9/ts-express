@@ -5,7 +5,6 @@ RUN addgroup --gid 9000 app && \
     find /app -mindepth 1 -delete
 
 ADD dist/ /app/dist
-ADD templates/ /app/templates
 ADD package.json /app
 ADD yarn.lock /app
 ADD LICENSE.txt /app

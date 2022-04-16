@@ -1,6 +1,8 @@
-import { resolveTemplate } from './templates';
 import log from './logging';
-import type { Language } from './templates';
+
+export type Language =
+  'en-US' |
+  'pl-PL';
 
 interface MailProps {
   template: string;
@@ -11,8 +13,7 @@ interface MailProps {
 type MailBackend = (subjects: string[], props: MailProps) => Promise<void>;
 
 const fakeMailBackend: MailBackend = async (subjects: string[], props: MailProps) => {
-  const content = await resolveTemplate(props.template, props.language, props.props);
-  log.info(`Sending fake e-mail to ${subjects}:\n${content}`);
+  log.info(`Sending fake e-mail: subjects = ${subjects}, template = ${props.template}, language = ${props.language}, props = ${props.props}`);
 };
 
 const mailBackend = fakeMailBackend;
