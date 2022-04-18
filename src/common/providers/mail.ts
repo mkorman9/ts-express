@@ -5,7 +5,7 @@ export type Language =
   'pl-PL';
 
 interface MailProps {
-  to: string[];
+  to: string;
   template: string;
   language: Language;
   options?: unknown;

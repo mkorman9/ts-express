@@ -108,7 +108,7 @@ export class AccountsProvider {
         });
 
         await sendMail({
-          to: [payload.email],
+          to: payload.email,
           template: 'new_account',
           language: payload.language as Language,
           options: {
