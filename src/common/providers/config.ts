@@ -11,6 +11,7 @@ const Mode = process.env.NODE_ENV || 'development';
 const InTestMode = Mode === 'test';
 const InDevMode = Mode === 'development';
 const InProdMode = Mode === 'production';
+const EnvironmentName = process.env.ENVIRONMENT_NAME || 'default';
 const ConfigPath = process.env.CONFIG_PATH || './config.yml';
 
 const readConfig = () => {
@@ -59,5 +60,6 @@ export default {
   inTestMode: InTestMode,
   inDevMode: InDevMode,
   inProdMode: InProdMode,
+  environmentName: EnvironmentName,
   ...readConfig()
 };

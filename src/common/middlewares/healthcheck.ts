@@ -14,7 +14,8 @@ const healthcheck = (req: Request, res: Response, next: NextFunction) => {
     .send({
       status: 'healthy',
       appVersion: config.version,
-      startupTime: startupTime
+      startupTime: startupTime,
+      environment: config.environmentName
     });
 };
 
