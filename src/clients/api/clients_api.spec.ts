@@ -90,6 +90,7 @@ describe('Clients API Tests', () => {
       .get('/api/v1/client');
 
     // then
+    clientsPageMock.restore();
     expect(clientsPageMock.callCount).equal(1);
     expect(clientsPageMock.lastCall.args).eql([{
       pageNumber: 0,
@@ -98,11 +99,10 @@ describe('Clients API Tests', () => {
       sortReverse: false,
       filters: {}
     }]);
+
     expect(response.status).equal(200);
     expect(response.body.totalPages).equal(1);
     expect(response.body.data).eql(Records.map(r => mapClientModelToResponse(r)));
-
-    clientsPageMock.restore();
   });
 
   it('should use given parameters when called for page with valid parameters', async () => {
@@ -125,6 +125,7 @@ describe('Clients API Tests', () => {
       });
 
     // then
+    clientsPageMock.restore();
     expect(clientsPageMock.callCount).equal(1);
     expect(clientsPageMock.lastCall.args).eql([{
       pageNumber: 2,
@@ -135,11 +136,10 @@ describe('Clients API Tests', () => {
         firstName: 'Daniel'
       }
     }]);
+
     expect(response.status).equal(200);
     expect(response.body.totalPages).equal(1);
     expect(response.body.data).eql([Records[0]].map(r => mapClientModelToResponse(r)));
-
-    clientsPageMock.restore();
   });
 
   it('should return error when called for page with invalid filter', async () => {
@@ -178,14 +178,14 @@ describe('Clients API Tests', () => {
       .get(`/api/v1/client/${Records[0].id}`);
 
     // then
+    clientByIdMock.restore();
     expect(clientByIdMock.callCount).equal(1);
     expect(clientByIdMock.lastCall.args).eql([
       Records[0].id
     ]);
+
     expect(response.status).equal(200);
     expect(response.body).eql(mapClientModelToResponse(Records[0]));
-
-    clientByIdMock.restore();
   });
 
   it('should return error when queried for non-existing client id', async () => {
@@ -199,13 +199,13 @@ describe('Clients API Tests', () => {
       .get(`/api/v1/client/${clientId}`);
 
     // then
+    clientByIdMock.restore();
     expect(clientByIdMock.callCount).equal(1);
     expect(clientByIdMock.lastCall.args).eql([
       clientId
     ]);
-    expect(response.status).equal(404);
 
-    clientByIdMock.restore();
+    expect(response.status).equal(404);
   });
 
   it('should return error when trying to add client without valid session', async () => {
@@ -244,6 +244,8 @@ describe('Clients API Tests', () => {
       .send(payload);
 
     // then
+    getSessionMock.restore();
+    addClientMock.restore();
     expect(addClientMock.callCount).equal(1);
     expect(addClientMock.lastCall.args).eql([{
       gender: undefined,
@@ -257,11 +259,9 @@ describe('Clients API Tests', () => {
     }, {
       author: TestSessionAccount.id
     }]);
+
     expect(response.status).equal(200);
     expect(response.body.id).equal(InsertedRecord.id);
-
-    getSessionMock.restore();
-    addClientMock.restore();
   });
 
   it('should return error when trying to add client with invalid gender', async () => {
@@ -282,10 +282,10 @@ describe('Clients API Tests', () => {
       .send(payload);
 
     // then
+    getSessionMock.restore();
+
     expect(response.status).equal(400);
     expect(response.body.causes).eql([{ field: 'gender', code: 'oneof' }]);
-
-    getSessionMock.restore();
   });
 
   it('should return error when trying to add client without firstName', async () => {
@@ -304,10 +304,10 @@ describe('Clients API Tests', () => {
       .send(payload);
 
     // then
+    getSessionMock.restore();
+
     expect(response.status).equal(400);
     expect(response.body.causes).eql([{ field: 'firstName', code: 'required' }]);
-
-    getSessionMock.restore();
   });
 
   it('should return error when trying to add client without lastName', async () => {
@@ -326,10 +326,10 @@ describe('Clients API Tests', () => {
       .send(payload);
 
     // then
+    getSessionMock.restore();
+
     expect(response.status).equal(400);
     expect(response.body.causes).eql([{ field: 'lastName', code: 'required' }]);
-
-    getSessionMock.restore();
   });
 
   it('should return error when trying to add client with invalid birth date', async () => {
@@ -350,10 +350,10 @@ describe('Clients API Tests', () => {
       .send(payload);
 
     // then
+    getSessionMock.restore();
+
     expect(response.status).equal(400);
     expect(response.body.causes).eql([{ field: 'birthDate', code: 'format' }]);
-
-    getSessionMock.restore();
   });
 
   it('should return error when trying to add client with invalid credit card number', async () => {
@@ -376,10 +376,10 @@ describe('Clients API Tests', () => {
       .send(payload);
 
     // then
+    getSessionMock.restore();
+
     expect(response.status).equal(400);
     expect(response.body.causes).eql([{ field: 'creditCards[0].number', code: 'ccnumber' }]);
-
-    getSessionMock.restore();
   });
 });
 
