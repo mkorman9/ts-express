@@ -3,6 +3,10 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { ratelimiterMiddleware } from '../../common/middlewares/rate_limiter';
 import captchaProvider from '../providers/captcha';
 
+export const DefaultImageWidth = 250;
+export const DefaultImageHeight = 75;
+export const DefaultAudioLanguage = 'en-US';
+
 const captchaAPI = Router();
 
 captchaAPI.get(
@@ -29,12 +33,12 @@ captchaAPI.get(
 
     let width = parseInt(req.query.width as string);
     if (Number.isNaN(width) || width <= 0 || width > 1000) {
-      width = 250;
+      width = DefaultImageWidth;
     }
 
     let height = parseInt(req.query.height as string);
     if (Number.isNaN(height) || height <= 0 || height > 1000) {
-      height = 75;
+      height = DefaultImageHeight;
     }
 
     try {
@@ -69,7 +73,7 @@ captchaAPI.get(
 
     let language = req.query.lang as string;
     if (!language) {
-      language = 'en-US';
+      language = DefaultAudioLanguage;
     }
 
     try {
