@@ -6,7 +6,6 @@ import Account from '../models/account';
 import PasswordCredentials from '../models/password_credentials';
 import GithubCredentials from '../models/github_credentials';
 import { sendMail, Language } from '../../common/providers/mail';
-import { buildExternalEndpointPath } from '../../common/providers/templates';
 import DB from '../../common/providers/db';
 
 export interface AccountAddPayload {
@@ -108,12 +107,13 @@ export class AccountsProvider {
           transaction: t
         });
 
-        await sendMail([payload.email], {
+        await sendMail({
+          to: [payload.email],
           template: 'new_account',
           language: payload.language as Language,
-          props: {
-            subject: payload.username,
-            url: buildExternalEndpointPath(`/account/activate/${account.id}`)
+          options: {
+            username: payload.username,
+            activationCode: account.id
           }
         });
 

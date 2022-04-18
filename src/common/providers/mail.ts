@@ -5,24 +5,25 @@ export type Language =
   'pl-PL';
 
 interface MailProps {
+  to: string[];
   template: string;
   language: Language;
-  props?: unknown;
+  options?: unknown;
 }
 
-type MailBackend = (subjects: string[], props: MailProps) => Promise<void>;
+type MailBackend = (props: MailProps) => Promise<void>;
 
-const fakeMailBackend: MailBackend = async (subjects: string[], props: MailProps) => {
-  log.info(`sending fake e-mail: subjects = ${subjects}, template = ${props.template}, language = ${props.language}, props = ${props.props}`);
+const fakeMailBackend: MailBackend = async (props: MailProps) => {
+  log.info(`sending fake e-mail: to = ${props.to}, template = ${props.template}, language = ${props.language}, options = ${JSON.stringify(props.options)}`);
 };
 
 const mailBackend = fakeMailBackend;
 
-export const sendMail = async (subjects: string[], props: MailProps) => {
+export const sendMail = async (props: MailProps) => {
   try {
-    await mailBackend(subjects, props);
+    await mailBackend(props);
   } catch (err) {
-    log.error(`error while sending e-mail (subjects = ${subjects}, template = ${props.template}, language = ${props.language}): ${err}`);
+    log.error(`error while sending e-mail (to = ${props.to}, template = ${props.template}, language = ${props.language}, options = ${JSON.stringify(props.options)}): ${err}`);
     throw err;
   }
 };
