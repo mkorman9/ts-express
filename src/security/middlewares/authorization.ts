@@ -9,9 +9,11 @@ const SessionCookieName = 'SESSION_ID';
 const SessionFieldName = 'session';
 const SessionExtractionStatusFieldName = 'sessionExtraction';
 
-const authMiddleware = (sessionExtractor: (req: Request) => (() => Promise<Session | null> | null)) => () => {
+type SessionResultFunc = () => Promise<Session | null>;
+
+const authMiddleware = (sessionExtractor: (req: Request) => (SessionResultFunc | null)) => () => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    if (getSession(req)) {
+    if (tryGetSession(req)) {
       return next();
     }
 
@@ -37,7 +39,7 @@ const authMiddleware = (sessionExtractor: (req: Request) => (() => Promise<Sessi
   };
 };
 
-export const getSession = (req: Request): Session => {
+export const tryGetSession = (req: Request): (Session | null) => {
   if (req[SessionFieldName]) {
     return req[SessionFieldName] as Session;
   }
@@ -45,11 +47,20 @@ export const getSession = (req: Request): Session => {
   return null;
 };
 
+export const getSession = (req: Request): Session => {
+  const session = tryGetSession(req);
+  if (!session) {
+    throw new Error("could not acquire active session");
+  }
+
+  return session;
+}
+
 export const setSession = (req: Request, session: Session | null) => {
   req[SessionFieldName] = session;
 };
 
-export const cookieAuthMiddleware = authMiddleware((req: Request) => {
+export const cookieAuthMiddleware = authMiddleware((req: Request): (SessionResultFunc | null) => {
   const sessionId = req.cookies[SessionCookieName];
   if (!sessionId) {
     return null;
@@ -60,7 +71,7 @@ export const cookieAuthMiddleware = authMiddleware((req: Request) => {
   };
 });
 
-export const tokenAuthMiddleware = authMiddleware((req: Request) => {
+export const tokenAuthMiddleware = authMiddleware((req: Request): (SessionResultFunc | null) => {
   const authHeaderValue = req.headers['authorization'];
   if (!authHeaderValue) {
     return null;
@@ -78,7 +89,7 @@ export const tokenAuthMiddleware = authMiddleware((req: Request) => {
 
 export const requireAuthentication = () => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    if (getSession(req)) {
+    if (tryGetSession(req)) {
       return next();
     }
 
@@ -129,7 +140,7 @@ export const requireRoles = (roles: string[]) => {
 };
 
 export const sendSessionCookie = (req: Request, res: Response) => {
-  const session = getSession(req);
+  const session = tryGetSession(req);
   let value = '';
 
   const options: CookieOptions = {

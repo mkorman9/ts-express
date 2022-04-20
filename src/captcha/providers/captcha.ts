@@ -100,7 +100,7 @@ class CaptchaProvider {
     });
   }
 
-  private async findCaptcha(id: string): Promise<Captcha> {
+  private async findCaptcha(id: string): Promise<Captcha | null> {
     try {
       return await Captcha.findOne({
         where: {

@@ -517,7 +517,7 @@ const parseClientsFilters = (query: unknown): FindClientsFilters => {
     } else if (k === 'email') {
       ret.email = value;
     } else if (k === 'bornAfter') {
-      let dt: Dayjs = null;
+      let dt: (Dayjs | null) = null;
       try {
         dt = dayjs(value);
       } catch (err) {
@@ -530,7 +530,7 @@ const parseClientsFilters = (query: unknown): FindClientsFilters => {
 
       ret.bornAfter = dt;
     } else if (k === 'bornBefore') {
-      let dt: Dayjs = null;
+      let dt: (Dayjs | null) = null;
       try {
         dt = dayjs(value);
       } catch (err) {

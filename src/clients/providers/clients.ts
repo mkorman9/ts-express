@@ -100,14 +100,14 @@ export class ClientsProvider {
   }
 
   async findClientsPaged(opts?: FindClientsPagedOptions): Promise<FindClientsPagedResult> {
-    const options: FindClientsPagedOptions = {
-      pageNumber: opts.pageNumber || 0,
-      pageSize: opts.pageSize || 10,
+    const options = {
+      pageNumber: opts?.pageNumber || 0,
+      pageSize: opts?.pageSize || 10,
 
-      sortBy: opts.sortBy || FindClientsSortFields.id,
-      sortReverse: opts.sortReverse || false,
+      sortBy: opts?.sortBy || FindClientsSortFields.id,
+      sortReverse: opts?.sortReverse || false,
 
-      filters: opts.filters || {}
+      filters: opts?.filters || {}
     };
 
     const filters: WhereAttributeHash<unknown>[] = [];

@@ -62,7 +62,7 @@ export class JSONMessageParser<M = unknown> implements MessageParser<M> {
 
 export class Publisher {
   constructor(
-    private channel: amqp.Channel
+    private channel: (amqp.Channel | null)
   ) { }
 
   public publish<M = unknown>(
@@ -85,7 +85,7 @@ export class Publisher {
   }
 }
 
-let connection: amqp.Connection = null;
+let connection: (amqp.Connection | null) = null;
 const publishers = new Map<string, Publisher>();
 
 export const initAMQP = async () => {
@@ -122,7 +122,12 @@ export const definePublisher = (name: string, props?: ChannelProps) => {
 };
 
 export const getPublisher = (name: string): Publisher => {
-  return publishers.get(name);
+  const publisher = publishers.get(name);
+  if (!publisher) {
+    throw new Error(`publisher '${name}' has not been defined`);
+  }
+
+  return publisher;
 };
 
 export const createConsumer = <M = unknown>(props?: ConsumerProps<M>): ((func: ConsumerFunc<M>) => void) => {
@@ -175,8 +180,13 @@ export const createConsumer = <M = unknown>(props?: ConsumerProps<M>): ((func: C
           consumeOptions.noAck = false;
         }
 
-        channel.consume(queue, (raw: amqp.ConsumeMessage) => {
+        channel.consume(queue, (raw: amqp.ConsumeMessage | null) => {
           let message: M;
+
+          if (!raw) {
+            log.error(`received null amqp message from queue ${queue}`);
+            return;
+          }
 
           try {
             message = parser.deserialize(raw.content);
@@ -210,6 +220,7 @@ const createChannel = async (props?: ChannelProps): Promise<amqp.Channel> => {
   const channel = await connection.createChannel();
   const queuesToDeclare = props?.queues || [];
   const exchangesToDeclare = props?.exchanges || [];
+
 
   for (const queue of queuesToDeclare) {
     await channel.assertQueue(

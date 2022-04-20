@@ -4,6 +4,7 @@ import {
   cookieAuthMiddleware,
   tokenAuthMiddleware,
   getSession,
+  tryGetSession,
   requireAuthentication,
   setSession,
   sendSessionCookie
@@ -16,7 +17,7 @@ sessionAPI.get(
   '/token',
   cookieAuthMiddleware(),
   async (req: Request, res: Response) => {
-    const session = getSession(req);
+    const session = tryGetSession(req);
     if (!session) {
       return res
         .status(401)

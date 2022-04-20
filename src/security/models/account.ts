@@ -74,7 +74,7 @@ class Account extends Model {
   }
 
   get isBanned(): boolean {
-    return this.bannedUntil && dayjs().isBefore(this.bannedUntil);
+    return (this.bannedUntil != null) && dayjs().isBefore(this.bannedUntil);
   }
 
   get roles(): string[] {
