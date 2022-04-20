@@ -30,7 +30,7 @@ const log = (() => {
 
     l.add(new Syslog({
       localhost: os.hostname(),
-      appName: 'ts-express',
+      app_name: 'ts-express',
 
       protocol: 'udp',
       host: props.syslog.host,
