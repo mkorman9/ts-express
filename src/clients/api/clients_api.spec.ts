@@ -133,7 +133,15 @@ describe('Clients API Tests', () => {
       sortBy: 'lastName',
       sortReverse: true,
       filters: {
-        firstName: 'Daniel'
+        gender: undefined,
+        firstName: 'Daniel',
+        lastName: undefined,
+        address: undefined,
+        phoneNumber: undefined,
+        email: undefined,
+        bornAfter: undefined,
+        bornBefore: undefined,
+        creditCardNumber: undefined
       }
     }]);
 
@@ -142,25 +150,12 @@ describe('Clients API Tests', () => {
     expect(response.body.data).eql([Records[0]].map(r => mapClientModelToResponse(r)));
   });
 
-  it('should return error when called for page with invalid filter', async () => {
-    // when
-    const response = await chai.request(app)
-      .get('/api/v1/client')
-      .query({
-        'filter[xxx]': 'yyy'
-      });
-
-    // then
-    expect(response.status).equal(400);
-    expect(response.body.causes).eql([{ field: 'filter', code: 'oneof' }]);
-  });
-
   it('should return error when called for page with invalid sortBy', async () => {
     // when
     const response = await chai.request(app)
       .get('/api/v1/client')
       .query({
-        'sortBy': 'xxx'
+        sortBy: 'xxx'
       });
 
     // then

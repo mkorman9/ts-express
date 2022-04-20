@@ -65,6 +65,7 @@ createApp()
 
     startJobs();
   })
-  .catch(() => {
+  .catch((err) => {
+    log.error(`failed to initialize app: ${err}`, { stack: err.stack });
     process.exit(1);
   });

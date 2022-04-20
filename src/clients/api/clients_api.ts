@@ -1,7 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { ParsedQs } from 'qs';
-import { body, validationResult } from 'express-validator';
-import dayjs, { Dayjs } from 'dayjs';
+import { body, query, validationResult } from 'express-validator';
+import dayjs from 'dayjs';
 import ws from 'ws';
 
 import clientsProvider, {
@@ -20,6 +19,52 @@ import {
 import accountsProvider from '../../security/providers/accounts';
 import log from '../../common/providers/logging';
 import { addSubscriber, removeSubscriber } from '../listeners/subscribers_store';
+
+const GetClientsPagedValidators = [
+  query('page')
+    .optional()
+    .isInt({ min: 0 }).withMessage('format'),
+  query('pageSize')
+    .optional()
+    .isInt({ min: 1, max: 100 }).withMessage('format'),
+  query('sortBy')
+    .optional()
+    .isString().withMessage('format')
+    .isIn(Object.values(FindClientsSortFields)).withMessage('oneof'),
+  query('sortReverse')
+    .optional(),
+  query('filter')
+    .optional()
+    .isObject().withMessage('format'),
+  query('filter.gender')
+    .optional()
+    .isString().withMessage('format')
+    .isIn(['-', 'M', 'F']).withMessage('oneof'),
+  query('filter.firstName')
+    .optional()
+    .isString().withMessage('format'),
+  query('filter.lastName')
+    .optional()
+    .isString().withMessage('format'),
+  query('filter.address')
+    .optional()
+    .isString().withMessage('format'),
+  query('filter.phoneNumber')
+    .optional()
+    .isString().withMessage('format'),
+  query('filter.email')
+    .optional()
+    .isString().withMessage('format'),
+  query('filter.bornAfter')
+    .optional()
+    .isISO8601().withMessage('format'),
+  query('filter.bornBefore')
+    .optional()
+    .isISO8601().withMessage('format'),
+  query('filter.creditCard')
+    .optional()
+    .isString().withMessage('format')
+];
 
 const ClientAddRequestValidators = [
   body('gender')
@@ -114,54 +159,46 @@ const clientsAPI = Router();
 
 clientsAPI.get(
   '',
+  ...GetClientsPagedValidators,
   async (req: Request, res: Response, next: NextFunction) => {
+    const validationErrors = validationResult(req);
+    if (!validationErrors.isEmpty()) {
+      return res
+        .status(400)
+        .json({
+          status: 'error',
+          message: 'Validation error',
+          causes: validationErrors.array().map(e => ({
+            field: e.param,
+            code: e.msg
+          }))
+        });
+    }
+
     let pageNumber = parseInt(req.query.page as string);
-    if (Number.isNaN(pageNumber) || pageNumber < 0) {
+    if (!pageNumber) {
       pageNumber = 0;
     }
 
     let pageSize = parseInt(req.query.pageSize as string);
-    if (Number.isNaN(pageSize) || pageSize <= 0 || pageSize > 100) {
+    if (!pageSize) {
       pageSize = 10;
     }
 
-    let sortBy = FindClientsSortFields.id;
-    if (req.query.sortBy) {
-      if (Object.values(FindClientsSortFields).includes(req.query.sortBy as FindClientsSortFields)) {
-        sortBy = req.query.sortBy as FindClientsSortFields;
-      } else {
-        return res
-          .status(400)
-          .json({
-            status: 'error',
-            message: 'Validation error',
-            causes: [{
-              field: 'sortBy',
-              code: 'oneof'
-            }]
-          });
-      }
-    }
-
+    const sortBy = req.query.sortBy as FindClientsSortFields || FindClientsSortFields.id;
     const sortReverse = 'sortReverse' in req.query;
 
-    let filters: FindClientsFilters = {};
-    try {
-      filters = parseClientsFilters(req.query);
-    } catch (err) {
-      if (err instanceof ClientsFiltersParsingError) {
-        return res
-          .status(400)
-          .json({
-            status: 'error',
-            message: 'Validation error',
-            causes: [{
-              field: err.field,
-              code: err.code
-            }]
-          });
-      }
-    }
+    const filters: FindClientsFilters = !req.query.filter ? {} : {
+      gender: req.query.filter['gender'],
+      firstName: req.query.filter['firstName'],
+      lastName: req.query.filter['lastName'],
+      address: req.query.filter['address'],
+      phoneNumber: req.query.filter['phoneNumber'],
+      email: req.query.filter['email'],
+      bornAfter: req.query.filter['bornAfter'] ? dayjs(req.query.filter['bornAfter']) : undefined,
+      bornBefore: req.query.filter['bornBefore'] ? dayjs(req.query.filter['bornBefore']) : undefined,
+      creditCardNumber: req.query.filter['creditCard'],
+    };
 
     try {
       const clientsPage = await clientsProvider.findClientsPaged({
@@ -456,86 +493,5 @@ clientsAPI.ws(
     });
   }
 );
-
-class ClientsFiltersParsingError extends Error {
-  constructor(
-    public code: string,
-    public field: string
-    ) {
-    super('ClientsFiltersParsingError');
-  }
-}
-
-const parseClientsFilters = (query: ParsedQs): FindClientsFilters => {
-  const queryFilters = query['filter'];
-  if (!queryFilters) {
-    return {};
-  }
-
-  const ret: FindClientsFilters = {};
-
-  Object.keys(queryFilters).forEach(k => {
-    let value = queryFilters[k];
-    if (Array.isArray(value)) {
-      value = value[value.length - 1];
-    }
-
-    if (k === 'gender') {
-      if (!['-', 'M', 'F'].includes(value)) {
-        throw new ClientsFiltersParsingError('oneof', 'filter[gender]');
-      }
-
-      ret.gender = value;
-    } else if (k === 'firstName') {
-      ret.firstName = value;
-    } else if (k === 'lastName') {
-      ret.lastName = value;
-    } else if (k === 'address') {
-      ret.address = value;
-    } else if (k === 'phoneNumber') {
-      ret.phoneNumber = value;
-    } else if (k === 'email') {
-      ret.email = value;
-    } else if (k === 'bornAfter') {
-      let dt: (Dayjs | null) = null;
-      try {
-        dt = dayjs(value);
-      } catch (err) {
-        // ignore
-      }
-
-      if (!dt || !dt.isValid()) {
-        throw new ClientsFiltersParsingError('dateformat', 'filter[bornAfter]');
-      }
-
-      ret.bornAfter = dt;
-    } else if (k === 'bornBefore') {
-      let dt: (Dayjs | null) = null;
-      try {
-        dt = dayjs(value);
-      } catch (err) {
-        // ignore
-      }
-
-      if (!dt || !dt.isValid()) {
-        throw new ClientsFiltersParsingError('dateformat', 'filter[bornBefore]');
-      }
-
-      ret.bornBefore = dt;
-    } else if (k === 'creditCard') {
-      ret.creditCardNumber = value;
-    } else {
-      throw new ClientsFiltersParsingError('oneof', 'filter');
-    }
-  });
-
-  if (ret.bornAfter && ret.bornBefore) {
-    if (ret.bornAfter.isAfter(ret.bornBefore)) {
-      throw new ClientsFiltersParsingError('invalidinterval', 'filter[bornAfter]');
-    }
-  }
-
-  return ret;
-};
 
 export default clientsAPI;
