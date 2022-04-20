@@ -15,17 +15,20 @@ class SessionProvider {
   private static readonly SessionIdLength = 24;
   private static readonly SessionTokenLength = 48;
 
-  async findById(id: string): Promise<Session> {
+  async findById(id: string): Promise<Session | null> {
     return await Session.findOne({
       where: {
-        id: id,
-        expiresAt: {
+        [Op.and]: [{
+          id: id
+        }, {
           [Op.or]: [{
-            [Op.eq]: null
+            expiresAt: null
           }, {
-            [Op.gte]: dayjs().toDate()
+            expiresAt: {
+              [Op.gte]: dayjs().toDate()
+            }
           }]
-        }
+        }]
       },
       include: [
         Account
@@ -33,17 +36,20 @@ class SessionProvider {
     });
   }
 
-  async findByToken(token: string): Promise<Session> {
+  async findByToken(token: string): Promise<Session | null> {
     return await Session.findOne({
       where: {
-        token: token,
-        expiresAt: {
+        [Op.and]: [{
+          token: token
+        }, {
           [Op.or]: [{
-            [Op.eq]: null
+            expiresAt: null
           }, {
-            [Op.gte]: dayjs().toDate()
+            expiresAt: {
+              [Op.gte]: dayjs().toDate()
+            }
           }]
-        }
+        }]
       },
       include: [
         Account

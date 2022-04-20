@@ -50,7 +50,7 @@ const InsertedRecord = {
   birthDate: null,
   isDeleted: false,
   creditCards: []
-} as Client;
+} as unknown as Client;
 
 const TestSessionAccount = {
   id: 'e9fa80e1-d978-4430-8f44-904f741e13d0',
@@ -232,7 +232,7 @@ describe('Clients API Tests', () => {
       lastName: 'Doe'
     };
 
-    const getSessionMock = sinon.stub(authProvider, 'getSession')
+    const tryGetSessionMock = sinon.stub(authProvider, 'tryGetSession')
       .returns(TestSession);
     const addClientMock = sinon.stub(clientsProvider, 'addClient')
       .returns(Promise.resolve(InsertedRecord));
@@ -244,7 +244,7 @@ describe('Clients API Tests', () => {
       .send(payload);
 
     // then
-    getSessionMock.restore();
+    tryGetSessionMock.restore();
     addClientMock.restore();
     expect(addClientMock.callCount).equal(1);
     expect(addClientMock.lastCall.args).eql([{
@@ -272,7 +272,7 @@ describe('Clients API Tests', () => {
       lastName: 'Doe'
     };
 
-    const getSessionMock = sinon.stub(authProvider, 'getSession')
+    const tryGetSessionMock = sinon.stub(authProvider, 'tryGetSession')
       .returns(TestSession);
 
     // when
@@ -282,7 +282,7 @@ describe('Clients API Tests', () => {
       .send(payload);
 
     // then
-    getSessionMock.restore();
+    tryGetSessionMock.restore();
 
     expect(response.status).equal(400);
     expect(response.body.causes).eql([{ field: 'gender', code: 'oneof' }]);
@@ -294,7 +294,7 @@ describe('Clients API Tests', () => {
       lastName: 'Doe'
     };
 
-    const getSessionMock = sinon.stub(authProvider, 'getSession')
+    const tryGetSessionMock = sinon.stub(authProvider, 'tryGetSession')
       .returns(TestSession);
 
     // when
@@ -304,7 +304,7 @@ describe('Clients API Tests', () => {
       .send(payload);
 
     // then
-    getSessionMock.restore();
+    tryGetSessionMock.restore();
 
     expect(response.status).equal(400);
     expect(response.body.causes).eql([{ field: 'firstName', code: 'required' }]);
@@ -316,7 +316,7 @@ describe('Clients API Tests', () => {
       firstName: 'Jane'
     };
 
-    const getSessionMock = sinon.stub(authProvider, 'getSession')
+    const tryGetSessionMock = sinon.stub(authProvider, 'tryGetSession')
       .returns(TestSession);
 
     // when
@@ -326,7 +326,7 @@ describe('Clients API Tests', () => {
       .send(payload);
 
     // then
-    getSessionMock.restore();
+    tryGetSessionMock.restore();
 
     expect(response.status).equal(400);
     expect(response.body.causes).eql([{ field: 'lastName', code: 'required' }]);
@@ -340,7 +340,7 @@ describe('Clients API Tests', () => {
       birthDate: 'XXX'
     };
 
-    const getSessionMock = sinon.stub(authProvider, 'getSession')
+    const tryGetSessionMock = sinon.stub(authProvider, 'tryGetSession')
       .returns(TestSession);
 
     // when
@@ -350,7 +350,7 @@ describe('Clients API Tests', () => {
       .send(payload);
 
     // then
-    getSessionMock.restore();
+    tryGetSessionMock.restore();
 
     expect(response.status).equal(400);
     expect(response.body.causes).eql([{ field: 'birthDate', code: 'format' }]);
@@ -366,7 +366,7 @@ describe('Clients API Tests', () => {
       }]
     };
 
-    const getSessionMock = sinon.stub(authProvider, 'getSession')
+    const tryGetSessionMock = sinon.stub(authProvider, 'tryGetSession')
       .returns(TestSession);
 
     // when
@@ -376,7 +376,7 @@ describe('Clients API Tests', () => {
       .send(payload);
 
     // then
-    getSessionMock.restore();
+    tryGetSessionMock.restore();
 
     expect(response.status).equal(400);
     expect(response.body.causes).eql([{ field: 'creditCards[0].number', code: 'ccnumber' }]);

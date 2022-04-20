@@ -9,22 +9,24 @@ const SessionCookieName = 'SESSION_ID';
 const SessionFieldName = 'session';
 const SessionExtractionStatusFieldName = 'sessionExtraction';
 
-type SessionResultFunc = () => Promise<Session | null>;
+type SessionAcquireFunc = () => Promise<Session | null>;
+type SessionExtractionResult = 'extraction_failed' |
+  SessionAcquireFunc;
 
-const authMiddleware = (sessionExtractor: (req: Request) => (SessionResultFunc | null)) => () => {
+const authMiddleware = (sessionExtractor: (req: Request) => SessionExtractionResult) => () => {
   return async (req: Request, res: Response, next: NextFunction) => {
     if (tryGetSession(req)) {
       return next();
     }
 
     try {
-      const fn = sessionExtractor(req);
-      if (!fn) {
+      const result = sessionExtractor(req);
+      if (result === 'extraction_failed') {
         req[SessionExtractionStatusFieldName] = 'no_credentials';
         return next();
       }
 
-      const session = await fn();
+      const session = await result();
       if (!session) {
         req[SessionExtractionStatusFieldName] = 'invalid_credentials';
         return next();
@@ -60,10 +62,10 @@ export const setSession = (req: Request, session: Session | null) => {
   req[SessionFieldName] = session;
 };
 
-export const cookieAuthMiddleware = authMiddleware((req: Request): (SessionResultFunc | null) => {
+export const cookieAuthMiddleware = authMiddleware((req: Request): SessionExtractionResult => {
   const sessionId = req.cookies[SessionCookieName];
   if (!sessionId) {
-    return null;
+    return 'extraction_failed';
   }
 
   return (): Promise<Session | null> => {
@@ -71,15 +73,15 @@ export const cookieAuthMiddleware = authMiddleware((req: Request): (SessionResul
   };
 });
 
-export const tokenAuthMiddleware = authMiddleware((req: Request): (SessionResultFunc | null) => {
+export const tokenAuthMiddleware = authMiddleware((req: Request): SessionExtractionResult => {
   const authHeaderValue = req.headers['authorization'];
   if (!authHeaderValue) {
-    return null;
+    return 'extraction_failed';
   }
 
   const token = parseAuthHeader(Array.isArray(authHeaderValue) ? authHeaderValue[authHeaderValue.length - 1] : authHeaderValue);
   if (!token) {
-    return null;
+    return 'extraction_failed';
   }
 
   return (): Promise<Session | null> => {

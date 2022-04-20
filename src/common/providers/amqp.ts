@@ -136,7 +136,7 @@ export const createConsumer = <M = unknown>(props?: ConsumerProps<M>): ((func: C
   }
 
   const init = async (): Promise<[amqp.Channel, string]> => {
-    const channel = await connection.createChannel();
+    const channel = await (connection as amqp.Connection).createChannel();
 
     if (props?.exchange) {
       await channel.assertExchange(
@@ -217,7 +217,7 @@ export const createConsumer = <M = unknown>(props?: ConsumerProps<M>): ((func: C
 };
 
 const createChannel = async (props?: ChannelProps): Promise<amqp.Channel> => {
-  const channel = await connection.createChannel();
+  const channel = await (connection as amqp.Connection).createChannel();
   const queuesToDeclare = props?.queues || [];
   const exchangesToDeclare = props?.exchanges || [];
 

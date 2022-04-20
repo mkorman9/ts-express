@@ -1,4 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
+import { ParsedQs } from 'qs';
 import { body, validationResult } from 'express-validator';
 import dayjs, { Dayjs } from 'dayjs';
 import ws from 'ws';
@@ -486,7 +487,7 @@ class ClientsFiltersParsingError extends Error {
   }
 }
 
-const parseClientsFilters = (query: unknown): FindClientsFilters => {
+const parseClientsFilters = (query: ParsedQs): FindClientsFilters => {
   const queryFilters = query['filter'];
   if (!queryFilters) {
     return {};
