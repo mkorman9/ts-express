@@ -21,27 +21,6 @@ import accountsProvider from '../../security/providers/accounts';
 import log from '../../common/providers/logging';
 import { addSubscriber, removeSubscriber } from '../listeners/subscribers_store';
 
-interface CreditCardView {
-  number: string;
-}
-
-interface ClientView {
-  id: string;
-  gender: string;
-  firstName: string;
-  lastName: string;
-  address: string;
-  phoneNumber: string;
-  email: string;
-  birthDate: Dayjs | null;
-  creditCards: CreditCardView[];
-}
-
-interface ClientsGetResponse {
-  data: ClientView[];
-  totalPages: number;
-}
-
 const ClientAddRequestValidators = [
   body('gender')
     .optional()
@@ -210,9 +189,9 @@ clientsAPI.get(
             creditCards: c.creditCards.map(cc => ({
               number: cc.number
             }))
-          }) as ClientView),
+          })),
           totalPages: Math.ceil(clientsPage.count / pageSize)
-        } as ClientsGetResponse);
+        });
     } catch (err) {
       next(err);
     }
@@ -247,7 +226,7 @@ clientsAPI.get(
           creditCards: client.creditCards.map(cc => ({
             number: cc.number
           }))
-        } as ClientView);
+        });
     } catch (err) {
       next(err);
     }

@@ -52,6 +52,10 @@ export interface FindClientByIdOptions {
   includeDeleted?: boolean;
 }
 
+export interface CreditCardAddPayload {
+  number: string;
+}
+
 export interface ClientAddPayload {
   gender?: string;
   firstName: string;
@@ -63,6 +67,10 @@ export interface ClientAddPayload {
   creditCards: { number: string }[];
 }
 
+export interface CreditCardUpdatePayload {
+  number: string;
+}
+
 export interface ClientUpdatePayload {
   gender?: string;
   firstName?: string;
@@ -71,7 +79,7 @@ export interface ClientUpdatePayload {
   phoneNumber?: string;
   email?: string;
   birthDate?: Dayjs | null;
-  creditCards?: { number: string }[];
+  creditCards?: CreditCardUpdatePayload[];
 }
 
 export interface AddClientProps {
