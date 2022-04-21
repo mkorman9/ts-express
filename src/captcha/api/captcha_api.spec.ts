@@ -45,7 +45,7 @@ describe('Captcha API Tests', () => {
     const captchaId = '76c7ca82-6d5c-428c-8088-147413891f59';
     const imageData = Buffer.of(1, 2, 3, 4);
     const getImageMock = sinon.stub(captchaProvider, 'getImage')
-      .returns(Promise.resolve(imageData));
+      .returns(Promise.resolve([imageData, 100]));
 
     // when
     const response = await chai.request(app)
@@ -67,7 +67,7 @@ describe('Captcha API Tests', () => {
     const width = 200;
     const height = 100;
     const getImageMock = sinon.stub(captchaProvider, 'getImage')
-      .returns(Promise.resolve(imageData));
+      .returns(Promise.resolve([imageData, 100]));
 
     // when
     const response = await chai.request(app)
@@ -93,7 +93,7 @@ describe('Captcha API Tests', () => {
     const width = 1200;
     const height = -10;
     const getImageMock = sinon.stub(captchaProvider, 'getImage')
-      .returns(Promise.resolve(imageData));
+      .returns(Promise.resolve([imageData, 100]));
 
     // when
     const response = await chai.request(app)
@@ -151,7 +151,7 @@ describe('Captcha API Tests', () => {
     const captchaId = '76c7ca82-6d5c-428c-8088-147413891f59';
     const audioData = Buffer.of(1, 2, 3, 4);
     const getAudioMock = sinon.stub(captchaProvider, 'getAudio')
-      .returns(Promise.resolve(audioData));
+      .returns(Promise.resolve([audioData, 100]));
 
     // when
     const response = await chai.request(app)
@@ -172,7 +172,7 @@ describe('Captcha API Tests', () => {
     const audioData = Buffer.of(1, 2, 3, 4);
     const language = 'pl-PL';
     const getAudioMock = sinon.stub(captchaProvider, 'getAudio')
-      .returns(Promise.resolve(audioData));
+      .returns(Promise.resolve([audioData, 100]));
 
     // when
     const response = await chai.request(app)

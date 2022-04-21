@@ -1,4 +1,4 @@
-import './dayjs_plugins';
+import './dayjs_config';
 import express, { Router } from 'express';
 import expressWs from 'express-ws';
 

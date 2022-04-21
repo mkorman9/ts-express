@@ -76,11 +76,11 @@ captchaAPI.get(
     }
 
     try {
-      const image = await captchaProvider.getImage(id, {
+      const result = await captchaProvider.getImage(id, {
         width: query.width,
         height: query.height
       });
-      if (!image) {
+      if (!result) {
         return res
           .status(404)
           .json({
@@ -92,9 +92,12 @@ captchaAPI.get(
           });
       }
 
+      const [image, expiresIn] = result;
+
       return res
         .status(200)
         .contentType('image/png')
+        .header('Cache-Control', `max-age=${expiresIn}, must-revalidate`)
         .send(image);
     } catch (err) {
       next(err);
@@ -121,10 +124,10 @@ captchaAPI.get(
     }
 
     try {
-      const audio = await captchaProvider.getAudio(id, {
+      const result = await captchaProvider.getAudio(id, {
         language: query.language
       });
-      if (!audio) {
+      if (!result) {
         return res
           .status(404)
           .json({
@@ -136,9 +139,12 @@ captchaAPI.get(
           });
       }
 
+      const [audio, expiresIn] = result;
+
       return res
         .status(200)
         .contentType('audio/mpeg')
+        .header('Cache-Control', `max-age=${expiresIn}, must-revalidate`)
         .send(audio);
     } catch (err) {
       next(err);

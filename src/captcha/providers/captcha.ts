@@ -42,25 +42,24 @@ class CaptchaProvider {
     });
   }
 
-  async getImage(id: string, props: GetCaptchaImageProps): Promise<Buffer | null> {
-    const result = await this.findCaptcha(id);
-    if (!result) {
+  async getImage(id: string, props: GetCaptchaImageProps): Promise<[Buffer, number] | null> {
+    const captcha = await this.findCaptcha(id);
+    if (!captcha) {
       return null;
     }
 
-    const captcha = new captchapng3(props.width, props.height, result.toString(), '#ffffff');
-    return captcha.getBuffer();
+    const image = new captchapng3(props.width, props.height, captcha.code, '#ffffff');
+    return [image.getBuffer(), dayjs(captcha.expiresAt).diff(dayjs(), 'second')];
   }
 
-  async getAudio(id: string, props: GetCaptchaAudioProps): Promise<Buffer | null> {
-    const result = await this.findCaptcha(id);
-    if (!result) {
+  async getAudio(id: string, props: GetCaptchaAudioProps): Promise<[Buffer, number] | null> {
+    const captcha = await this.findCaptcha(id);
+    if (!captcha) {
       return null;
     }
 
-    const captchaValue = result.toString();
     const languageString = this.convertLanguageString(props.language);
-    const captchaValueToRead = this.formatTextToSpeech(captchaValue, props.language);
+    const captchaValueToRead = this.formatTextToSpeech(captcha.code, props.language);
 
     const response = await axios.get(
       `http://translate.google.com/translate_tts?ie=UTF-8&total=1&idx=0&textlen=32&client=tw-ob&q=${encodeURIComponent(captchaValueToRead)}&tl=${languageString}`,
@@ -69,7 +68,7 @@ class CaptchaProvider {
       }
     );
 
-    return response.data;
+    return [response.data, dayjs(captcha.expiresAt).diff(dayjs(), 'second')];
   }
 
   async verifyAnswer(id: string, answer: string): Promise<boolean> {
