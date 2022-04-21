@@ -376,15 +376,15 @@ clientsAPI.put(
     const account = getSession(req).account;
     if (account.isBanned) {
       return res
-          .status(400)
-          .json({
-            status: 'error',
-            message: 'Validation error',
-            causes: [{
-              field: 'account',
-              code: 'banned'
-            }]
-          });
+        .status(400)
+        .json({
+          status: 'error',
+          message: 'Validation error',
+          causes: [{
+            field: 'account',
+            code: 'banned'
+          }]
+        });
     }
 
     try {
