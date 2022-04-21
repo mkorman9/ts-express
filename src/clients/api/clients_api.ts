@@ -5,7 +5,9 @@ import ws from 'ws';
 import clientsProvider, {
   FindClientsSortFields,
   ClientAddPayload,
-  ClientUpdatePayload
+  CreditCardAddPayload,
+  ClientUpdatePayload,
+  CreditCardUpdatePayload
 } from '../providers/clients';
 import Client from '../models/client';
 import { ClientChangeItem } from '../providers/clients_changes';
@@ -281,8 +283,8 @@ clientsAPI.post(
       phoneNumber: req.body.phoneNumber,
       email: req.body.email,
       birthDate: req.body.birthDate ? req.body.birthDate : undefined,
-      creditCards: !req.body.creditCards ? [] : (req.body.creditCards as { number: string }[]).map(cc => ({
-        number: cc['number']
+      creditCards: !req.body.creditCards ? [] : (req.body.creditCards as CreditCardAddPayload[]).map(cc => ({
+        number: cc.number
       }))
     };
 
@@ -342,7 +344,7 @@ clientsAPI.put(
       phoneNumber: req.body.phoneNumber,
       email: req.body.email,
       birthDate: req.body.birthDate ? new Date(req.body.birthDate) : undefined,
-      creditCards: !req.body.creditCards ? undefined : (req.body.creditCards as { number: string }[]).map(cc => ({
+      creditCards: !req.body.creditCards ? undefined : (req.body.creditCards as CreditCardUpdatePayload[]).map(cc => ({
         number: cc.number
       }))
     };
