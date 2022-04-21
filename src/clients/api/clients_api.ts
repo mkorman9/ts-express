@@ -1,6 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { body, query, validationResult } from 'express-validator';
-import dayjs from 'dayjs';
 import ws from 'ws';
 
 import clientsProvider, {
@@ -104,7 +103,7 @@ const ClientAddRequestValidators = [
     .matches(/^\d{4} \d{4} \d{4} \d{4}$/).withMessage('ccnumber'),
   body('creditCards.number')
     .custom((_, { req }) => {
-      const creditCards = (req.body['creditCards'] || []).map(cc => cc.number);
+      const creditCards = (req.body.creditCards || []).map(cc => cc.number);
       return creditCards.length === new Set(creditCards).size;
     })
     .withMessage('unique')
@@ -148,7 +147,7 @@ const ClientUpdateRequestValidators = [
     .matches(/^\d{4} \d{4} \d{4} \d{4}$/).withMessage('ccnumber'),
   body('creditCards.number')
     .custom((_, { req }) => {
-      const creditCards = (req.body['creditCards'] || []).map(cc => cc.number);
+      const creditCards = (req.body.creditCards || []).map(cc => cc.number);
       return creditCards.length === new Set(creditCards).size;
     })
     .withMessage('unique')
@@ -275,14 +274,14 @@ clientsAPI.post(
     }
 
     const clientPayload: ClientAddPayload = {
-      gender: req.body['gender'],
-      firstName: req.body['firstName'],
-      lastName: req.body['lastName'],
-      address: req.body['address'],
-      phoneNumber: req.body['phoneNumber'],
-      email: req.body['email'],
-      birthDate: req.body['birthDate'] ? req.body['birthDate'] : undefined,
-      creditCards: !req.body['creditCards'] ? [] : (req.body['creditCards'] as { number: string }[]).map(cc => ({
+      gender: req.body.gender,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      address: req.body.address,
+      phoneNumber: req.body.phoneNumber,
+      email: req.body.email,
+      birthDate: req.body.birthDate ? req.body.birthDate : undefined,
+      creditCards: !req.body.creditCards ? [] : (req.body.creditCards as { number: string }[]).map(cc => ({
         number: cc['number']
       }))
     };
@@ -336,15 +335,15 @@ clientsAPI.put(
     }
 
     const clientPayload: ClientUpdatePayload = {
-      gender: req.body['gender'],
-      firstName: req.body['firstName'],
-      lastName: req.body['lastName'],
-      address: req.body['address'],
-      phoneNumber: req.body['phoneNumber'],
-      email: req.body['email'],
-      birthDate: req.body['birthDate'] ? dayjs(req.body['birthDate']) : req.body['birthDate'],
-      creditCards: !req.body['creditCards'] ? undefined : (req.body['creditCards'] as { number: string }[]).map(cc => ({
-        number: cc['number']
+      gender: req.body.gender,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      address: req.body.address,
+      phoneNumber: req.body.phoneNumber,
+      email: req.body.email,
+      birthDate: req.body.birthDate ? new Date(req.body.birthDate) : undefined,
+      creditCards: !req.body.creditCards ? undefined : (req.body.creditCards as { number: string }[]).map(cc => ({
+        number: cc.number
       }))
     };
 

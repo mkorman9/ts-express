@@ -104,10 +104,10 @@ accountAPI.post(
 
     try {
       await accountsProvider.addAccount({
-        username: req.body['username'],
-        email: req.body['email'],
-        password: req.body['password'],
-        language: req.body['language']
+        username: req.body.username,
+        email: req.body.email,
+        password: req.body.password,
+        language: req.body.language
       }, {
         ip: req.ip
       });
@@ -168,7 +168,7 @@ accountAPI.post(
     }
 
     try {
-      const account = await accountsProvider.findAccountById(req.body['accountID']);
+      const account = await accountsProvider.findAccountById(req.body.accountID);
       if (!account) {
         return res
           .status(400)

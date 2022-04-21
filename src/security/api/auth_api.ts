@@ -42,7 +42,7 @@ authAPI.post(
     const rememberMe = 'rememberMe' in req.query;
 
     try {
-      const account = await accountsProvider.findAccountByCredentialsEmail(req.body['email']);
+      const account = await accountsProvider.findAccountByCredentialsEmail(req.body.email);
 
       if (!account || !account.passwordCredentials) {
         return res
@@ -56,7 +56,7 @@ authAPI.post(
           });
       }
 
-      const passwordMatch = await bcrypt.compare(req.body['password'], account.passwordCredentials.passwordBcrypt);
+      const passwordMatch = await bcrypt.compare(req.body.password, account.passwordCredentials.passwordBcrypt);
       if (!passwordMatch) {
         return res
           .status(401)
