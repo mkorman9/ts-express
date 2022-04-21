@@ -173,7 +173,7 @@ const ClientUpdateRequestSchema = z.object({
   address: z.string().optional(),
   phoneNumber: z.string().optional(),
   email: z.string().optional(),
-  birthDate: z.preprocess(parseDate, z.date()).optional(),
+  birthDate: z.preprocess(parseDate, z.date()).nullish(),
   creditCards: z.array(z.object({
     number: z.string(),
   })).optional()
