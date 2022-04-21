@@ -34,13 +34,13 @@ export interface FindClientsFilters {
 }
 
 export interface FindClientsPagedOptions {
-  pageNumber?: number;
+  page?: number;
   pageSize?: number;
 
   sortBy?: FindClientsSortFields;
   sortReverse?: boolean;
 
-  filters?: FindClientsFilters;
+  filter?: FindClientsFilters;
 }
 
 export interface FindClientsPagedResult {
@@ -109,13 +109,13 @@ export class ClientsProvider {
 
   async findClientsPaged(opts?: FindClientsPagedOptions): Promise<FindClientsPagedResult> {
     const options = {
-      pageNumber: opts?.pageNumber || 0,
+      page: opts?.page || 0,
       pageSize: opts?.pageSize || 10,
 
       sortBy: opts?.sortBy || FindClientsSortFields.id,
       sortReverse: opts?.sortReverse || false,
 
-      filters: opts?.filters || {}
+      filters: opts?.filter || {}
     };
 
     const filters: WhereAttributeHash<unknown>[] = [];
@@ -202,7 +202,7 @@ export class ClientsProvider {
 
     const rows = await Client.findAll({
       limit: options.pageSize,
-      offset: options.pageSize * options.pageNumber,
+      offset: options.pageSize * options.page,
       where: {
         [Op.and]: [{
           isDeleted: false

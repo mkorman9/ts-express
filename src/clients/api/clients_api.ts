@@ -151,6 +151,26 @@ const ClientUpdateRequestValidators = [
     .withMessage('unique')
 ];
 
+const GetClientsPagedQuerySchema = z.object({
+  page: z.preprocess(arg => parseInt(arg as string), z.number()).default(0),
+  pageSize: z.preprocess(arg => parseInt(arg as string), z.number()).default(10),
+  sortBy: z.nativeEnum(FindClientsSortFields).default(FindClientsSortFields.id),
+  sortReverse: z.preprocess(arg => !!arg, z.boolean()),
+  filter: z.object({
+    gender: z.string().optional(),
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    address: z.string().optional(),
+    phoneNumber: z.string().optional(),
+    email: z.string().optional(),
+    bornAfter: z.preprocess(parseDate, z.date()).optional(),
+    bornBefore: z.preprocess(parseDate, z.date()).optional(),
+    creditCard: z.string().optional()
+  }).default({})
+});
+
+type GetClientsPagedQuery = z.infer<typeof GetClientsPagedQuerySchema>;
+
 const ClientAddRequestSchema = z.object({
   gender: z.string().optional(),
   firstName: z.string(),
@@ -201,26 +221,20 @@ clientsAPI.get(
         });
     }
 
-    const filters = req.query.filter || new Map<string, string>();
+    let query: GetClientsPagedQuery;
+    try {
+      query = GetClientsPagedQuerySchema.parse(req.query);
+    } catch (err) {
+      return res
+        .status(400)
+        .json({
+          status: 'error',
+          message: 'Malformed request'
+        });
+    }
 
     try {
-      const clientsPage = await clientsProvider.findClientsPaged({
-        pageNumber: parseInt(req.query.page as string) || 0,
-        pageSize: parseInt(req.query.pageSize as string) || 10,
-        sortBy: (req.query.sortBy as FindClientsSortFields) || FindClientsSortFields.id,
-        sortReverse: !!req.query.sortReverse,
-        filters: {
-          gender: filters['gender'],
-          firstName: filters['firstName'],
-          lastName: filters['lastName'],
-          address: filters['address'],
-          phoneNumber: filters['phoneNumber'],
-          email: filters['email'],
-          bornAfter: filters['bornAfter'] ? new Date(filters['bornAfter']) : undefined,
-          bornBefore: filters['bornBefore'] ? new Date(filters['bornBefore']) : undefined,
-          creditCard: filters['creditCard']
-        }
-      });
+      const clientsPage = await clientsProvider.findClientsPaged(query);
 
       res
         .status(200)

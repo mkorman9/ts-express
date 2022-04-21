@@ -93,21 +93,11 @@ describe('Clients API Tests', () => {
     clientsPageMock.restore();
     expect(clientsPageMock.callCount).equal(1);
     expect(clientsPageMock.lastCall.args).eql([{
-      pageNumber: 0,
+      page: 0,
       pageSize: 10,
       sortBy: 'id',
       sortReverse: false,
-      filters: {
-        gender: undefined,
-        firstName: undefined,
-        lastName: undefined,
-        address: undefined,
-        phoneNumber: undefined,
-        email: undefined,
-        bornAfter: undefined,
-        bornBefore: undefined,
-        creditCard: undefined
-      }
+      filter: {}
     }]);
 
     expect(response.status).equal(200);
@@ -138,20 +128,12 @@ describe('Clients API Tests', () => {
     clientsPageMock.restore();
     expect(clientsPageMock.callCount).equal(1);
     expect(clientsPageMock.lastCall.args).eql([{
-      pageNumber: 2,
+      page: 2,
       pageSize: 20,
       sortBy: 'lastName',
       sortReverse: true,
-      filters: {
-        gender: undefined,
-        firstName: 'Daniel',
-        lastName: undefined,
-        address: undefined,
-        phoneNumber: undefined,
-        email: undefined,
-        bornAfter: undefined,
-        bornBefore: undefined,
-        creditCard: undefined
+      filter: {
+        firstName: 'Daniel'
       }
     }]);
 
