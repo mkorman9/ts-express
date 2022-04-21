@@ -29,7 +29,7 @@ captchaAPI.get(
 captchaAPI.get(
   '/image/:id',
   async (req: Request, res: Response, next: NextFunction) => {
-    const id = req.params['id'];
+    const id = req.params.id;
 
     let width = parseInt(req.query.width as string);
     if (Number.isNaN(width) || width <= 0 || width > 1000) {
@@ -69,7 +69,7 @@ captchaAPI.get(
   '/audio/:id',
   ratelimiterMiddleware('general'),
   async (req: Request, res: Response, next: NextFunction) => {
-    const id = req.params['id'];
+    const id = req.params.id;
 
     let language = req.query.lang as string;
     if (!language) {
