@@ -1,7 +1,6 @@
 import { DataTypes } from 'sequelize';
 import { Table, Column, Model, HasOne } from 'sequelize-typescript';
 import dayjs from 'dayjs';
-import type { Dayjs } from 'dayjs';
 
 import PasswordCredentials from './password_credentials';
 import GithubCredentials from './github_credentials';
@@ -23,37 +22,14 @@ class Account extends Model {
   @Column({ field: 'deleted', type: DataTypes.BOOLEAN })
   isDeleted: boolean;
 
-  @Column({
-    field: 'banned_until',
-    type: DataTypes.DATE,
-    allowNull: true,
-    get: function () {
-      const value = this.getDataValue('bannedUntil');
-      if (!value) {
-        return null;
-      }
-
-      return dayjs(value);
-    }
-  })
-  bannedUntil: Dayjs | null;
+  @Column({ field: 'banned_until', type: DataTypes.DATE, allowNull: true })
+  bannedUntil: Date | null;
 
   @Column({ field: 'preferred_language', type: DataTypes.STRING(32) })
   language: string;
 
-  @Column({
-    field: 'created_at',
-    type: DataTypes.DATE,
-    get: function () {
-      const value = this.getDataValue('registeredAt');
-      if (!value) {
-        return null;
-      }
-
-      return dayjs(value);
-    }
-  })
-  registeredAt: Dayjs;
+  @Column({ field: 'created_at', type: DataTypes.DATE })
+  registeredAt: Date;
 
   @HasOne(() => PasswordCredentials)
   passwordCredentials: PasswordCredentials | null;

@@ -22,8 +22,8 @@ describe('Captcha API Tests', () => {
       .returns(Promise.resolve({
         id: generatedCaptchaId,
         code: '000000',
-        createdAt: dayjs(),
-        expiresAt: dayjs().add(30, 'minutes')
+        createdAt: dayjs().toDate(),
+        expiresAt: dayjs().add(30, 'minutes').toDate()
       } as Captcha));
 
     // when

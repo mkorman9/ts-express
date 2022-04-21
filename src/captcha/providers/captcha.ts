@@ -33,7 +33,7 @@ class CaptchaProvider {
       id: id,
       code: code,
       createdAt: now,
-      expiresAt: dayjs(now).add(CaptchaProvider.CaptchaExpirationMinutes, 'minutes')
+      expiresAt: dayjs(now).add(CaptchaProvider.CaptchaExpirationMinutes, 'minutes').toDate()
     });
   }
 

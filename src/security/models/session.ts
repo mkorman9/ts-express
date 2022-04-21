@@ -1,7 +1,5 @@
 import { DataTypes } from 'sequelize';
 import { Table, Column, Model, ForeignKey, BelongsTo } from 'sequelize-typescript';
-import dayjs from 'dayjs';
-import type { Dayjs } from 'dayjs';
 
 import Account from './account';
 
@@ -26,37 +24,14 @@ class Session extends Model {
   @Column({ field: 'ip', type: DataTypes.STRING(64) })
   ip: string;
 
-  @Column({
-    field: 'issued_at',
-    type: DataTypes.DATE,
-    get: function () {
-      const value = this.getDataValue('issuedAt');
-      if (!value) {
-        return null;
-      }
-
-      return dayjs(value);
-    }
-  })
-  issuedAt: Dayjs;
+  @Column({ field: 'issued_at', type: DataTypes.DATE })
+  issuedAt: Date;
 
   @Column({ field: 'duration', type: DataTypes.INTEGER, allowNull: true })
   duration: number;
 
-  @Column({
-    field: 'expires_at',
-    type: DataTypes.DATE,
-    allowNull: true,
-    get: function () {
-      const value = this.getDataValue('expiresAt');
-      if (!value) {
-        return null;
-      }
-
-      return dayjs(value);
-    }
-  })
-  expiresAt: Dayjs | null;
+  @Column({ field: 'expires_at', type: DataTypes.DATE, allowNull: true })
+  expiresAt: Date | null;
 
   get roles(): Set<string> {
     if (!this.rolesString) {

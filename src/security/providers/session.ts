@@ -67,7 +67,7 @@ class SessionProvider {
       ip: props.ip,
       issuedAt: now,
       duration: (props.duration && props.duration > 0) ? props.duration : null,
-      expiresAt: (props.duration && props.duration > 0) ? dayjs(now).add(props.duration, 'seconds') : null
+      expiresAt: (props.duration && props.duration > 0) ? dayjs(now).add(props.duration, 'seconds').toDate() : null
     });
 
     session.account = account;
@@ -90,7 +90,7 @@ class SessionProvider {
       return session;
     }
 
-    session.expiresAt = dayjs().add(session.duration, 'seconds');
+    session.expiresAt = dayjs().add(session.duration, 'seconds').toDate();
     session.save();
 
     return session;

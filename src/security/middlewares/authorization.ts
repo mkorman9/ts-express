@@ -153,7 +153,7 @@ export const sendSessionCookie = (req: Request, res: Response) => {
 
   if (session) {
     if (session.expiresAt) {
-      options.expires = session.expiresAt.toDate();
+      options.expires = session.expiresAt;
     }
 
     value = session.id;

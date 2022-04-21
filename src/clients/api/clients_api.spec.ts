@@ -70,9 +70,9 @@ const TestSession = {
   accountId: TestSessionAccount.id,
   token: 'c9cf6558-d8df-42cf-9099-81273fd76550',
   roles: new Set<string>(['CLIENTS_EDITOR']),
-  issuedAt: dayjs(),
+  issuedAt: dayjs().toDate(),
   duration: 3600,
-  expiresAt: dayjs().add(1, 'hour'),
+  expiresAt: dayjs().add(1, 'hour').toDate(),
   ip: '127.0.0.1',
 } as Session;
 

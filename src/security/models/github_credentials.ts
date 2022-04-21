@@ -1,7 +1,5 @@
 import { DataTypes } from 'sequelize';
 import { Table, Column, Model, BelongsTo, ForeignKey } from 'sequelize-typescript';
-import dayjs from 'dayjs';
-import type { Dayjs } from 'dayjs';
 
 import Account from './account';
 
@@ -29,20 +27,8 @@ class GithubCredentials extends Model {
   @Column({ field: 'access_token', type: DataTypes.STRING(255) })
   accessToken: string;
 
-  @Column({
-    field: 'last_access',
-    type: DataTypes.DATE,
-    allowNull: true,
-    get: function () {
-      const value = this.getDataValue('lastAccessTime');
-      if (!value) {
-        return null;
-      }
-
-      return dayjs(value);
-    }
-  })
-  lastAccessTime: Dayjs | null;
+  @Column({ field: 'last_access', type: DataTypes.DATE, allowNull: true })
+  lastAccessTime: Date | null;
 
   @Column({ field: 'last_access_ip', type: DataTypes.STRING(255) })
   lastAccessIp: string;
