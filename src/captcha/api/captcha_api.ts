@@ -1,11 +1,43 @@
 import { Router, Request, Response, NextFunction } from 'express';
+import { z } from 'zod';
 
 import { ratelimiterMiddleware } from '../../common/middlewares/rate_limiter';
-import captchaProvider from '../providers/captcha';
+import captchaProvider, { CaptchaAudioLanguage } from '../providers/captcha';
 
 export const DefaultImageWidth = 250;
 export const DefaultImageHeight = 75;
-export const DefaultAudioLanguage = 'en-US';
+export const DefaultAudioLanguage = CaptchaAudioLanguage.EnUS;
+
+const GetCaptchaImageQuerySchema = z.object({
+  width: z
+    .preprocess(arg => parseInt(arg as string), z.number())
+    .transform(arg => {
+      if (arg <= 0 || arg > 1000) {
+        return DefaultImageWidth;
+      }
+
+      return arg;
+    })
+    .default(DefaultImageWidth),
+  height: z
+    .preprocess(arg => parseInt(arg as string), z.number())
+    .transform(arg => {
+      if (arg <= 0 || arg > 1000) {
+        return DefaultImageHeight;
+      }
+
+      return arg;
+    })
+    .default(DefaultImageHeight)
+});
+
+type GetCaptchaImageQuery = z.infer<typeof GetCaptchaImageQuerySchema>;
+
+const GetCaptchaAudioQuerySchema = z.object({
+  language: z.nativeEnum(CaptchaAudioLanguage).default(DefaultAudioLanguage)
+});
+
+type GetCaptchaAudioQuery = z.infer<typeof GetCaptchaAudioQuerySchema>;
 
 const captchaAPI = Router();
 
@@ -31,18 +63,23 @@ captchaAPI.get(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
 
-    let width = parseInt(req.query.width as string);
-    if (Number.isNaN(width) || width <= 0 || width > 1000) {
-      width = DefaultImageWidth;
-    }
-
-    let height = parseInt(req.query.height as string);
-    if (Number.isNaN(height) || height <= 0 || height > 1000) {
-      height = DefaultImageHeight;
+    let query: GetCaptchaImageQuery;
+    try {
+      query = GetCaptchaImageQuerySchema.parse(req.query);
+    } catch (err) {
+      return res
+        .status(400)
+        .json({
+          status: 'error',
+          message: 'Malformed query params'
+        });
     }
 
     try {
-      const image = await captchaProvider.getImage(id, { width, height });
+      const image = await captchaProvider.getImage(id, {
+        width: query.width,
+        height: query.height
+      });
       if (!image) {
         return res
           .status(404)
@@ -71,13 +108,22 @@ captchaAPI.get(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
 
-    let language = req.query.lang as string;
-    if (!language) {
-      language = DefaultAudioLanguage;
+    let query: GetCaptchaAudioQuery;
+    try {
+      query = GetCaptchaAudioQuerySchema.parse(req.query);
+    } catch (err) {
+      return res
+        .status(400)
+        .json({
+          status: 'error',
+          message: 'Malformed query params'
+        });
     }
 
     try {
-      const audio = await captchaProvider.getAudio(id, { language });
+      const audio = await captchaProvider.getAudio(id, {
+        language: query.language
+      });
       if (!audio) {
         return res
           .status(404)

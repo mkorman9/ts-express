@@ -11,8 +11,13 @@ export interface GetCaptchaImageProps {
   height: number;
 }
 
+export enum CaptchaAudioLanguage {
+  EnUS = 'en-US',
+  PlPL = 'pl-PL'
+}
+
 export interface GetCaptchaAudioProps {
-  language: string;
+  language: CaptchaAudioLanguage;
 }
 
 class CaptchaProvider {
@@ -54,19 +59,11 @@ class CaptchaProvider {
     }
 
     const captchaValue = result.toString();
-
-    let language = 'en';
-    if (props.language === 'pl-PL') {
-      language = 'pl';
-    }
-
-    let captchaValueToRead = '';
-    if (language === 'en' || language === 'pl') {
-      captchaValueToRead = captchaValue.split('').join(', ').toUpperCase();
-    }
+    const languageString = this.convertLanguageString(props.language);
+    const captchaValueToRead = this.formatTextToSpeech(captchaValue, props.language);
 
     const response = await axios.get(
-      `http://translate.google.com/translate_tts?ie=UTF-8&total=1&idx=0&textlen=32&client=tw-ob&q=${encodeURIComponent(captchaValueToRead)}&tl=${language}`,
+      `http://translate.google.com/translate_tts?ie=UTF-8&total=1&idx=0&textlen=32&client=tw-ob&q=${encodeURIComponent(captchaValueToRead)}&tl=${languageString}`,
       {
         responseType: 'arraybuffer'
       }
@@ -119,6 +116,27 @@ class CaptchaProvider {
         throw err;
       }
     }
+  }
+
+  private convertLanguageString(language: CaptchaAudioLanguage): string {
+    if (language === CaptchaAudioLanguage.EnUS) {
+      return 'en';
+    } else if (language === CaptchaAudioLanguage.PlPL) {
+      return 'pl';
+    }
+
+    return '';
+  }
+
+  private formatTextToSpeech(text: string, language: CaptchaAudioLanguage): string {
+    if (
+      language === CaptchaAudioLanguage.EnUS ||
+      language === CaptchaAudioLanguage.PlPL
+    ) {
+      return text.split('').join(', ').toUpperCase();
+    }
+
+    return '';
   }
 }
 
