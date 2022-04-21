@@ -64,7 +64,7 @@ export interface ClientAddPayload {
   phoneNumber?: string;
   email?: string;
   birthDate?: Date;
-  creditCards: { number: string }[];
+  creditCards: CreditCardAddPayload[];
 }
 
 export interface CreditCardUpdatePayload {

@@ -1,14 +1,10 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { body, query, validationResult } from 'express-validator';
+import { z } from 'zod';
 import ws from 'ws';
 
-import clientsProvider, {
-  FindClientsSortFields,
-  ClientAddPayload,
-  CreditCardAddPayload,
-  ClientUpdatePayload,
-  CreditCardUpdatePayload
-} from '../providers/clients';
+import { parseDate } from '../../common/providers/validation';
+import clientsProvider, { FindClientsSortFields } from '../providers/clients';
 import Client from '../models/client';
 import { ClientChangeItem } from '../providers/clients_changes';
 import {
@@ -155,6 +151,36 @@ const ClientUpdateRequestValidators = [
     .withMessage('unique')
 ];
 
+const ClientAddRequestSchema = z.object({
+  gender: z.string().optional(),
+  firstName: z.string(),
+  lastName: z.string(),
+  address: z.string().optional(),
+  phoneNumber: z.string().optional(),
+  email: z.string().optional(),
+  birthDate: z.preprocess(parseDate, z.date()).optional(),
+  creditCards: z.array(z.object({
+    number: z.string(),
+  })).default([])
+});
+
+type ClientAddRequest = z.infer<typeof ClientAddRequestSchema>;
+
+const ClientUpdateRequestSchema = z.object({
+  gender: z.string().optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  address: z.string().optional(),
+  phoneNumber: z.string().optional(),
+  email: z.string().optional(),
+  birthDate: z.preprocess(parseDate, z.date()).optional(),
+  creditCards: z.array(z.object({
+    number: z.string(),
+  })).optional()
+});
+
+type ClientUpdateRequest = z.infer<typeof ClientUpdateRequestSchema>;
+
 const clientsAPI = Router();
 
 clientsAPI.get(
@@ -275,35 +301,34 @@ clientsAPI.post(
         });
     }
 
-    const clientPayload: ClientAddPayload = {
-      gender: req.body.gender,
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      address: req.body.address,
-      phoneNumber: req.body.phoneNumber,
-      email: req.body.email,
-      birthDate: req.body.birthDate ? req.body.birthDate : undefined,
-      creditCards: !req.body.creditCards ? [] : (req.body.creditCards as CreditCardAddPayload[]).map(cc => ({
-        number: cc.number
-      }))
-    };
+    let payload: ClientAddRequest;
+    try {
+      payload = ClientAddRequestSchema.parse(req.body);
+    } catch (err) {
+      return res
+        .status(400)
+        .json({
+          status: 'error',
+          message: 'Malformed request'
+        });
+    }
 
     const account = getSession(req).account;
     if (account.isBanned) {
       return res
-          .status(400)
-          .json({
-            status: 'error',
-            message: 'Validation error',
-            causes: [{
-              field: 'account',
-              code: 'banned'
-            }]
-          });
+        .status(400)
+        .json({
+          status: 'error',
+          message: 'Validation error',
+          causes: [{
+            field: 'account',
+            code: 'banned'
+          }]
+        });
     }
 
     try {
-      const client = await clientsProvider.addClient(clientPayload, { author: account.id });
+      const client = await clientsProvider.addClient(payload, { author: account.id });
 
       return res
         .status(200)
@@ -336,18 +361,17 @@ clientsAPI.put(
         });
     }
 
-    const clientPayload: ClientUpdatePayload = {
-      gender: req.body.gender,
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      address: req.body.address,
-      phoneNumber: req.body.phoneNumber,
-      email: req.body.email,
-      birthDate: req.body.birthDate ? new Date(req.body.birthDate) : undefined,
-      creditCards: !req.body.creditCards ? undefined : (req.body.creditCards as CreditCardUpdatePayload[]).map(cc => ({
-        number: cc.number
-      }))
-    };
+    let payload: ClientUpdateRequest;
+    try {
+      payload = ClientUpdateRequestSchema.parse(req.body);
+    } catch (err) {
+      return res
+        .status(400)
+        .json({
+          status: 'error',
+          message: 'Malformed request'
+        });
+    }
 
     const account = getSession(req).account;
     if (account.isBanned) {
@@ -364,7 +388,7 @@ clientsAPI.put(
     }
 
     try {
-      const result = await clientsProvider.updateClient(req.params.id, clientPayload, { author: account.id });
+      const result = await clientsProvider.updateClient(req.params.id, payload, { author: account.id });
       if (!result) {
         return res
           .status(404)

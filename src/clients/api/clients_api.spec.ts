@@ -253,13 +253,8 @@ describe('Clients API Tests', () => {
     addClientMock.restore();
     expect(addClientMock.callCount).equal(1);
     expect(addClientMock.lastCall.args).eql([{
-      gender: undefined,
       firstName: payload.firstName,
       lastName: payload.lastName,
-      address: undefined,
-      phoneNumber: undefined,
-      email: undefined,
-      birthDate: undefined,
       creditCards: []
     }, {
       author: TestSessionAccount.id
