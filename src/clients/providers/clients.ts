@@ -1,5 +1,5 @@
 import { Op, WhereAttributeHash } from 'sequelize';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 import { Transaction } from 'sequelize';
 
@@ -28,9 +28,9 @@ export interface FindClientsFilters {
   address?: string;
   phoneNumber?: string;
   email?: string;
-  bornAfter?: Dayjs;
-  bornBefore?: Dayjs;
-  creditCardNumber?: string;
+  bornAfter?: Date;
+  bornBefore?: Date;
+  creditCard?: string;
 }
 
 export interface FindClientsPagedOptions {
@@ -45,7 +45,7 @@ export interface FindClientsPagedOptions {
 
 export interface FindClientsPagedResult {
   rows: Client[];
-  count: number;
+  totalPages: number;
 }
 
 export interface FindClientByIdOptions {
@@ -63,7 +63,7 @@ export interface ClientAddPayload {
   address?: string;
   phoneNumber?: string;
   email?: string;
-  birthDate?: Dayjs;
+  birthDate?: Date;
   creditCards: { number: string }[];
 }
 
@@ -78,7 +78,7 @@ export interface ClientUpdatePayload {
   address?: string;
   phoneNumber?: string;
   email?: string;
-  birthDate?: Dayjs | null;
+  birthDate?: Date | null;
   creditCards?: CreditCardUpdatePayload[];
 }
 
@@ -163,22 +163,22 @@ export class ClientsProvider {
     if (options.filters.bornAfter) {
       filters.push({
         birthDate: {
-          [Op.gte]: options.filters.bornAfter.toDate()
+          [Op.gte]: options.filters.bornAfter
         }
       });
     }
     if (options.filters.bornBefore) {
       filters.push({
         birthDate: {
-          [Op.lte]: options.filters.bornBefore.toDate()
+          [Op.lte]: options.filters.bornBefore
         }
       });
     }
-    if (options.filters.creditCardNumber) {
+    if (options.filters.creditCard) {
       const clientWithCreditCard = await CreditCard.findAll({
         where: {
           number: {
-            [Op.like]: `%${options.filters.creditCardNumber}%`
+            [Op.like]: `%${options.filters.creditCard}%`
           }
         }
       });
@@ -220,7 +220,7 @@ export class ClientsProvider {
 
     return {
       rows,
-      count
+      totalPages: Math.ceil(count / options.pageSize)
     };
   }
 
@@ -329,7 +329,7 @@ export class ClientsProvider {
           address: client.address,
           phoneNumber: client.phoneNumber,
           email: client.email,
-          birthDate: client.birthDate ? dayjs(client.birthDate) : null,
+          birthDate: client.birthDate ? client.birthDate : null,
           creditCards: (client.creditCards || []).map(cc => ({ number: cc.number }))
         };
 

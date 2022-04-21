@@ -5,7 +5,6 @@ import ws from 'ws';
 
 import clientsProvider, {
   FindClientsSortFields,
-  FindClientsFilters,
   ClientAddPayload,
   ClientUpdatePayload
 } from '../providers/clients';
@@ -175,40 +174,25 @@ clientsAPI.get(
         });
     }
 
-    let pageNumber = parseInt(req.query.page as string);
-    if (!pageNumber) {
-      pageNumber = 0;
-    }
-
-    let pageSize = parseInt(req.query.pageSize as string);
-    if (!pageSize) {
-      pageSize = 10;
-    }
-
-    const sortBy = req.query.sortBy as FindClientsSortFields || FindClientsSortFields.id;
-    const sortReverse = 'sortReverse' in req.query;
-
-    const filters: FindClientsFilters = !req.query.filter ? {} : {
-      gender: req.query.filter['gender'],
-      firstName: req.query.filter['firstName'],
-      lastName: req.query.filter['lastName'],
-      address: req.query.filter['address'],
-      phoneNumber: req.query.filter['phoneNumber'],
-      email: req.query.filter['email'],
-      bornAfter: req.query.filter['bornAfter'] ? dayjs(req.query.filter['bornAfter']) : undefined,
-      bornBefore: req.query.filter['bornBefore'] ? dayjs(req.query.filter['bornBefore']) : undefined,
-      creditCardNumber: req.query.filter['creditCard'],
-    };
+    const filters = req.query.filter || new Map<string, string>();
 
     try {
       const clientsPage = await clientsProvider.findClientsPaged({
-        pageNumber,
-        pageSize,
-
-        sortBy,
-        sortReverse,
-
-        filters
+        pageNumber: parseInt(req.query.page as string) || 0,
+        pageSize: parseInt(req.query.pageSize as string) || 10,
+        sortBy: (req.query.sortBy as FindClientsSortFields) || FindClientsSortFields.id,
+        sortReverse: !!req.query.sortReverse,
+        filters: {
+          gender: filters['gender'],
+          firstName: filters['firstName'],
+          lastName: filters['lastName'],
+          address: filters['address'],
+          phoneNumber: filters['phoneNumber'],
+          email: filters['email'],
+          bornAfter: filters['bornAfter'] ? new Date(filters['bornAfter']) : undefined,
+          bornBefore: filters['bornBefore'] ? new Date(filters['bornBefore']) : undefined,
+          creditCard: filters['creditCard']
+        }
       });
 
       res
@@ -227,7 +211,7 @@ clientsAPI.get(
               number: cc.number
             }))
           })),
-          totalPages: Math.ceil(clientsPage.count / pageSize)
+          totalPages: clientsPage.totalPages
         });
     } catch (err) {
       next(err);
@@ -297,7 +281,7 @@ clientsAPI.post(
       address: req.body['address'],
       phoneNumber: req.body['phoneNumber'],
       email: req.body['email'],
-      birthDate: req.body['birthDate'] ? dayjs(req.body['birthDate']) : undefined,
+      birthDate: req.body['birthDate'] ? req.body['birthDate'] : undefined,
       creditCards: !req.body['creditCards'] ? [] : (req.body['creditCards'] as { number: string }[]).map(cc => ({
         number: cc['number']
       }))

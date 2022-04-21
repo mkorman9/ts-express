@@ -20,7 +20,7 @@ const Records = [{
   address: 'Queens Road 1482, Bristol, Cambridgeshire ST7 9GA',
   phoneNumber: '0744-910-818',
   email: 'amelia.pierce@example.com',
-  birthDate: dayjs('1982-07-22T20:30:05.000Z'),
+  birthDate: new Date('1982-07-22T20:30:05.000Z'),
   isDeleted: false,
   creditCards: []
 }, {
@@ -82,7 +82,7 @@ describe('Clients API Tests', () => {
     const clientsPageMock = sinon.stub(clientsProvider, 'findClientsPaged')
       .returns(Promise.resolve({
         rows: Records,
-        count: Records.length
+        totalPages: 1
       }));
 
     // when
@@ -97,7 +97,17 @@ describe('Clients API Tests', () => {
       pageSize: 10,
       sortBy: 'id',
       sortReverse: false,
-      filters: {}
+      filters: {
+        gender: undefined,
+        firstName: undefined,
+        lastName: undefined,
+        address: undefined,
+        phoneNumber: undefined,
+        email: undefined,
+        bornAfter: undefined,
+        bornBefore: undefined,
+        creditCard: undefined
+      }
     }]);
 
     expect(response.status).equal(200);
@@ -110,7 +120,7 @@ describe('Clients API Tests', () => {
     const clientsPageMock = sinon.stub(clientsProvider, 'findClientsPaged')
       .returns(Promise.resolve({
         rows: [Records[0]],
-        count: 1
+        totalPages: 1
       }));
 
     // when
@@ -141,7 +151,7 @@ describe('Clients API Tests', () => {
         email: undefined,
         bornAfter: undefined,
         bornBefore: undefined,
-        creditCardNumber: undefined
+        creditCard: undefined
       }
     }]);
 

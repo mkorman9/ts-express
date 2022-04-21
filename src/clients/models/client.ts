@@ -1,7 +1,5 @@
 import { DataTypes } from 'sequelize';
 import { Table, Column, Model, HasMany } from 'sequelize-typescript';
-import dayjs from 'dayjs';
-import type { Dayjs } from 'dayjs';
 
 import CreditCard from './credit_card';
 
@@ -28,20 +26,8 @@ class Client extends Model {
   @Column({ field: 'email', type: DataTypes.STRING(64) })
   email: string;
 
-  @Column({
-    field: 'birth_date',
-    type: DataTypes.DATE,
-    allowNull: true,
-    get: function () {
-      const value = this.getDataValue('birthDate');
-      if (!value) {
-        return null;
-      }
-
-      return dayjs(value);
-    }
-  })
-  birthDate: Dayjs | null;
+  @Column({ field: 'birth_date', type: DataTypes.DATE, allowNull: true })
+  birthDate: Date | null;
 
   @Column({ field: 'deleted', type: DataTypes.BOOLEAN })
   isDeleted: boolean;

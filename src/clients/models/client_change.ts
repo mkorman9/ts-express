@@ -1,7 +1,5 @@
 import { DataTypes } from 'sequelize';
 import { Table, Column, Model, ForeignKey } from 'sequelize-typescript';
-import dayjs from 'dayjs';
-import type { Dayjs } from 'dayjs';
 
 import Client from './client';
 
@@ -17,20 +15,8 @@ class ClientChange extends Model {
   @Column({ field: 'change_type', type: DataTypes.STRING(64) })
   type: string;
 
-  @Column({
-    field: 'change_timestamp',
-    type: DataTypes.DATE,
-    allowNull: true,
-    get: function () {
-      const value = this.getDataValue('timestamp');
-      if (!value) {
-        return null;
-      }
-
-      return dayjs(value);
-    }
-  })
-  timestamp: Dayjs;
+  @Column({ field: 'change_timestamp', type: DataTypes.DATE, allowNull: true })
+  timestamp: Date;
 
   @Column({ field: 'author', type: DataTypes.UUID })
   author: string;

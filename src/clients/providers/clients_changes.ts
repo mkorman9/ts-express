@@ -1,4 +1,4 @@
-import { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 
 export interface ClientDescriptor {
   gender?: string;
@@ -7,7 +7,7 @@ export interface ClientDescriptor {
   address?: string;
   phoneNumber?: string;
   email?: string;
-  birthDate?: Dayjs | null;
+  birthDate?: Date | null;
   creditCards?: { number: string }[];
 }
 
@@ -25,7 +25,7 @@ export const generateClientChangeset = (oldData: ClientDescriptor, newData: Clie
     address: oldData.address || '',
     phoneNumber: oldData.phoneNumber || '',
     email: oldData.email || '',
-    birthDate: oldData.birthDate ? oldData.birthDate.format() : '',
+    birthDate: oldData.birthDate ? dayjs(oldData.birthDate).format() : '',
     creditCards: (oldData.creditCards || []).map(cc => cc.number).sort().join(',')
   };
   const newDataPayload = {
@@ -35,7 +35,7 @@ export const generateClientChangeset = (oldData: ClientDescriptor, newData: Clie
     address: newData.address || '',
     phoneNumber: newData.phoneNumber || '',
     email: newData.email || '',
-    birthDate: newData.birthDate ? newData.birthDate.format() : '',
+    birthDate: newData.birthDate ? dayjs(newData.birthDate).format() : '',
     creditCards: (newData.creditCards || []).map(cc => cc.number).sort().join(',')
   };
 
