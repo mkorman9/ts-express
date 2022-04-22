@@ -8,11 +8,16 @@ import GithubCredentials from '../models/github_credentials';
 import { sendMail, Language } from '../../common/providers/mail';
 import DB from '../../common/providers/db';
 
+export enum AccountLanguage {
+  EnUS = 'en-US',
+  PlPL = 'pl-PL'
+}
+
 export interface AccountAddPayload {
   username: string;
   email: string;
   password: string;
-  language: string;
+  language: AccountLanguage;
 }
 
 export interface AccountAddProps {

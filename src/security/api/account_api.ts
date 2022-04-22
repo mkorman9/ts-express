@@ -1,8 +1,9 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { body, validationResult } from 'express-validator';
+import { z } from 'zod';
+
 import { captchaMiddleware } from '../../captcha/middlewares/captcha';
 import { ratelimiterMiddleware } from '../../common/middlewares/rate_limiter';
-
 import {
   tokenAuthMiddleware,
   requireAuthentication,
@@ -10,7 +11,8 @@ import {
 } from '../middlewares/authorization';
 import accountsProvider, {
   EmailAlreadyInUseError,
-  UsernameAlreadyInUseError
+  UsernameAlreadyInUseError,
+  AccountLanguage
 } from '../providers/accounts';
 
 const AccountRegisterValidators = [
@@ -48,6 +50,15 @@ const AccountActivateValidators = [
     .bail()
     .isString().withMessage('format')
 ];
+
+const AccountRegisterRequestSchema = z.object({
+  username: z.string(),
+  email: z.string(),
+  password: z.string(),
+  language: z.nativeEnum(AccountLanguage)
+});
+
+type AccountRegisterRequest = z.infer<typeof AccountRegisterRequestSchema>;
 
 const accountAPI = Router();
 
@@ -102,15 +113,20 @@ accountAPI.post(
         });
     }
 
+    let payload: AccountRegisterRequest;
     try {
-      await accountsProvider.addAccount({
-        username: req.body.username,
-        email: req.body.email,
-        password: req.body.password,
-        language: req.body.language
-      }, {
-        ip: req.ip
-      });
+      payload = AccountRegisterRequestSchema.parse(req.body);
+    } catch (err) {
+      return res
+        .status(400)
+        .json({
+          status: 'error',
+          message: 'Malformed request'
+        });
+    }
+
+    try {
+      await accountsProvider.addAccount(payload, { ip: req.ip });
     } catch (err) {
       if (err instanceof UsernameAlreadyInUseError) {
         return res
