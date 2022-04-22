@@ -41,7 +41,7 @@ const AccountRegisterValidators = [
     .bail()
     .isString().withMessage('format')
     .bail()
-    .isIn(['en-US', 'pl-PL']).withMessage('oneof')
+    .isIn(Object.values(AccountLanguage)).withMessage('oneof')
 ];
 
 const AccountActivateValidators = [
