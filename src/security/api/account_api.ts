@@ -12,7 +12,9 @@ import {
 import accountsProvider, {
   EmailAlreadyInUseError,
   UsernameAlreadyInUseError,
-  AccountLanguage
+  AccountLanguage,
+  AccountDoesNotExistError,
+  AccountNotMeantToBeActivatedError
 } from '../providers/accounts';
 
 const AccountRegisterValidators = [
@@ -184,32 +186,34 @@ accountAPI.post(
     }
 
     try {
-      const account = await accountsProvider.findAccountById(req.body.accountID);
-      if (!account) {
-        return res
-          .status(400)
-          .json({
-            status: 'error',
-            message: 'Account does not exist',
-            causes: [{
-              field: 'account',
-              code: 'invalid'
-            }]
-          });
-      }
+      try {
+        await accountsProvider.activateAccount(req.body.accountID);
+      } catch (err) {
+        if (err instanceof AccountDoesNotExistError) {
+          return res
+            .status(400)
+            .json({
+              status: 'error',
+              message: 'Account does not exist',
+              causes: [{
+                field: 'account',
+                code: 'invalid'
+              }]
+            });
+        } else if (err instanceof AccountNotMeantToBeActivatedError) {
+          return res
+            .status(400)
+            .json({
+              status: 'error',
+              message: 'Invalid account type',
+              causes: [{
+                field: 'account',
+                code: 'invalid'
+              }]
+            });
+        }
 
-      const ok = await accountsProvider.activateAccount(account);
-      if (!ok) {
-        return res
-          .status(400)
-          .json({
-            status: 'error',
-            message: 'Invalid account type',
-            causes: [{
-              field: 'account',
-              code: 'invalid'
-            }]
-          });
+        throw err;
       }
 
       return res

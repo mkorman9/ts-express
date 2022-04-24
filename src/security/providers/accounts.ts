@@ -30,6 +30,12 @@ export class UsernameAlreadyInUseError extends Error {
 export class EmailAlreadyInUseError extends Error {
 }
 
+export class AccountDoesNotExistError extends Error {
+}
+
+export class AccountNotMeantToBeActivatedError extends Error {
+}
+
 export class AccountsProvider {
   private static readonly PasswordSaltRounds = 12;
 
@@ -138,19 +144,29 @@ export class AccountsProvider {
     }
   }
 
-  async activateAccount(account: Account): Promise<boolean> {
-    if (account.isActive) {
-      return false;
+  async activateAccount(accountId: string) {
+    let account: Account | null;
+    try {
+      account = await this.findAccountById(accountId);
+      if (!account) {
+        throw new AccountDoesNotExistError();
+      }
+    } catch (err) {
+      if (err.name === 'SequelizeDatabaseError' &&
+        err.original &&
+        err.original.code === '22P02') {  // invalid UUID format
+        throw new AccountDoesNotExistError();
+      } else {
+        throw err;
+      }
     }
 
-    if (!account.passwordCredentials) {
-      return false;
+    if (account.isActive || !account.passwordCredentials) {
+      throw new AccountNotMeantToBeActivatedError();
     }
 
     account.isActive = true;
     await account.save();
-
-    return true;
   }
 }
 
