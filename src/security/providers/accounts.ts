@@ -77,26 +77,16 @@ export class AccountsProvider {
   }
 
   async authorizeByPassword(email: string, password: string, props: AuthorizeByPasswordProps): Promise<Session> {
-    const credentials = await PasswordCredentials.findOne({
-      where: {
-        email: email
-      },
-      include: [
-        Account
-      ]
-    });
-
-    if (!credentials) {
-      throw new AccountDoesNotExistError();
-    }
-
     const account = await Account.findOne({
       where: {
-        id: credentials.accountId,
         isDeleted: false
       },
-      include: [
-        PasswordCredentials,
+      include: [{
+          model: PasswordCredentials,
+          where: {
+            email: email
+          }
+        },
         GithubCredentials
       ]
     });
