@@ -1,15 +1,17 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { body, validationResult } from 'express-validator';
-import dayjs from 'dayjs';
-import bcrypt from 'bcrypt';
 
-import accountsProvider from '../providers/accounts';
+import accountsProvider, {
+  AccountDoesNotExistError,
+  InvalidPasswordError as InvalidCredentialsError,
+  InactiveAccountError
+} from '../providers/accounts';
 import {
   setSession,
   sendSessionCookie
 } from '../../security/middlewares/authorization';
-import sessionProvider from '../../security/providers/session';
 import { ratelimiterMiddleware } from '../../common/middlewares/rate_limiter';
+import Session from '../models/session';
 
 const PasswordAuthRequestValidators = [
   body('email')
@@ -42,50 +44,37 @@ authAPI.post(
     const rememberMe = 'rememberMe' in req.query;
 
     try {
-      const account = await accountsProvider.findAccountByCredentialsEmail(req.body.email);
+      let session: Session | null;
+      try {
+        session = await accountsProvider.authorizeByPassword(req.body.email, req.body.password, {
+          prolongedSession: rememberMe,
+          ip: req.ip
+        });
+      } catch (err) {
+        if (err instanceof AccountDoesNotExistError || err instanceof InvalidCredentialsError) {
+          return res
+            .status(401)
+            .json({
+              status: 'error',
+              causes: [{
+                field: 'credentials',
+                code: 'invalid'
+              }]
+            });
+        } else if (err instanceof InactiveAccountError) {
+          return res
+            .status(401)
+            .json({
+              status: 'error',
+              causes: [{
+                field: 'account',
+                code: 'inactive'
+              }]
+            });
+        }
 
-      if (!account || !account.passwordCredentials) {
-        return res
-          .status(401)
-          .json({
-            status: 'error',
-            causes: [{
-              field: 'credentials',
-              code: 'invalid'
-            }]
-          });
+        throw err;
       }
-
-      const passwordMatch = await bcrypt.compare(req.body.password, account.passwordCredentials.passwordBcrypt);
-      if (!passwordMatch) {
-        return res
-          .status(401)
-          .json({
-            status: 'error',
-            causes: [{
-              field: 'credentials',
-              code: 'invalid'
-            }]
-          });
-      }
-
-      if (!account.isActive) {
-        return res
-          .status(401)
-          .json({
-            status: 'error',
-            causes: [{
-              field: 'account',
-              code: 'inactive'
-            }]
-          });
-      }
-
-      const session = await sessionProvider.startSession(account, {
-        ip: req.ip,
-        duration: rememberMe ? dayjs.duration(14, 'days').asSeconds() : dayjs.duration(4, 'hours').asSeconds(),
-        roles: account.roles
-      });
 
       setSession(req, session);
       sendSessionCookie(req, res);

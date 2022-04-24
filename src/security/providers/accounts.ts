@@ -2,11 +2,14 @@ import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
 import bcrypt from 'bcrypt';
 import { Transaction } from 'sequelize';
+
 import Account from '../models/account';
+import sessionProvider from './session';
 import PasswordCredentials from '../models/password_credentials';
 import GithubCredentials from '../models/github_credentials';
 import { sendMail, Language } from '../../common/providers/mail';
 import DB from '../../common/providers/db';
+import Session from '../models/session';
 
 export enum AccountLanguage {
   EnUS = 'en-US',
@@ -24,6 +27,11 @@ export interface AccountAddProps {
   ip: string;
 }
 
+export interface AuthorizeByPasswordProps {
+  prolongedSession: boolean;
+  ip: string;
+}
+
 export class UsernameAlreadyInUseError extends Error {
 }
 
@@ -34,6 +42,12 @@ export class AccountDoesNotExistError extends Error {
 }
 
 export class AccountNotMeantToBeActivatedError extends Error {
+}
+
+export class InvalidPasswordError extends Error {
+}
+
+export class InactiveAccountError extends Error {
 }
 
 export class AccountsProvider {
@@ -62,7 +76,7 @@ export class AccountsProvider {
     }
   }
 
-  async findAccountByCredentialsEmail(email: string): Promise<Account | null> {
+  async authorizeByPassword(email: string, password: string, props: AuthorizeByPasswordProps): Promise<Session> {
     const credentials = await PasswordCredentials.findOne({
       where: {
         email: email
@@ -73,10 +87,10 @@ export class AccountsProvider {
     });
 
     if (!credentials) {
-      return null;
+      throw new AccountDoesNotExistError();
     }
 
-    return await Account.findOne({
+    const account = await Account.findOne({
       where: {
         id: credentials.accountId,
         isDeleted: false
@@ -85,6 +99,25 @@ export class AccountsProvider {
         PasswordCredentials,
         GithubCredentials
       ]
+    });
+
+    if (!account || !account.passwordCredentials) {
+      throw new AccountDoesNotExistError();
+    }
+
+    if (!account.isActive) {
+      throw new InactiveAccountError();
+    }
+
+    const passwordMatch = await bcrypt.compare(password, account.passwordCredentials.passwordBcrypt);
+    if (!passwordMatch) {
+      throw new InvalidPasswordError();
+    }
+
+    return await sessionProvider.startSession(account, {
+      ip: props.ip,
+      duration: props.prolongedSession ? dayjs.duration(14, 'days').asSeconds() : dayjs.duration(4, 'hours').asSeconds(),
+      roles: account.roles
     });
   }
 
