@@ -20,8 +20,11 @@
                 <constraints nullable="false" />
             </column>
         </createTable>
-        <addPrimaryKey tableName="captchas" columnNames="id" constraintName="captchas_pkey" />
-
+        <addPrimaryKey
+          tableName="captchas"
+          columnNames="id"
+          constraintName="captchas_pkey"
+        />
     </changeSet>
 
 </databaseChangeLog>

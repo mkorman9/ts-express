@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>   
-<databaseChangeLog  
-  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"  
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">  
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
     <changeSet author="mkorman" id="2021-04-26-clients">
         <createTable tableName="clients">
@@ -28,7 +28,11 @@
                 <constraints nullable="false" />
             </column>
         </createTable>
-        <addPrimaryKey tableName="clients" columnNames="id" constraintName="clients_pkey" />
+        <addPrimaryKey
+          tableName="clients"
+          columnNames="id"
+          constraintName="clients_pkey"
+        />
 
         <createTable tableName="clients_credit_cards">
             <column name="client_id" type="uuid">
@@ -38,11 +42,20 @@
                 <constraints nullable="false" />
             </column>
         </createTable>
-        <addPrimaryKey tableName="clients_credit_cards" columnNames="client_id,number" constraintName="clients_credit_cards_pkey" />
-        <addForeignKeyConstraint baseTableName="clients_credit_cards" referencedTableName="clients" 
-                                 baseColumnNames="client_id" referencedColumnNames="id" 
-                                 constraintName="fk_clients_credit_cards" 
-                                 onDelete="CASCADE" onUpdate="CASCADE" />
+        <addPrimaryKey
+          tableName="clients_credit_cards"
+          columnNames="client_id,number"
+          constraintName="clients_credit_cards_pkey"
+        />
+        <addForeignKeyConstraint
+          baseTableName="clients_credit_cards"
+          referencedTableName="clients"
+          baseColumnNames="client_id"
+          referencedColumnNames="id"
+          constraintName="fk_clients_credit_cards"
+          onDelete="CASCADE"
+          onUpdate="CASCADE"
+        />
 
         <createTable tableName="clients_changes">
             <column name="id" type="uuid">
@@ -60,11 +73,20 @@
             <column name="changeset" type="text" defaultValue="">
             </column>
         </createTable>
-        <addPrimaryKey tableName="clients_changes" columnNames="id,client_id" constraintName="clients_changes_pkey" />
-        <addForeignKeyConstraint baseTableName="clients_changes" referencedTableName="clients" 
-                                 baseColumnNames="client_id" referencedColumnNames="id" 
-                                 constraintName="fk_clients_clients_changes" 
-                                 onDelete="CASCADE" onUpdate="CASCADE" />
+        <addPrimaryKey
+          tableName="clients_changes"
+          columnNames="id,client_id"
+          constraintName="clients_changes_pkey"
+        />
+        <addForeignKeyConstraint
+          baseTableName="clients_changes"
+          referencedTableName="clients"
+          baseColumnNames="client_id"
+          referencedColumnNames="id"
+          constraintName="fk_clients_clients_changes"
+          onDelete="CASCADE"
+          onUpdate="CASCADE"
+        />
     </changeSet>
 
 </databaseChangeLog>

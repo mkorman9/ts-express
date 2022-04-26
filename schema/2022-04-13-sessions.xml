@@ -26,17 +26,24 @@
                 <constraints nullable="false" />
             </column>
             <column name="duration" type="integer">
-                <constraints nullable="true" />
             </column>
             <column name="expires_at" type="timestamp">
-                <constraints nullable="true" />
             </column>
         </createTable>
-        <addPrimaryKey tableName="sessions" columnNames="id" constraintName="sessions_pkey" />
-        <addForeignKeyConstraint baseTableName="sessions" referencedTableName="accounts"
-                                 baseColumnNames="account_id" referencedColumnNames="id"
-                                 constraintName="fk_sessions_accounts"
-                                 onDelete="CASCADE" onUpdate="CASCADE" />
+        <addPrimaryKey
+          tableName="sessions"
+          columnNames="id"
+          constraintName="sessions_pkey"
+        />
+        <addForeignKeyConstraint
+          baseTableName="sessions"
+          referencedTableName="accounts"
+          baseColumnNames="account_id"
+          referencedColumnNames="id"
+          constraintName="fk_sessions_accounts"
+          onDelete="CASCADE"
+          onUpdate="CASCADE"
+        />
     </changeSet>
 
 </databaseChangeLog>
