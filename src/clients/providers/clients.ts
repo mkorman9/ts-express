@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 import { Transaction } from 'sequelize';
 
-import DB, { isInvalidValueError } from '../../common/providers/db';
+import DB, { isInvalidUUIDError } from '../../common/providers/db';
 import Client from '../models/client';
 import CreditCard from '../models/credit_card';
 import ClientChange from '../models/client_change';
@@ -247,7 +247,7 @@ export class ClientsProvider {
         ]
       });
     } catch (err) {
-      if (isInvalidValueError(err)) {
+      if (isInvalidUUIDError(err)) {
         return null;
       } else {
         throw err;
@@ -400,7 +400,7 @@ export class ClientsProvider {
         return true;
       });
     } catch (err) {
-      if (isInvalidValueError(err)) {
+      if (isInvalidUUIDError(err)) {
         return false;
       } else {
         throw err;
@@ -449,7 +449,7 @@ export class ClientsProvider {
         return true;
       });
     } catch (err) {
-      if (isInvalidValueError(err)) {
+      if (isInvalidUUIDError(err)) {
         return false;
       } else {
         throw err;
@@ -473,7 +473,7 @@ export class ClientsProvider {
         ]
       });
     } catch (err) {
-      if (isInvalidValueError(err)) {
+      if (isInvalidUUIDError(err)) {
         return null;
       } else {
         throw err;

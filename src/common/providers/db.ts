@@ -89,10 +89,11 @@ export const advisoryLock = async (lock: number, callback: () => Promise<void>) 
   }
 };
 
-export const isInvalidValueError = (err: Error): boolean => {
+export const isInvalidUUIDError = (err: Error): boolean => {
   return err.name === 'SequelizeDatabaseError' &&
     err['original'] &&
-    err['original']['code'] === '22P02';
+    err['original']['code'] === '22P02' &&
+    err['original']['routine'] === 'string_to_uuid';
 };
 
 export default DB;

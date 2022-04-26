@@ -8,7 +8,7 @@ import sessionProvider from './session';
 import PasswordCredentials from '../models/password_credentials';
 import GithubCredentials from '../models/github_credentials';
 import { sendMail, Language } from '../../common/providers/mail';
-import DB, { isInvalidValueError } from '../../common/providers/db';
+import DB, { isInvalidUUIDError } from '../../common/providers/db';
 import Session from '../models/session';
 
 export enum AccountLanguage {
@@ -66,7 +66,7 @@ export class AccountsProvider {
         ]
       });
     } catch (err) {
-      if (isInvalidValueError(err)) {
+      if (isInvalidUUIDError(err)) {
         return null;
       } else {
         throw err;
@@ -173,7 +173,7 @@ export class AccountsProvider {
         throw new AccountDoesNotExistError();
       }
     } catch (err) {
-      if (isInvalidValueError(err)) {
+      if (isInvalidUUIDError(err)) {
         throw new AccountDoesNotExistError();
       } else {
         throw err;
