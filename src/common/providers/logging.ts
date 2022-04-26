@@ -4,7 +4,7 @@ import os from 'os';
 
 import config from './config';
 
-const log = (() => {
+const createLogger = () => {
   const props = {
     level: config.logging?.level || 'info',
     syslog: {
@@ -14,21 +14,23 @@ const log = (() => {
     }
   };
 
-  const l = winston.createLogger({
+  const logger = winston.createLogger({
     level: props.level,
     transports: [
       new winston.transports.Console()
     ],
     format: winston.format.combine(
       winston.format.timestamp(),
-      winston.format.printf(l => `${l.timestamp} | ${l.level} | ${l.message}`)
+      winston.format.printf(
+        l => l.stack ? `${l.timestamp} | ${l.level} | ${l.message}\n${l.stack}` : `${l.timestamp} | ${l.level} | ${l.message}`
+      )
     )
   });
 
   if (props.syslog.enabled) {
-    l.info(`syslog logger enabled, endpoint - ${props.syslog.host}:${props.syslog.port}`);
+    logger.info(`syslog logger enabled, endpoint - ${props.syslog.host}:${props.syslog.port}`);
 
-    l.add(new Syslog({
+    logger.add(new Syslog({
       localhost: os.hostname(),
       app_name: 'ts-express',
 
@@ -43,7 +45,7 @@ const log = (() => {
     }));
   }
 
-  return l;
-})();
+  return logger;
+};
 
-export default log;
+export default createLogger();
