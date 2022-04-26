@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import { Op } from 'sequelize';
 
 import Captcha from '../models/captcha';
+import { isInvalidValueError } from '../../common/providers/db';
 
 export interface GetCaptchaImageProps {
   width: number;
@@ -123,9 +124,7 @@ class CaptchaProvider {
         }
       });
     } catch (err) {
-      if (err.name === 'SequelizeDatabaseError' &&
-        err.original &&
-        err.original.code === '22P02') {  // invalid UUID format
+      if (isInvalidValueError(err)) {
         return null;
       } else {
         throw err;
