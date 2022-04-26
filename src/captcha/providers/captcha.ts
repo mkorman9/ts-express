@@ -20,6 +20,16 @@ export interface GetCaptchaAudioProps {
   language: CaptchaAudioLanguage;
 }
 
+export interface CaptchaImageData {
+  data: Buffer;
+  expiresIn: number;
+}
+
+export interface CaptchaAudioData {
+  data: Buffer;
+  expiresIn: number;
+}
+
 class CaptchaProvider {
   private static readonly CaptchaCharset = '1234567890'.split('');
   private static readonly CaptchaLength = 6;
@@ -42,17 +52,20 @@ class CaptchaProvider {
     });
   }
 
-  async getImage(id: string, props: GetCaptchaImageProps): Promise<[Buffer, number] | null> {
+  async getImage(id: string, props: GetCaptchaImageProps): Promise<CaptchaImageData | null> {
     const captcha = await this.findCaptcha(id);
     if (!captcha) {
       return null;
     }
 
     const image = new captchapng3(props.width, props.height, captcha.code, '#ffffff');
-    return [image.getBuffer(), dayjs(captcha.expiresAt).diff(dayjs(), 'second')];
+    return {
+      data: image.getBuffer(),
+      expiresIn: dayjs(captcha.expiresAt).diff(dayjs(), 'second')
+    };
   }
 
-  async getAudio(id: string, props: GetCaptchaAudioProps): Promise<[Buffer, number] | null> {
+  async getAudio(id: string, props: GetCaptchaAudioProps): Promise<CaptchaAudioData | null> {
     const captcha = await this.findCaptcha(id);
     if (!captcha) {
       return null;
@@ -68,7 +81,10 @@ class CaptchaProvider {
       }
     );
 
-    return [response.data, dayjs(captcha.expiresAt).diff(dayjs(), 'second')];
+    return {
+      data: response.data,
+      expiresIn: dayjs(captcha.expiresAt).diff(dayjs(), 'second')
+    };
   }
 
   async verifyAnswer(id: string, answer: string): Promise<boolean> {
