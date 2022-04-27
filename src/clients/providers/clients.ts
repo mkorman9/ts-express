@@ -344,8 +344,8 @@ export class ClientsProvider {
               clientId: id,
               number: cc.number
             })), {
-            transaction: t
-          }
+              transaction: t
+            }
           );
 
           await client.reload({
