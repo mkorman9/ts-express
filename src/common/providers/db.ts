@@ -16,8 +16,8 @@ const initSequelize = () => {
     uri: config.database?.uri,
     queryLogging: config.database?.queryLogging || false,
     pool: {
-      max: config.database?.pool?.max || 5,
       min: config.database?.pool?.min || 0,
+      max: config.database?.pool?.max || 5,
       acquireMs: config.database?.pool?.acquireMs || 30000,
       idleMs: config.database?.pool?.idleMs || 10000
     }

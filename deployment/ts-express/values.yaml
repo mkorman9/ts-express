@@ -9,6 +9,14 @@ app:
   configMap: config
   secrets: secrets
 
+  config:
+    database:
+      pool:
+        min: 0
+        max: 5
+        acquireMs: 30000
+        idleMs: 10000
+
   health:
     endpoint: /health
     readiness:

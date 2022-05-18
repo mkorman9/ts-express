@@ -12,3 +12,9 @@ data:
     server:
       address: 0.0.0.0
       port: {{ .Values.app.port }}
+    database:
+      pool:
+        min: {{ .Values.app.config.database.pool.min }}
+        max: {{ .Values.app.config.database.pool.max }}
+        acquireMs: {{ .Values.app.config.database.pool.acquireMs }}
+        idleMs: {{ .Values.app.config.database.pool.idleMs }}
