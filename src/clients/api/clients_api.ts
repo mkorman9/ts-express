@@ -505,7 +505,7 @@ clientsAPI.get(
 );
 
 clientsAPI.ws(
-  '/events',
+  '/events/ws',
   async (ws: ws) => {
     log.info('client connected to websocket');
     const subscriptionId = addSubscriber(ws);
