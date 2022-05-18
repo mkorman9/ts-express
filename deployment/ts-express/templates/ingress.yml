@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.ingress.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.app.name }}
+    app.kubernetes.io/version: {{ .Values.app.version }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "{{ .Values.ingress.useHttps }}"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "{{ .Values.ingress.useHttps }}"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "{{ .Values.ingress.proxyReadTimeout }}"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "{{ .Values.ingress.proxySendTimeout }}"
+spec:
+  {{- if .Values.ingress.useHttps }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.hostname }}
+      secretName: {{ .Values.ingress.tlsCertName }}
+  {{- end }}
+  rules:
+    - http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.app.name }}
+                port:
+                  number: {{ .Values.app.port }}
+      {{- if or (eq .Values.ingress.strictHostCheck true) (eq .Values.ingress.useHttps true) }}
+      host: {{ .Values.ingress.hostname }}
+      {{- end }}

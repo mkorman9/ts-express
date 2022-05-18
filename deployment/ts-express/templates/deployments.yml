@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.app.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.app.name }}
+    app.kubernetes.io/version: {{ .Values.app.version }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  {{- if .Values.gitlab.project }}
+  annotations:
+    app.gitlab.com/app: {{ .Values.gitlab.project | quote }}
+    app.gitlab.com/env: {{ .Values.gitlab.environment | quote }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.app.replicas }}
+  revisionHistoryLimit: {{ .Values.app.historicRevisions }}
+  selector:
+    matchLabels:
+      app: {{ .Values.app.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.app.name }}
+      {{- if .Values.gitlab.project }}
+      annotations:
+        app.gitlab.com/app: {{ .Values.gitlab.project | quote }}
+        app.gitlab.com/env: {{ .Values.gitlab.environment | quote }}
+      {{- end }}
+    spec:
+      containers:
+        - name: {{ .Values.app.name }}
+          image: {{ .Values.app.imageName }}:{{ .Values.app.version }}
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          ports:
+            - protocol: TCP
+              name: http
+              containerPort: {{ .Values.app.port }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.app.health.endpoint }}
+              port: {{ .Values.app.port }}
+              scheme: HTTP
+            initialDelaySeconds: {{ .Values.app.health.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.app.health.readiness.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.app.health.endpoint }}
+              port: {{ .Values.app.port }}
+              scheme: HTTP
+            initialDelaySeconds: {{ .Values.app.health.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.app.health.liveness.periodSeconds }}
+            timeoutSeconds: {{ .Values.app.health.liveness.timeoutSeconds }}
+          resources:
+            requests:
+              cpu: {{ .Values.app.resources.cpu.request }}
+              memory: {{ .Values.app.resources.memory.request }}
+            limits:
+              cpu: {{ .Values.app.resources.cpu.limit }}
+              memory: {{ .Values.app.resources.memory.limit }}
+          volumeMounts:
+            - name: config
+              mountPath: /app/config.yml
+              subPath: config.yml
+              readOnly: true
+            - name: secrets
+              mountPath: /app/secrets.yml
+              subPath: secrets.yml
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: {{ .Values.app.configMap }}
+        - name: secrets
+          secret:
+            secretName: {{ .Values.app.secrets }}
+      {{- if .Values.images.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.images.pullSecret }}
+      {{- end }}
+      automountServiceAccountToken: false

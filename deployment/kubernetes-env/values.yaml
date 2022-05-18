@@ -1,0 +1,42 @@
+secret:
+  name: secrets
+
+images:
+  pullPolicy: IfNotPresent
+
+postgres:
+  name: postgres
+  image: postgres:12
+
+  port: 5432
+
+  username: username
+  password: password
+  dbname: tsexpress
+
+  volume:
+    name: postgres-volume
+    claimName: postgres-volume-claim
+    size: 100Mi
+    path: "/var/lib/ts-express/dev-env/postgres-volume"
+
+rabbitmq:
+  username: admin
+  password: admin
+
+migration:
+  name: db-migration
+  backoffLimit: 1
+  restartPolicy: Never
+
+  init:
+    name: check-db-ready
+    image: postgres:12
+
+  liquibase:
+    name: liquibase
+    image: liquibase/liquibase:4.2
+
+  testdata:
+    name: testdata
+    image: postgres:12

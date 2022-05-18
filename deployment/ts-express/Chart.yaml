@@ -1,0 +1,5 @@
+apiVersion: v2
+name: ts-express
+description: Stack for ts-express project
+type: application
+version: 0.1.0

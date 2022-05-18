@@ -1,0 +1,5 @@
+apiVersion: v2
+name: ts-express-local-environment
+description: External dependencies of ts-express for local setup
+type: application
+version: 0.1.0

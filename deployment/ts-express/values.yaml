@@ -1,0 +1,50 @@
+app:
+  name: ts-express
+  version: latest
+  imageName: mkorman/ts-express
+  port: 8080
+  replicas: 1
+  historicRevisions: 3
+
+  configMap: config
+  secrets: secrets
+
+  health:
+    endpoint: /health
+    readiness:
+      initialDelaySeconds: 5
+      periodSeconds: 20
+    liveness:
+      initialDelaySeconds: 30
+      periodSeconds: 20
+      timeoutSeconds: 5
+
+  metrics:
+    endpoint: /metrics
+
+  resources:
+    cpu:
+      request: 250m
+      limit: 1
+    memory:
+      request: 256Mi
+      limit: 512Mi
+
+gitlab:
+  project: ""
+  environment: ""
+
+images:
+  pullPolicy: IfNotPresent
+  pullSecret: ""
+
+ingress:
+  name: ingress
+  hostname: localhost
+
+  useHttps: false
+  tlsCertName: ""
+  strictHostCheck: false
+
+  proxyReadTimeout: 3600
+  proxySendTimeout: 3600

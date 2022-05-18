@@ -1,0 +1,32 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: {{ .Values.postgres.volume.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    type: local
+    app: {{ .Values.postgres.name }}
+spec:
+  storageClassName: manual
+  capacity:
+    storage: {{ .Values.postgres.volume.size }}
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  hostPath:
+    path: {{ .Values.postgres.volume.path | quote }}
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ .Values.postgres.volume.claimName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.postgres.name }}
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.postgres.volume.size }}

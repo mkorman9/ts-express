@@ -1,0 +1,73 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.migration.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: {{ .Values.migration.init.name }}
+          image: {{ .Values.migration.init.image }}
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          command: 
+            - sh
+            - -c
+            - >
+              until pg_isready \
+                -h {{ .Values.postgres.name }}.{{ .Release.Namespace }}.svc.cluster.local \
+                -p {{ .Values.postgres.port }} \
+                -U {{ .Values.postgres.username }}  \
+                -d {{ .Values.postgres.dbname }}  \
+                ; do sleep 2; done;
+      containers:
+        - name: {{ .Values.migration.liquibase.name }}
+          image: {{ .Values.migration.liquibase.image }}
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          securityContext:
+            runAsUser: 0
+          command: 
+            - /bin/bash
+            - -c
+            - >
+              cp -Lr /mnt/schema/* /liquibase/changelog && \
+                ./liquibase \
+                --url=jdbc:postgresql://{{ .Values.postgres.name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.postgres.port }}/{{ .Values.postgres.dbname }} \
+                --changeLogFile=./changelog/changelog.xml \
+                --username={{ .Values.postgres.username }} \
+                --password={{ .Values.postgres.password }} \
+                update
+          volumeMounts:
+            - mountPath: /mnt/schema
+              name: db-schema
+              readOnly: true
+        - name: {{ .Values.migration.testdata.name }}
+          image: {{ .Values.migration.testdata.image }}
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          command: 
+            - /bin/bash
+            - -c
+            - >
+              sleep 5 && \
+                for f in /mnt/testdata/*.sql;
+                do
+                    PGPASSWORD={{ .Values.postgres.password }} psql \
+                      -h {{ .Values.postgres.name }}.{{ .Release.Namespace }}.svc.cluster.local \
+                      -p {{ .Values.postgres.port }} \
+                      -d {{ .Values.postgres.dbname }} \
+                      -U {{ .Values.postgres.username }} \
+                      -f "$f"
+                done
+          volumeMounts:
+            - mountPath: /mnt/testdata
+              name: db-testdata
+              readOnly: true
+      volumes:
+        - name: db-schema
+          configMap:
+            name: db-schema
+        - name: db-testdata
+          configMap:
+            name: db-testdata
+      restartPolicy: {{ .Values.migration.restartPolicy }}
+  backoffLimit: {{ .Values.migration.backoffLimit }}
