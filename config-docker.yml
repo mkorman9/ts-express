@@ -1,0 +1,9 @@
+logging:
+  level: debug
+
+database:
+  uri: postgres://username:password@postgres:5432/tsexpress?sslmode=disable
+  queryLogging: true
+
+amqp:
+  uri: amqp://username:password@rabbitmq:5672/
