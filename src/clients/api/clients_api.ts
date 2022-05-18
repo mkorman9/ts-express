@@ -15,6 +15,7 @@ import {
 import accountsProvider from '../../security/providers/accounts';
 import log from '../../common/providers/logging';
 import { addSubscriber, removeSubscriber } from '../listeners/subscribers_store';
+import { withRequestBody } from '../../common/providers/web';
 
 const GetClientsPagedValidators = [
   query('page')
@@ -301,57 +302,33 @@ clientsAPI.post(
   requireRoles(['CLIENTS_EDITOR']),
   ...ClientAddRequestValidators,
   async (req: Request, res: Response, next: NextFunction) => {
-    const validationErrors = validationResult(req);
-    if (!validationErrors.isEmpty()) {
-      return res
-        .status(400)
-        .json({
-          status: 'error',
-          message: 'Validation error',
-          causes: validationErrors.array().map(e => ({
-            field: e.param,
-            code: e.msg
-          }))
-        });
-    }
+    withRequestBody<ClientAddRequest>(req, res, ClientAddRequestSchema, async payload => {
+      const account = getSession(req).account;
+      if (account.isBanned) {
+        return res
+          .status(400)
+          .json({
+            status: 'error',
+            message: 'Validation error',
+            causes: [{
+              field: 'account',
+              code: 'banned'
+            }]
+          });
+      }
 
-    let payload: ClientAddRequest;
-    try {
-      payload = ClientAddRequestSchema.parse(req.body);
-    } catch (err) {
-      return res
-        .status(400)
-        .json({
-          status: 'error',
-          message: 'Malformed request'
-        });
-    }
+      try {
+        const client = await clientsProvider.addClient(payload, { author: account.id });
 
-    const account = getSession(req).account;
-    if (account.isBanned) {
-      return res
-        .status(400)
-        .json({
-          status: 'error',
-          message: 'Validation error',
-          causes: [{
-            field: 'account',
-            code: 'banned'
-          }]
-        });
-    }
-
-    try {
-      const client = await clientsProvider.addClient(payload, { author: account.id });
-
-      return res
-        .status(200)
-        .json({
-          id: client.id
-        });
-    } catch (err) {
-      next(err);
-    }
+        return res
+          .status(200)
+          .json({
+            id: client.id
+          });
+      } catch (err) {
+        next(err);
+      }
+    });
   }
 );
 
@@ -361,65 +338,41 @@ clientsAPI.put(
   requireRoles(['CLIENTS_EDITOR']),
   ClientUpdateRequestValidators,
   async (req: Request, res: Response, next: NextFunction) => {
-    const validationErrors = validationResult(req);
-    if (!validationErrors.isEmpty()) {
-      return res
-        .status(400)
-        .json({
-          status: 'error',
-          message: 'Validation error',
-          causes: validationErrors.array().map(e => ({
-            field: e.param,
-            code: e.msg
-          }))
-        });
-    }
-
-    let payload: ClientUpdateRequest;
-    try {
-      payload = ClientUpdateRequestSchema.parse(req.body);
-    } catch (err) {
-      return res
-        .status(400)
-        .json({
-          status: 'error',
-          message: 'Malformed request'
-        });
-    }
-
-    const account = getSession(req).account;
-    if (account.isBanned) {
-      return res
-        .status(400)
-        .json({
-          status: 'error',
-          message: 'Validation error',
-          causes: [{
-            field: 'account',
-            code: 'banned'
-          }]
-        });
-    }
-
-    try {
-      const result = await clientsProvider.updateClient(req.params.id, payload, { author: account.id });
-      if (!result) {
+    withRequestBody<ClientUpdateRequest>(req, res, ClientUpdateRequestSchema, async payload => {
+      const account = getSession(req).account;
+      if (account.isBanned) {
         return res
-          .status(404)
+          .status(400)
           .json({
             status: 'error',
-            message: 'Client not found'
+            message: 'Validation error',
+            causes: [{
+              field: 'account',
+              code: 'banned'
+            }]
           });
       }
-
-      return res
-        .status(200)
-        .json({
-          status: 'success'
-        });
-    } catch (err) {
-      next(err);
-    }
+  
+      try {
+        const result = await clientsProvider.updateClient(req.params.id, payload, { author: account.id });
+        if (!result) {
+          return res
+            .status(404)
+            .json({
+              status: 'error',
+              message: 'Client not found'
+            });
+        }
+  
+        return res
+          .status(200)
+          .json({
+            status: 'success'
+          });
+      } catch (err) {
+        next(err);
+      }
+    })    
   }
 );
 
