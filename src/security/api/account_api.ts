@@ -1,21 +1,18 @@
-import { Router, Request, Response, NextFunction } from 'express';
-import { body, validationResult } from 'express-validator';
+import { NextFunction, Request, Response, Router } from 'express';
+import { body } from 'express-validator';
 import { z } from 'zod';
 
 import { captchaMiddleware } from '../../captcha/middlewares/captcha';
 import { ratelimiterMiddleware } from '../../common/middlewares/rate_limiter';
+import { validationMiddleware } from '../../common/middlewares/validation';
 import { withRequestBody } from '../../common/providers/web';
-import {
-  tokenAuthMiddleware,
-  requireAuthentication,
-  getSession
-} from '../middlewares/authorization';
+import { getSession, requireAuthentication, tokenAuthMiddleware } from '../middlewares/authorization';
 import accountsProvider, {
+  AccountDoesNotExistError, 
+  AccountLanguage, 
+  AccountNotMeantToBeActivatedError, 
   EmailAlreadyInUseError,
-  UsernameAlreadyInUseError,
-  AccountLanguage,
-  AccountDoesNotExistError,
-  AccountNotMeantToBeActivatedError
+  UsernameAlreadyInUseError
 } from '../providers/accounts';
 
 const AccountRegisterValidators = [
@@ -100,6 +97,7 @@ accountAPI.post(
   '/register/password',
   ratelimiterMiddleware('general'),
   ...AccountRegisterValidators,
+  validationMiddleware(),
   captchaMiddleware('captcha'),
   async (req: Request, res: Response, next: NextFunction) => {
     withRequestBody<AccountRegisterRequest>(req, res, AccountRegisterRequestSchema, async payload => {
@@ -147,21 +145,8 @@ accountAPI.post(
   '/activate',
   ratelimiterMiddleware('general'),
   ...AccountActivateValidators,
+  validationMiddleware(),
   async (req: Request, res: Response, next: NextFunction) => {
-    const validationErrors = validationResult(req);
-    if (!validationErrors.isEmpty()) {
-      return res
-        .status(400)
-        .json({
-          status: 'error',
-          message: 'Validation error',
-          causes: validationErrors.array().map(e => ({
-            field: e.param,
-            code: e.msg
-          }))
-        });
-    }
-
     try {
       try {
         await accountsProvider.activateAccount(req.body.accountID);

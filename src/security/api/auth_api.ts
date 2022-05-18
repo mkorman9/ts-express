@@ -1,17 +1,15 @@
-import { Router, Request, Response, NextFunction } from 'express';
-import { body, validationResult } from 'express-validator';
+import { NextFunction, Request, Response, Router } from 'express';
+import { body } from 'express-validator';
 
+import { ratelimiterMiddleware } from '../../common/middlewares/rate_limiter';
+import { validationMiddleware } from '../../common/middlewares/validation';
+import { sendSessionCookie, setSession } from '../../security/middlewares/authorization';
+import Session from '../models/session';
 import accountsProvider, {
   AccountDoesNotExistError,
-  InvalidPasswordError as InvalidCredentialsError,
-  InactiveAccountError
+  InactiveAccountError,
+  InvalidPasswordError as InvalidCredentialsError
 } from '../providers/accounts';
-import {
-  setSession,
-  sendSessionCookie
-} from '../../security/middlewares/authorization';
-import { ratelimiterMiddleware } from '../../common/middlewares/rate_limiter';
-import Session from '../models/session';
 
 const PasswordAuthRequestValidators = [
   body('email')
@@ -26,21 +24,8 @@ authAPI.post(
   '/password',
   ratelimiterMiddleware('login'),
   ...PasswordAuthRequestValidators,
+  validationMiddleware(),
   async (req: Request, res: Response, next: NextFunction) => {
-    const validationErrors = validationResult(req);
-    if (!validationErrors.isEmpty()) {
-      return res
-        .status(400)
-        .json({
-          status: 'error',
-          message: 'Validation error',
-          causes: validationErrors.array().map(e => ({
-            field: e.param,
-            code: e.msg
-          }))
-        });
-    }
-
     const rememberMe = 'rememberMe' in req.query;
 
     try {

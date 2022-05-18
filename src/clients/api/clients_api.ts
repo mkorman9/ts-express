@@ -2,6 +2,7 @@ import { NextFunction, Request, Response, Router } from 'express';
 import { body, query } from 'express-validator';
 import ws from 'ws';
 import { z } from 'zod';
+import { validationMiddleware } from '../../common/middlewares/validation';
 
 import log from '../../common/providers/logging';
 import { parseDate } from '../../common/providers/validation';
@@ -204,6 +205,7 @@ const clientsAPI = Router();
 clientsAPI.get(
   '',
   ...GetClientsPagedValidators,
+  validationMiddleware(),
   async (req: Request, res: Response, next: NextFunction) => {
     withRequestQuery<GetClientsPagedQuery>(req, res, GetClientsPagedQuerySchema, async query => {
       try {
@@ -274,6 +276,7 @@ clientsAPI.post(
   tokenAuthMiddleware(),
   requireRoles(['CLIENTS_EDITOR']),
   ...ClientAddRequestValidators,
+  validationMiddleware(),
   async (req: Request, res: Response, next: NextFunction) => {
     withRequestBody<ClientAddRequest>(req, res, ClientAddRequestSchema, async payload => {
       const account = getSession(req).account;
@@ -310,6 +313,7 @@ clientsAPI.put(
   tokenAuthMiddleware(),
   requireRoles(['CLIENTS_EDITOR']),
   ClientUpdateRequestValidators,
+  validationMiddleware(),
   async (req: Request, res: Response, next: NextFunction) => {
     withRequestBody<ClientUpdateRequest>(req, res, ClientUpdateRequestSchema, async payload => {
       const account = getSession(req).account;
