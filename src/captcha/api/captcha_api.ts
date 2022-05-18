@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 
 import { ratelimiterMiddleware } from '../../common/middlewares/rate_limiter';
+import { getRequestQuery, requestQueryMiddleware } from '../../common/middlewares/validation';
 import captchaProvider, { CaptchaAudioLanguage } from '../providers/captcha';
 
 export const DefaultImageWidth = 250;
@@ -60,20 +61,10 @@ captchaAPI.get(
 
 captchaAPI.get(
   '/image/:id',
+  requestQueryMiddleware(GetCaptchaImageQuerySchema),
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-
-    let query: GetCaptchaImageQuery;
-    try {
-      query = GetCaptchaImageQuerySchema.parse(req.query);
-    } catch (err) {
-      return res
-        .status(400)
-        .json({
-          status: 'error',
-          message: 'Malformed query params'
-        });
-    }
+    const query = getRequestQuery<GetCaptchaImageQuery>(req);
 
     try {
       const captchaImage = await captchaProvider.getImage(id, {
@@ -106,20 +97,10 @@ captchaAPI.get(
 captchaAPI.get(
   '/audio/:id',
   ratelimiterMiddleware('general'),
+  requestQueryMiddleware(GetCaptchaAudioQuerySchema),
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-
-    let query: GetCaptchaAudioQuery;
-    try {
-      query = GetCaptchaAudioQuerySchema.parse(req.query);
-    } catch (err) {
-      return res
-        .status(400)
-        .json({
-          status: 'error',
-          message: 'Malformed query params'
-        });
-    }
+    const query = getRequestQuery<GetCaptchaAudioQuery>(req);
 
     try {
       const captchaAudio = await captchaProvider.getAudio(id, {
