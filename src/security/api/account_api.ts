@@ -97,8 +97,8 @@ accountAPI.post(
   ratelimiterMiddleware('general'),
   ...AccountRegisterValidators,
   validationMiddleware(),
-  captchaMiddleware('captcha'),
   requestBodyMiddleware(AccountRegisterRequestSchema),
+  captchaMiddleware('captcha'),
   async (req: Request, res: Response, next: NextFunction) => {
     const payload = getRequestBody<AccountRegisterRequest>(req);
 
