@@ -45,6 +45,7 @@ export interface MessageParser<M = unknown> {
 }
 
 type ConsumerFunc<M = unknown> = (msg: M, channel: amqp.Channel, raw: amqp.ConsumeMessage) => void;
+type PublisherFunc = () => Promise<Publisher>;
 
 export class JSONMessageParser<M = unknown> implements MessageParser<M> {
   serialize(m: M): Buffer {
@@ -86,7 +87,6 @@ export class Publisher {
 }
 
 let connection: (amqp.Connection | null) = null;
-const publishers = new Map<string, Publisher>();
 
 export const initAMQP = async () => {
   const props = {
@@ -106,28 +106,24 @@ export const closeAMQP = async () => {
   }
 };
 
-export const definePublisher = (name: string, props?: ChannelProps) => {
+export const definePublisher = (props?: ChannelProps): PublisherFunc => {
   if (!connection) {
-    publishers.set(name, new Publisher(null));
-    return;
+    return async () => {
+      return new Publisher(null);
+    };
   }
 
-  createChannel(props)
-    .then(channel => {
-      publishers.set(name, new Publisher(channel));
-    })
-    .catch(err => {
-      log.error(`failed to define publisher ${name}: ${err}`);
-    });
-};
+  return async () => {
+    let cached: Publisher | null = null;
 
-export const getPublisher = (name: string): Publisher => {
-  const publisher = publishers.get(name);
-  if (!publisher) {
-    throw new Error(`publisher '${name}' has not been defined`);
-  }
+    if (cached) {
+      return cached;
+    }
 
-  return publisher;
+    cached = new Publisher(await createChannel(props));
+
+    return cached;
+  };
 };
 
 export const createConsumer = <M = unknown>(props?: ConsumerProps<M>): ((func: ConsumerFunc<M>) => void) => {

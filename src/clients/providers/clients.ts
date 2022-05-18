@@ -8,7 +8,7 @@ import Client from '../models/client';
 import CreditCard from '../models/credit_card';
 import ClientChange from '../models/client_change';
 import { generateClientChangeset } from './clients_changes';
-import { definePublisher, getPublisher } from '../../common/providers/amqp';
+import { definePublisher } from '../../common/providers/amqp';
 
 export enum FindClientsSortFields {
   id = 'id',
@@ -95,17 +95,15 @@ export interface DeleteClientProps {
 }
 
 export class ClientsProvider {
-  constructor() {
-    definePublisher('clients_events', {
-      exchanges: [{
-        name: 'clients_events',
-        type: 'fanout',
-        options: {
-          durable: false
-        }
-      }]
-    });
-  }
+  private eventsPublisher = definePublisher({
+    exchanges: [{
+      name: 'clients_events',
+      type: 'fanout',
+      options: {
+        durable: false
+      }
+    }]
+  });
 
   async findClientsPaged(opts?: FindClientsPagedOptions): Promise<FindClientsPagedResult> {
     const options = {
@@ -292,7 +290,7 @@ export class ClientsProvider {
         transaction: t
       });
 
-      getPublisher('clients_events').publish('clients_events', '', {
+      (await this.eventsPublisher()).publish('clients_events', '', {
         event: 'added',
         id: client.id,
         author: props.author
@@ -391,7 +389,7 @@ export class ClientsProvider {
           transaction: t
         });
 
-        getPublisher('clients_events').publish('clients_events', '', {
+        (await this.eventsPublisher()).publish('clients_events', '', {
           event: 'modified',
           id: client.id,
           author: props.author
@@ -440,7 +438,7 @@ export class ClientsProvider {
           transaction: t
         });
 
-        getPublisher('clients_events').publish('clients_events', '', {
+        (await this.eventsPublisher()).publish('clients_events', '', {
           event: 'deleted',
           id: client.id,
           author: props.author
