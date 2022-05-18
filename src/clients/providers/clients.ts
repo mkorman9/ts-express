@@ -95,7 +95,7 @@ export interface DeleteClientProps {
 }
 
 export class ClientsProvider {
-  private eventsPublisher = definePublisher({
+  private eventsPublisherHandler = definePublisher({
     exchanges: [{
       name: 'clients_events',
       type: 'fanout',
@@ -290,10 +290,12 @@ export class ClientsProvider {
         transaction: t
       });
 
-      (await this.eventsPublisher()).publish('clients_events', '', {
-        event: 'added',
-        id: client.id,
-        author: props.author
+      await this.eventsPublisherHandler.withPublisher(async publisher => { 
+        publisher.publish('clients_events', '', {
+          event: 'added',
+          id: client.id,
+          author: props.author
+        });
       });
 
       return client;
@@ -389,10 +391,12 @@ export class ClientsProvider {
           transaction: t
         });
 
-        (await this.eventsPublisher()).publish('clients_events', '', {
-          event: 'modified',
-          id: client.id,
-          author: props.author
+        await this.eventsPublisherHandler.withPublisher(async publisher => {
+          publisher.publish('clients_events', '', {
+            event: 'modified',
+            id: client.id,
+            author: props.author
+          });
         });
 
         return true;
@@ -438,10 +442,12 @@ export class ClientsProvider {
           transaction: t
         });
 
-        (await this.eventsPublisher()).publish('clients_events', '', {
-          event: 'deleted',
-          id: client.id,
-          author: props.author
+        await this.eventsPublisherHandler.withPublisher(async publisher => {
+          publisher.publish('clients_events', '', {
+            event: 'deleted',
+            id: client.id,
+            author: props.author
+          });
         });
 
         return true;

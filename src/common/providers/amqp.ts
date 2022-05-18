@@ -44,8 +44,11 @@ export interface MessageParser<M = unknown> {
   contentType(): string
 }
 
+interface PublisherHandler {
+  withPublisher: (func: (publisher: Publisher) => Promise<void>) => Promise<void>;
+}
+
 type ConsumerFunc<M = unknown> = (msg: M, channel: amqp.Channel, raw: amqp.ConsumeMessage) => void;
-type PublisherFunc = () => Promise<Publisher>;
 
 export class JSONMessageParser<M = unknown> implements MessageParser<M> {
   serialize(m: M): Buffer {
@@ -63,7 +66,7 @@ export class JSONMessageParser<M = unknown> implements MessageParser<M> {
 
 export class Publisher {
   constructor(
-    private channel: (amqp.Channel | null)
+    private channel: amqp.Channel
   ) { }
 
   public publish<M = unknown>(
@@ -72,11 +75,6 @@ export class Publisher {
     message: M,
     props?: PublishProps<M>
   ): boolean {
-    if (!this.channel) {
-      log.warn('not publishing AMQP message due to no active connection');
-      return true;
-    }
-
     const parser = props?.parser || new JSONMessageParser<M>();
 
     return this.channel.publish(exchange, key, parser.serialize(message), {
@@ -106,23 +104,22 @@ export const closeAMQP = async () => {
   }
 };
 
-export const definePublisher = (props?: ChannelProps): PublisherFunc => {
-  if (!connection) {
-    return async () => {
-      return new Publisher(null);
-    };
-  }
+export const definePublisher = (props?: ChannelProps): PublisherHandler => {
+  let cachedPublisher: Publisher | null = null;
 
-  return async () => {
-    let cached: Publisher | null = null;
+  return {
+    withPublisher: async (func: (publisher: Publisher) => Promise<void>) => {
+      if (!connection) {
+        log.warn('not publishing AMQP message due to no active connection');
+        return;
+      }
 
-    if (cached) {
-      return cached;
+      if (!cachedPublisher) {
+        cachedPublisher = new Publisher(await createChannel(props));
+      }
+
+      await func(cachedPublisher);
     }
-
-    cached = new Publisher(await createChannel(props));
-
-    return cached;
   };
 };
 
