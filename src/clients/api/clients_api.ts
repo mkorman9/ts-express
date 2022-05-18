@@ -2,18 +2,22 @@ import { NextFunction, Request, Response, Router } from 'express';
 import { body, query } from 'express-validator';
 import ws from 'ws';
 import { z } from 'zod';
-import { validationMiddleware } from '../../common/middlewares/validation';
 
+import { 
+  getRequestBody,
+  getRequestQuery,
+  requestBodyMiddleware,
+  requestQueryMiddleware,
+  validationMiddleware
+} from '../../common/middlewares/validation';
 import log from '../../common/providers/logging';
 import { parseDate } from '../../common/providers/validation';
-import { withRequestBody, withRequestQuery } from '../../common/providers/web';
 import { getSession, requireRoles, tokenAuthMiddleware } from '../../security/middlewares/authorization';
 import accountsProvider from '../../security/providers/accounts';
 import { addSubscriber, removeSubscriber } from '../listeners/subscribers_store';
 import Client from '../models/client';
 import clientsProvider, { FindClientsSortFields } from '../providers/clients';
 import { ClientChangeItem } from '../providers/clients_changes';
-
 
 const GetClientsPagedValidators = [
   query('page')
@@ -206,33 +210,34 @@ clientsAPI.get(
   '',
   ...GetClientsPagedValidators,
   validationMiddleware(),
+  requestQueryMiddleware(GetClientsPagedQuerySchema),
   async (req: Request, res: Response, next: NextFunction) => {
-    withRequestQuery<GetClientsPagedQuery>(req, res, GetClientsPagedQuerySchema, async query => {
-      try {
-        const clientsPage = await clientsProvider.findClientsPaged(query);
-  
-        res
-          .status(200)
-          .json({
-            data: clientsPage.rows.map((c: Client) => ({
-              id: c.id,
-              gender: c.gender,
-              firstName: c.firstName,
-              lastName: c.lastName,
-              address: c.address,
-              phoneNumber: c.phoneNumber,
-              email: c.email,
-              birthDate: c.birthDate,
-              creditCards: c.creditCards.map(cc => ({
-                number: cc.number
-              }))
-            })),
-            totalPages: clientsPage.totalPages
-          });
-      } catch (err) {
-        next(err);
-      }
-    });
+    try {
+      const query = getRequestQuery<GetClientsPagedQuery>(req);
+      
+      const clientsPage = await clientsProvider.findClientsPaged(query);
+
+      res
+        .status(200)
+        .json({
+          data: clientsPage.rows.map((c: Client) => ({
+            id: c.id,
+            gender: c.gender,
+            firstName: c.firstName,
+            lastName: c.lastName,
+            address: c.address,
+            phoneNumber: c.phoneNumber,
+            email: c.email,
+            birthDate: c.birthDate,
+            creditCards: c.creditCards.map(cc => ({
+              number: cc.number
+            }))
+          })),
+          totalPages: clientsPage.totalPages
+        });
+    } catch (err) {
+      next(err);
+    }
   }
 );
 
@@ -277,34 +282,35 @@ clientsAPI.post(
   requireRoles(['CLIENTS_EDITOR']),
   ...ClientAddRequestValidators,
   validationMiddleware(),
+  requestBodyMiddleware(ClientAddRequestSchema),
   async (req: Request, res: Response, next: NextFunction) => {
-    withRequestBody<ClientAddRequest>(req, res, ClientAddRequestSchema, async payload => {
-      const account = getSession(req).account;
-      if (account.isBanned) {
-        return res
-          .status(400)
-          .json({
-            status: 'error',
-            message: 'Validation error',
-            causes: [{
-              field: 'account',
-              code: 'banned'
-            }]
-          });
-      }
+    const payload = getRequestBody<ClientAddRequest>(req);
 
-      try {
-        const client = await clientsProvider.addClient(payload, { author: account.id });
+    const account = getSession(req).account;
+    if (account.isBanned) {
+      return res
+        .status(400)
+        .json({
+          status: 'error',
+          message: 'Validation error',
+          causes: [{
+            field: 'account',
+            code: 'banned'
+          }]
+        });
+    }
 
-        return res
-          .status(200)
-          .json({
-            id: client.id
-          });
-      } catch (err) {
-        next(err);
-      }
-    });
+    try {
+      const client = await clientsProvider.addClient(payload, { author: account.id });
+
+      return res
+        .status(200)
+        .json({
+          id: client.id
+        });
+    } catch (err) {
+      next(err);
+    }
   }
 );
 
@@ -314,42 +320,43 @@ clientsAPI.put(
   requireRoles(['CLIENTS_EDITOR']),
   ClientUpdateRequestValidators,
   validationMiddleware(),
+  requestBodyMiddleware(ClientUpdateRequestSchema),
   async (req: Request, res: Response, next: NextFunction) => {
-    withRequestBody<ClientUpdateRequest>(req, res, ClientUpdateRequestSchema, async payload => {
-      const account = getSession(req).account;
-      if (account.isBanned) {
+    const payload = getRequestBody<ClientUpdateRequest>(req);
+
+    const account = getSession(req).account;
+    if (account.isBanned) {
+      return res
+        .status(400)
+        .json({
+          status: 'error',
+          message: 'Validation error',
+          causes: [{
+            field: 'account',
+            code: 'banned'
+          }]
+        });
+    }
+
+    try {
+      const result = await clientsProvider.updateClient(req.params.id, payload, { author: account.id });
+      if (!result) {
         return res
-          .status(400)
+          .status(404)
           .json({
             status: 'error',
-            message: 'Validation error',
-            causes: [{
-              field: 'account',
-              code: 'banned'
-            }]
+            message: 'Client not found'
           });
       }
-  
-      try {
-        const result = await clientsProvider.updateClient(req.params.id, payload, { author: account.id });
-        if (!result) {
-          return res
-            .status(404)
-            .json({
-              status: 'error',
-              message: 'Client not found'
-            });
-        }
-  
-        return res
-          .status(200)
-          .json({
-            status: 'success'
-          });
-      } catch (err) {
-        next(err);
-      }
-    })    
+
+      return res
+        .status(200)
+        .json({
+          status: 'success'
+        });
+    } catch (err) {
+      next(err);
+    }
   }
 );
 

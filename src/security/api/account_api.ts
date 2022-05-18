@@ -4,8 +4,7 @@ import { z } from 'zod';
 
 import { captchaMiddleware } from '../../captcha/middlewares/captcha';
 import { ratelimiterMiddleware } from '../../common/middlewares/rate_limiter';
-import { validationMiddleware } from '../../common/middlewares/validation';
-import { withRequestBody } from '../../common/providers/web';
+import { getRequestBody, requestBodyMiddleware, validationMiddleware } from '../../common/middlewares/validation';
 import { getSession, requireAuthentication, tokenAuthMiddleware } from '../middlewares/authorization';
 import accountsProvider, {
   AccountDoesNotExistError, 
@@ -99,45 +98,46 @@ accountAPI.post(
   ...AccountRegisterValidators,
   validationMiddleware(),
   captchaMiddleware('captcha'),
+  requestBodyMiddleware(AccountRegisterRequestSchema),
   async (req: Request, res: Response, next: NextFunction) => {
-    withRequestBody<AccountRegisterRequest>(req, res, AccountRegisterRequestSchema, async payload => {
-      try {
-        await accountsProvider.addAccount(payload, { ip: req.ip });
-      } catch (err) {
-        if (err instanceof UsernameAlreadyInUseError) {
-          return res
-            .status(400)
-            .json({
-              status: 'error',
-              message: 'Validation error',
-              causes: [{
-                field: 'username',
-                code: 'unique'
-              }]
-            });
-        }
-        if (err instanceof EmailAlreadyInUseError) {
-          return res
-            .status(400)
-            .json({
-              status: 'error',
-              message: 'Validation error',
-              causes: [{
-                field: 'email',
-                code: 'unique'
-              }]
-            });
-        }
-  
-        return next(err);
+    const payload = getRequestBody<AccountRegisterRequest>(req);
+
+    try {
+      await accountsProvider.addAccount(payload, { ip: req.ip });
+    } catch (err) {
+      if (err instanceof UsernameAlreadyInUseError) {
+        return res
+          .status(400)
+          .json({
+            status: 'error',
+            message: 'Validation error',
+            causes: [{
+              field: 'username',
+              code: 'unique'
+            }]
+          });
       }
-  
-      return res
-        .status(200)
-        .json({
-          status: 'OK'
-        });
-    }) 
+      if (err instanceof EmailAlreadyInUseError) {
+        return res
+          .status(400)
+          .json({
+            status: 'error',
+            message: 'Validation error',
+            causes: [{
+              field: 'email',
+              code: 'unique'
+            }]
+          });
+      }
+
+      return next(err);
+    }
+
+    return res
+      .status(200)
+      .json({
+        status: 'OK'
+      });
   }
 );
 
