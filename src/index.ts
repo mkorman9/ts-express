@@ -35,7 +35,7 @@ createApp()
   .then(app => {
     const props = {
       address: config.server?.address || '0.0.0.0',
-      port: config.server?.port || 5000
+      port: config.server?.port || 8080
     };
     const server = app.listen(props.port, props.address, () => {
       log.info(`server listening on ${props.address}:${props.port}`);
