@@ -1,21 +1,18 @@
-import { Router, Request, Response, NextFunction } from 'express';
-import { body, query, validationResult } from 'express-validator';
-import { z } from 'zod';
+import { NextFunction, Request, Response, Router } from 'express';
+import { body, query } from 'express-validator';
 import ws from 'ws';
+import { z } from 'zod';
 
-import { parseDate } from '../../common/providers/validation';
-import clientsProvider, { FindClientsSortFields } from '../providers/clients';
-import Client from '../models/client';
-import { ClientChangeItem } from '../providers/clients_changes';
-import {
-  tokenAuthMiddleware,
-  requireRoles,
-  getSession
-} from '../../security/middlewares/authorization';
-import accountsProvider from '../../security/providers/accounts';
 import log from '../../common/providers/logging';
+import { parseDate } from '../../common/providers/validation';
+import { withRequestBody, withRequestQuery } from '../../common/providers/web';
+import { getSession, requireRoles, tokenAuthMiddleware } from '../../security/middlewares/authorization';
+import accountsProvider from '../../security/providers/accounts';
 import { addSubscriber, removeSubscriber } from '../listeners/subscribers_store';
-import { withRequestBody } from '../../common/providers/web';
+import Client from '../models/client';
+import clientsProvider, { FindClientsSortFields } from '../providers/clients';
+import { ClientChangeItem } from '../providers/clients_changes';
+
 
 const GetClientsPagedValidators = [
   query('page')
@@ -208,56 +205,32 @@ clientsAPI.get(
   '',
   ...GetClientsPagedValidators,
   async (req: Request, res: Response, next: NextFunction) => {
-    const validationErrors = validationResult(req);
-    if (!validationErrors.isEmpty()) {
-      return res
-        .status(400)
-        .json({
-          status: 'error',
-          message: 'Validation error',
-          causes: validationErrors.array().map(e => ({
-            field: e.param,
-            code: e.msg
-          }))
-        });
-    }
-
-    let query: GetClientsPagedQuery;
-    try {
-      query = GetClientsPagedQuerySchema.parse(req.query);
-    } catch (err) {
-      return res
-        .status(400)
-        .json({
-          status: 'error',
-          message: 'Malformed request'
-        });
-    }
-
-    try {
-      const clientsPage = await clientsProvider.findClientsPaged(query);
-
-      res
-        .status(200)
-        .json({
-          data: clientsPage.rows.map((c: Client) => ({
-            id: c.id,
-            gender: c.gender,
-            firstName: c.firstName,
-            lastName: c.lastName,
-            address: c.address,
-            phoneNumber: c.phoneNumber,
-            email: c.email,
-            birthDate: c.birthDate,
-            creditCards: c.creditCards.map(cc => ({
-              number: cc.number
-            }))
-          })),
-          totalPages: clientsPage.totalPages
-        });
-    } catch (err) {
-      next(err);
-    }
+    withRequestQuery<GetClientsPagedQuery>(req, res, GetClientsPagedQuerySchema, async query => {
+      try {
+        const clientsPage = await clientsProvider.findClientsPaged(query);
+  
+        res
+          .status(200)
+          .json({
+            data: clientsPage.rows.map((c: Client) => ({
+              id: c.id,
+              gender: c.gender,
+              firstName: c.firstName,
+              lastName: c.lastName,
+              address: c.address,
+              phoneNumber: c.phoneNumber,
+              email: c.email,
+              birthDate: c.birthDate,
+              creditCards: c.creditCards.map(cc => ({
+                number: cc.number
+              }))
+            })),
+            totalPages: clientsPage.totalPages
+          });
+      } catch (err) {
+        next(err);
+      }
+    });
   }
 );
 
