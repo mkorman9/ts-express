@@ -70,9 +70,9 @@ class SessionProvider {
   async startSession(account: Account, props: NewSessionProps = {}): Promise<Session> {
     const now = dayjs();
     const session = await Session.create({
-      id: SessionProvider.generateSecureRandomString(SessionProvider.SessionIdLength),
+      id: await SessionProvider.generateSecureRandomString(SessionProvider.SessionIdLength),
       accountId: account.id,
-      token: SessionProvider.generateSecureRandomString(SessionProvider.SessionTokenLength),
+      token: await SessionProvider.generateSecureRandomString(SessionProvider.SessionTokenLength),
       rolesString: (props.roles || []).join(';'),
       ip: props.ip,
       issuedAt: now,
@@ -116,8 +116,17 @@ class SessionProvider {
     });
   }
 
-  private static generateSecureRandomString(n: number): string {
-    return randomBytes(n).toString('hex');
+  private static generateSecureRandomString(n: number): Promise<string> {
+    return new Promise((resolve, reject) => {
+      randomBytes(n, (err, buf) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        resolve(buf.toString('hex'));
+      });
+    });
   }
 }
 
