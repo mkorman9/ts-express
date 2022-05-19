@@ -40,7 +40,7 @@ export const AccountAPIProvider: FC = (props: PropsWithChildren<unknown>) => {
   const accessToken = session.data.accessToken;
 
   const getAccountInfo = (): Promise<AccountInfo> => {
-    return callGet<AccountInfoResponse>('/api/v1/account/info', {
+    return callGet<AccountInfoResponse>('/api/v1/account', {
       headers: {
         'Authorization': `Bearer ${accessToken}`
       }
@@ -104,7 +104,7 @@ export const AccountAPIProvider: FC = (props: PropsWithChildren<unknown>) => {
   };
 
   const activateAccount = (accountId: string): Promise<void> => {
-    return callPost('/api/v1/account/activate', {
+    return callPost('/api/v1/account/activation', {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -170,7 +170,7 @@ export const AccountAPIProvider: FC = (props: PropsWithChildren<unknown>) => {
   };
 
   const registerNewAccount = (username: string, email: string, password: string, captcha: CaptchaAnswer): Promise<void> => {
-    return callPost('/api/v1/account/register/password', {
+    return callPost('/api/v1/account', {
       headers: {
         'Content-Type': 'application/json'
       },

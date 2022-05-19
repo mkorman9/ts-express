@@ -62,7 +62,7 @@ type AccountRegisterRequest = z.infer<typeof AccountRegisterRequestSchema>;
 const accountAPI = Router();
 
 accountAPI.get(
-  '/info',
+  '',
   tokenAuthMiddleware(),
   requireAuthentication(),
   async (req: Request, res: Response) => {
@@ -93,7 +93,7 @@ accountAPI.get(
 );
 
 accountAPI.post(
-  '/register/password',
+  '',
   ratelimiterMiddleware('general'),
   ...AccountRegisterValidators,
   validationMiddleware(),
@@ -142,7 +142,7 @@ accountAPI.post(
 );
 
 accountAPI.post(
-  '/activate',
+  '/activation',
   ratelimiterMiddleware('general'),
   ...AccountActivateValidators,
   validationMiddleware(),
