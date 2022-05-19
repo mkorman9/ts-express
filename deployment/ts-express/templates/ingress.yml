@@ -30,6 +30,13 @@ spec:
                 name: {{ .Values.app.name }}
                 port:
                   number: {{ .Values.app.port }}
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.frontend.name }}
+                port:
+                  number: {{ .Values.frontend.port }}
       {{- if or (eq .Values.ingress.strictHostCheck true) (eq .Values.ingress.useHttps true) }}
       host: {{ .Values.ingress.hostname }}
       {{- end }}

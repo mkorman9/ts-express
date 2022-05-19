@@ -18,3 +18,80 @@ data:
         max: {{ .Values.app.config.database.pool.max }}
         acquireMs: {{ .Values.app.config.database.pool.acquireMs }}
         idleMs: {{ .Values.app.config.database.pool.idleMs }}
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Values.frontend.configMap }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.app.name }}
+    app.kubernetes.io/version: {{ .Values.app.version }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  nginx.conf: |
+    user                    nginx;
+    pid                     /var/run/nginx.pid;
+    worker_processes        {{ .Values.frontend.config.workerProcesses }};
+    worker_rlimit_nofile    {{ .Values.frontend.config.workerRlimitNofile }};
+
+    events {
+        worker_connections  {{ .Values.frontend.config.workerConnections }};
+        use                 {{ .Values.frontend.config.events }};
+    }
+
+    http {
+        server_tokens off;
+        include       /etc/nginx/mime.types;
+        default_type  {{ .Values.frontend.config.defaultType }};
+
+        log_format main '$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"';
+        access_log /dev/stdout main;
+        error_log  /dev/stdout warn;
+
+        {{ if .Values.frontend.config.remoteLogging.enabled }}
+        log_format graylog_json escape=json '{'
+          '"timestamp":"$time_iso8601",'
+          '"ip":"$remote_addr",'
+          '"body_bytes_sent":$body_bytes_sent,'
+          '"latency":$request_time,'
+          '"status":$status,'
+          '"message":"$request",'
+          '"method":"$request_method",'
+          '"host":"$host",'
+          '"referrer":"$http_referer",'
+          '"user_agent":"$http_user_agent",'
+          '"http_version":"$server_protocol"'
+          '}';
+        access_log syslog:server={{ .Values.frontend.config.remoteLogging.address }} graylog_json;
+        error_log  syslog:server={{ .Values.frontend.config.remoteLogging.address }} warn;
+        {{ end }}
+
+        {{- range .Values.frontend.config.trustedProxies }}
+        set_real_ip_from  {{ . }};
+        {{- end }}
+        real_ip_header    {{ .Values.frontend.config.realIpHeader }};
+
+        server {
+            listen        {{ .Values.frontend.port | int }} default_server;
+
+            client_header_timeout {{ .Values.frontend.config.clientHeaderTimeout }};
+            client_body_timeout   {{ .Values.frontend.config.clientBodyTimeout }};
+            keepalive_timeout     {{ .Values.frontend.config.keepaliveTimeout }};
+            gzip                  {{ if .Values.frontend.config.gzip }}on{{ else }}off{{ end }};
+            gzip_comp_level       {{ .Values.frontend.config.gzipCompLevel }};
+            gzip_types            {{ join " " .Values.frontend.config.gzipTypes }};
+
+            location {{ .Values.frontend.health.endpoint }} {
+                access_log off;
+                add_header Content-Type text/plain;
+                return 200 'OK';
+            }
+
+            location / {
+                root  /app;
+                index {{ .Values.frontend.config.index }};
+                try_files $uri $uri/ /{{ .Values.frontend.config.index }};
+            }
+        }
+    }

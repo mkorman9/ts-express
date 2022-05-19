@@ -6,3 +6,8 @@ cd $SCRIPTPATH/..
 
 yarn build
 docker build -t mkorman/ts-express .
+
+cd frontend
+
+yarn build
+docker build -t mkorman/ts-express-frontend .

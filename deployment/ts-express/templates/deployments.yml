@@ -85,3 +85,77 @@ spec:
         - name: {{ .Values.images.pullSecret }}
       {{- end }}
       automountServiceAccountToken: false
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.frontend.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.app.name }}
+    app.kubernetes.io/version: {{ .Values.app.version }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  {{- if .Values.gitlab.project }}
+  annotations:
+    app.gitlab.com/app: {{ .Values.gitlab.project | quote }}
+    app.gitlab.com/env: {{ .Values.gitlab.environment | quote }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.frontend.replicas }}
+  revisionHistoryLimit: {{ .Values.frontend.historicRevisions }}
+  selector:
+    matchLabels:
+      app: {{ .Values.frontend.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.frontend.name }}
+      {{- if .Values.gitlab.project }}
+      annotations:
+        app.gitlab.com/app: {{ .Values.gitlab.project | quote }}
+        app.gitlab.com/env: {{ .Values.gitlab.environment | quote }}
+      {{- end }}
+    spec:
+      containers:
+        - name: {{ .Values.frontend.name }}
+          image: {{ .Values.frontend.imageName }}:{{ .Values.app.version }}
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.frontend.port }}
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.frontend.health.endpoint }}
+              port: {{ .Values.frontend.port }}
+              scheme: HTTP
+            initialDelaySeconds: {{ .Values.frontend.health.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.frontend.health.readiness.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.frontend.health.endpoint }}
+              port: {{ .Values.frontend.port }}
+              scheme: HTTP
+            initialDelaySeconds: {{ .Values.frontend.health.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.frontend.health.liveness.periodSeconds }}
+            timeoutSeconds: {{ .Values.frontend.health.liveness.timeoutSeconds }}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /usr/sbin/nginx
+                  - -s
+                  - quit
+          volumeMounts:
+            - name: config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: {{ .Values.frontend.configMap }}
+      {{- if .Values.images.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.images.pullSecret }}
+      {{- end }}
+      automountServiceAccountToken: false

@@ -38,6 +38,58 @@ app:
       request: 256Mi
       limit: 512Mi
 
+frontend:
+  name: frontend
+  imageName: mkorman/ts-express-frontend
+  port: 8080
+  replicas: 1
+  historicRevisions: 3
+
+  configMap: frontend-config
+
+  health:
+    endpoint: /health
+    readiness:
+      initialDelaySeconds: 5
+      periodSeconds: 20
+    liveness:
+      initialDelaySeconds: 30
+      periodSeconds: 20
+      timeoutSeconds: 5
+
+  config:
+    trustedProxies:
+      - 10.0.0.0/8
+      - 172.16.0.0/12
+      - 192.168.0.0/16
+    realIpHeader: X-Forwarded-For
+
+    workerProcesses: auto
+    workerRlimitNofile: 32634
+    workerConnections: 4096
+    events: epoll
+    defaultType: application/octet-stream
+    clientHeaderTimeout: 60
+    clientBodyTimeout: 60
+    keepaliveTimeout: 60
+    gzip: true
+    gzipCompLevel: 4
+    gzipTypes: 
+      - text/plain
+      - text/css
+      - application/json
+      - application/javascript
+      - application/x-javascript
+      - text/xml
+      - application/xml
+      - application/xml+rss
+      - text/javascript
+    index: index.html
+
+    remoteLogging:
+      enabled: false
+      address: example.com
+
 gitlab:
   project: ""
   environment: ""
