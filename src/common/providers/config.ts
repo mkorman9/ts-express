@@ -25,8 +25,9 @@ const readConfig = () => {
   try {
     const configContent = fs.readFileSync(ConfigPath, 'utf8');
     return YAML.parse(configContent);
-  } catch (err) {
-    throw new ConfigurationError(`Could not load config file from "${ConfigPath}"`);
+  } catch (_) {
+    // ignore
+    return {};
   }
 };
 

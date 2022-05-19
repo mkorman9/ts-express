@@ -88,7 +88,7 @@ let connection: (amqp.Connection | null) = null;
 
 export const initAMQP = async () => {
   const props = {
-    uri: config.amqp?.uri
+    uri: config.amqp?.uri || process.env.AMQP_URI
   };
 
   if (!props.uri) {

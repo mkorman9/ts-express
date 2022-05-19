@@ -13,7 +13,7 @@ const modelsDirs = [
 
 const initSequelize = () => {
   const props = {
-    uri: config.database?.uri,
+    uri: config.database?.uri || process.env.DATABASE_URI,
     queryLogging: config.database?.queryLogging || false,
     pool: {
       min: config.database?.pool?.min || 0,
