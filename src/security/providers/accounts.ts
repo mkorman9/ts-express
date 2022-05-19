@@ -44,7 +44,7 @@ export class AccountDoesNotExistError extends Error {
 export class AccountNotMeantToBeActivatedError extends Error {
 }
 
-export class InvalidPasswordError extends Error {
+export class InvalidCredentialsError extends Error {
 }
 
 export class InactiveAccountError extends Error {
@@ -99,7 +99,7 @@ export class AccountsProvider {
 
     const passwordMatch = await bcrypt.compare(password, account.passwordCredentials.passwordBcrypt);
     if (!passwordMatch) {
-      throw new InvalidPasswordError();
+      throw new InvalidCredentialsError();
     }
 
     return await sessionProvider.startSession(account, {

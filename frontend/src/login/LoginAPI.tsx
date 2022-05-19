@@ -11,7 +11,7 @@ const LoginAPIContext = createContext<LoginAPIContextType>({} as LoginAPIContext
 
 export const LoginAPIProvider: FC = (props: PropsWithChildren<unknown>) => {
   const authWithPassword = (email: string, password: string, rememberMe: boolean): Promise<SessionData> => {
-    return callPost<SessionDataResponse>(`/api/v1/login/auth/password${rememberMe ? '?rememberMe' : ''}`, {
+    return callPost<SessionDataResponse>(`/api/v1/session${rememberMe ? '?rememberMe' : ''}`, {
       headers: {
         'Content-Type': 'application/json'
       },

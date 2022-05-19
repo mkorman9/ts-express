@@ -1,6 +1,6 @@
 import { FC, createContext, useContext, PropsWithChildren } from 'react';
 
-import { callGet, callPost, callPut } from '../common/API';
+import { callDelete, callGet, callPut } from '../common/API';
 import type { SessionData, SessionDataResponse, SessionAPIContextType } from './SessionAPI.d';
 
 export type { SessionData, SessionDataResponse, SessionAPIContextType } from './SessionAPI.d';
@@ -9,7 +9,7 @@ const SessionAPIContext = createContext<SessionAPIContextType>({} as SessionAPIC
 
 export const SessionAPIProvider: FC = (props: PropsWithChildren<unknown>) => {
   const getSessionStatus = (): Promise<SessionData> => {
-    return callGet<SessionDataResponse>(`/api/v1/login/session/token`, {
+    return callGet<SessionDataResponse>(`/api/v1/session`, {
     })
       .then(response => ({
         id:          response.data.id,
@@ -19,7 +19,7 @@ export const SessionAPIProvider: FC = (props: PropsWithChildren<unknown>) => {
   };
 
   const refreshSession = (accessToken: string): Promise<SessionData> => {
-    return callPut<SessionDataResponse>(`/api/v1/login/session/refresh`, {
+    return callPut<SessionDataResponse>(`/api/v1/session`, {
       headers: {
         'Authorization': `Bearer ${accessToken}`
       }
@@ -32,7 +32,7 @@ export const SessionAPIProvider: FC = (props: PropsWithChildren<unknown>) => {
   };
 
   const terminateSession = (accessToken: string): Promise<void> => {
-    return callPost(`/api/v1/login/session/revoke`, {
+    return callDelete(`/api/v1/session`, {
       headers: {
         'Authorization': `Bearer ${accessToken}`
       }

@@ -40,7 +40,7 @@ export const AccountAPIProvider: FC = (props: PropsWithChildren<unknown>) => {
   const accessToken = session.data.accessToken;
 
   const getAccountInfo = (): Promise<AccountInfo> => {
-    return callGet<AccountInfoResponse>('/api/v1/login/account/info', {
+    return callGet<AccountInfoResponse>('/api/v1/account/info', {
       headers: {
         'Authorization': `Bearer ${accessToken}`
       }
@@ -70,7 +70,7 @@ export const AccountAPIProvider: FC = (props: PropsWithChildren<unknown>) => {
   };
 
   const getPublicAccountInfoByUsername = (username: string): Promise<PublicAccountInfo> => {
-    return callGet<PublicAccountInfoResponse>(`/api/v1/login/account/info/username/${username}`, {
+    return callGet<PublicAccountInfoResponse>(`/api/v1/account/info/username/${username}`, {
     })
       .then(response => {
         const publicAccountInfo = response.data;
@@ -87,7 +87,7 @@ export const AccountAPIProvider: FC = (props: PropsWithChildren<unknown>) => {
   };
 
   const getPublicAccountInfoByID = (id: string): Promise<PublicAccountInfo> => {
-    return callGet<PublicAccountInfoResponse>(`/api/v1/login/account/info/id/${id}`, {
+    return callGet<PublicAccountInfoResponse>(`/api/v1/account/info/id/${id}`, {
     })
       .then(response => {
         const publicAccountInfo = response.data;
@@ -104,7 +104,7 @@ export const AccountAPIProvider: FC = (props: PropsWithChildren<unknown>) => {
   };
 
   const activateAccount = (accountId: string): Promise<void> => {
-    return callPost('/api/v1/login/account/activate', {
+    return callPost('/api/v1/account/activate', {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -117,7 +117,7 @@ export const AccountAPIProvider: FC = (props: PropsWithChildren<unknown>) => {
   };
 
   const requestPasswordReset = (email: string, captcha: CaptchaAnswer): Promise<void> => {
-    return callPost('/api/v1/login/account/password/reset', {
+    return callPost('/api/v1/account/password/reset', {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -134,7 +134,7 @@ export const AccountAPIProvider: FC = (props: PropsWithChildren<unknown>) => {
   };
 
   const setNewPassword = (password: string, accountId?: string, code?: string): Promise<void> => {
-    let path = '/api/v1/login/account/password/set';
+    let path = '/api/v1/account/password/set';
     const headers: HeadersInit = new Headers();
 
     headers.set('Content-Type', 'application/json');
@@ -156,7 +156,7 @@ export const AccountAPIProvider: FC = (props: PropsWithChildren<unknown>) => {
   };
 
   const changeEmail = (accountId: string, code: string): Promise<void> => {
-    return callPost('/api/v1/login/account/email/change', {
+    return callPost('/api/v1/account/email/change', {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -170,7 +170,7 @@ export const AccountAPIProvider: FC = (props: PropsWithChildren<unknown>) => {
   };
 
   const registerNewAccount = (username: string, email: string, password: string, captcha: CaptchaAnswer): Promise<void> => {
-    return callPost('/api/v1/login/account/register/password', {
+    return callPost('/api/v1/account/register/password', {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -190,7 +190,7 @@ export const AccountAPIProvider: FC = (props: PropsWithChildren<unknown>) => {
   };
 
   const editProfile = (payload: EditProfilePayload): Promise<EditProfileStatusResponse> => {
-    return callPost<EditProfileStatusResponse>('/api/v1/login/account/edit', {
+    return callPost<EditProfileStatusResponse>('/api/v1/account/edit', {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${accessToken}`

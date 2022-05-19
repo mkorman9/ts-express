@@ -9,7 +9,6 @@ import prometheusMiddleware from 'express-prometheus-middleware';
 
 import clientsAPI from './clients/api/clients_api';
 import sessionAPI from './security/api/session_api';
-import authAPI from './security/api/auth_api';
 import accountAPI from './security/api/account_api';
 import captchaAPI from './captcha/api/captcha_api';
 
@@ -44,9 +43,8 @@ app.get('/health', healthcheck);
 // API v1
 const apiV1 = Router();
 apiV1.use('/client', clientsAPI);
-apiV1.use('/login/session', sessionAPI);
-apiV1.use('/login/auth', authAPI);
-apiV1.use('/login/account', accountAPI);
+apiV1.use('/session', sessionAPI);
+apiV1.use('/account', accountAPI);
 apiV1.use('/captcha', captchaAPI);
 app.use('/api/v1', apiV1);
 
