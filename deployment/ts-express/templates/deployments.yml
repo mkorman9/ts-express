@@ -67,6 +67,12 @@ spec:
               mountPath: /app/secrets.yml
               subPath: secrets.yml
               readOnly: true
+          securityContext:
+            allowPrivilegeEscalation: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10000
+        runAsGroup: 10000
       volumes:
         - name: config
           configMap:
