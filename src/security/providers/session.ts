@@ -4,6 +4,8 @@ import { Op } from 'sequelize';
 
 import Session from '../models/session';
 import Account from '../models/account';
+import PasswordCredentials from '../models/password_credentials';
+import GithubCredentials from '../models/github_credentials';
 
 export interface NewSessionProps {
   ip?: string;
@@ -30,9 +32,13 @@ class SessionProvider {
           }]
         }]
       },
-      include: [
-        Account
-      ]
+      include: [{
+        model: Account,
+        include: [
+          PasswordCredentials,
+          GithubCredentials
+        ]
+      }]
     });
   }
 
@@ -51,9 +57,13 @@ class SessionProvider {
           }]
         }]
       },
-      include: [
-        Account
-      ]
+      include: [{
+        model: Account,
+        include: [
+          PasswordCredentials,
+          GithubCredentials
+        ]
+      }]
     });
   }
 
